@@ -11,14 +11,25 @@
   "private": true,
   "packageManager": "npm@10.9.7",
   "dependencies": {
+    "@angular/animations": "^21.2.9",
+    "@angular/cdk": "^21.2.7",
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",
     "@angular/core": "^21.2.0",
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "@stomp/ng2-stompjs": "^8.0.0",
+    "bpmn-js": "^18.14.0",
+    "bpmn-js-properties-panel": "^5.53.0",
+    "echarts": "^6.0.0",
+    "ngx-echarts": "^21.0.0",
+    "ngx-toastr": "^20.0.5",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.30",
+    "zone.js": "^0.16.1"
   },
   "devDependencies": {
     "@angular/build": "^21.2.7",

@@ -1,1 +1,24 @@
-/* You can add global styles to this file, and also import other style files */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+app-root {
+  display: block;
+  height: 100%;
+}
+
+/* ── BPMN diagram: resaltar nodo activo ── */
+.highlight-current .djs-visual > :nth-child(1) {
+  fill: #dbeafe !important;
+  stroke: #2563eb !important;
+  stroke-width: 3px !important;
+}
+.highlight-current .djs-visual text {
+  fill: #1e3a8a !important;
+  font-weight: 600 !important;
+}

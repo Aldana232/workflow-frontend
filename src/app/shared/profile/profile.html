@@ -1,0 +1,97 @@
+<div class="profile-page">
+
+  <div class="profile-header">
+    <button class="btn-back" (click)="goBack()">← Volver</button>
+    <h1>Mi Perfil</h1>
+  </div>
+
+  <div class="profile-layout">
+
+    <!-- Avatar card -->
+    <div class="avatar-card">
+      <div class="big-avatar">
+        @if (avatarUrl) {
+          <img [src]="avatarUrl" class="big-avatar-img" alt="avatar" />
+        } @else {
+          <span class="big-initials">{{ initials }}</span>
+        }
+      </div>
+      <p class="avatar-name">{{ user?.name ?? '—' }}</p>
+      <p class="avatar-role-badge">{{ roleLabel }}</p>
+
+      <div class="avatar-actions">
+        <label class="btn-upload-avatar" for="avatarInput">
+          📷 Cambiar foto
+        </label>
+        <input
+          id="avatarInput"
+          type="file"
+          accept="image/*"
+          style="display:none"
+          (change)="onAvatarChange($event)"
+        />
+        @if (avatarUrl) {
+          <button class="btn-remove-avatar" (click)="removeAvatar()">🗑 Quitar</button>
+        }
+      </div>
+      <p class="avatar-hint">JPG, PNG o GIF · máx 2 MB</p>
+    </div>
+
+    <!-- Info + edit card -->
+    <div class="info-card">
+
+      <section class="info-section">
+        <h3>Información de la cuenta</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Nombre completo</span>
+            <span class="info-value">{{ user?.name ?? '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ user?.email ?? '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Rol</span>
+            <span class="role-badge role-badge--{{ user?.role?.toLowerCase() }}">{{ roleLabel }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Empresa</span>
+            <span class="info-value">{{ user?.companyId || 'SAGUAPAC' }}</span>
+          </div>
+          @if (user?.departmentId) {
+            <div class="info-item">
+              <span class="info-label">Departamento</span>
+              <span class="info-value">{{ user.departmentId }}</span>
+            </div>
+          }
+          <div class="info-item">
+            <span class="info-label">ID de usuario</span>
+            <span class="info-value info-value--muted">{{ user?.id ?? '—' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <hr class="section-sep" />
+
+      <section class="info-section">
+        <h3>Editar nombre</h3>
+        <div class="edit-row">
+          <input
+            class="edit-input"
+            type="text"
+            placeholder="Nombre completo"
+            [(ngModel)]="editName"
+          />
+          <button class="btn-save" (click)="saveName()" [disabled]="saving">
+            {{ saving ? 'Guardando…' : 'Guardar' }}
+          </button>
+        </div>
+        <p class="hint-text">El nombre actualizado se mostrará en el sistema</p>
+      </section>
+
+    </div>
+
+  </div>
+
+</div>

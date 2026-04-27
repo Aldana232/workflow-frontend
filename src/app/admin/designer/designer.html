@@ -1,0 +1,489 @@
+<div class="designer-shell">
+  <!-- ══ TOOLBAR ══════════════════════════════════════════════════════════ -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="toolbar-brand">
+        <div class="brand-icon">⚡</div>
+        <span class="brand-text">Diseñador</span>
+      </div>
+
+      <div class="process-name-wrap">
+        <input
+          class="process-name-input"
+          type="text"
+          [(ngModel)]="processName"
+          placeholder="Nombre del proceso…"
+        />
+        <span class="name-edit-icon">✏️</span>
+      </div>
+
+      <div class="toolbar-badges">
+        @if (savedOk) {
+          <span class="badge-saved">✓ Guardado</span>
+        }
+        @if (collabStatus === 'connected') {
+          <span class="badge-collab badge-collab--connected" title="Colaboración activa">● En vivo</span>
+        } @else if (collabStatus === 'connecting') {
+          <span class="badge-collab badge-collab--connecting" title="Conectando…">● Conectando…</span>
+        } @else if (collabStatus === 'disconnected') {
+          <span class="badge-collab badge-collab--disconnected" title="Sin conexión de colaboración">● Desconectado</span>
+        }
+        @if (collabPeers.length > 0) {
+          <div class="collab-peers">
+            @for (peer of collabPeers; track peer.clientId) {
+              <span class="peer-avatar" [style.background]="peer.color" [title]="peer.name + ' está editando'">
+                {{ peer.name.charAt(0).toUpperCase() }}
+              </span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="toolbar-actions">
+      <!-- ── Guardar & Publicar ────────────────────────────── -->
+      <button class="btn-toolbar btn-save" (click)="save()" [disabled]="saving" title="Ctrl+S">
+        @if (saving) {
+          <span class="spinner"></span> Guardando…
+        } @else {
+          <span class="btn-icon">💾</span> Guardar
+        }
+      </button>
+      <div class="toolbar-divider"></div>
+      <button
+        class="btn-toolbar btn-publish"
+        (click)="publish()"
+        [disabled]="publishing || !processId"
+        title="Publicar proceso"
+      >
+        @if (publishing) {
+          <span class="spinner"></span> Publicando…
+        } @else {
+          <span class="btn-icon">🚀</span> Publicar
+        }
+      </button>
+
+      <!-- ── Separador ────────────────────────────────────── -->
+      <div class="toolbar-divider"></div>
+
+      <!-- ── Controles de Zoom ───────────────────────────── -->
+      <div class="zoom-controls">
+        <button class="btn-toolbar btn-zoom" (click)="zoomIn()" title="Acercar (Ctrl++)">
+          <span class="btn-icon">🔍+</span>
+        </button>
+        <button class="btn-toolbar btn-zoom" (click)="zoomOut()" title="Alejar (Ctrl+-)">
+          <span class="btn-icon">🔍−</span>
+        </button>
+        <button
+          class="btn-toolbar btn-zoom"
+          (click)="fitScreen()"
+          title="Ajustar a pantalla (Ctrl+0)"
+        >
+          <span class="btn-icon">📐</span>
+        </button>
+      </div>
+
+      <!-- ── Agente de voz ──────────────────────────────── -->
+      <div class="toolbar-divider"></div>
+      <button
+        class="btn-toolbar btn-mic"
+        [class.btn-mic--recording]="isRecording"
+        (click)="toggleVoice()"
+        [title]="isRecording ? 'Detener grabación' : (speechSupported ? 'Activar agente de voz' : 'Voz no soportada en este navegador')"
+        [disabled]="!speechSupported"
+      >
+        @if (isRecording) {
+          <span class="mic-pulse-ring"></span>
+          <span class="btn-icon">🎙</span> Grabando…
+        } @else {
+          <span class="btn-icon">🎤</span> Voz
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
+  <div class="designer-main">
+    <!-- ── Custom Palette ───────────────────────────────────────────── -->
+    <nav class="custom-palette">
+      @for (group of palette; track group.section) {
+        <div class="pal-group">
+          <div class="pal-group-title">{{ group.section }}</div>
+          @for (item of group.items; track item.id) {
+            <button
+              class="pal-item"
+              (mousedown)="onPaletteMousedown($event, item)"
+              [title]="item.label"
+            >
+              <span class="pal-icon">{{ item.icon }}</span>
+              <span class="pal-label">{{ item.label }}</span>
+            </button>
+          }
+        </div>
+      }
+    </nav>
+
+    <!-- ── BPMN Canvas ───────────────────────────────────────────────── -->
+    <div #canvasWrapper class="canvas-wrapper">
+      <div #bpmnCanvas class="bpmn-canvas"></div>
+      <!-- Capa de cursores colaborativos: pointer-events:none para no bloquear el canvas -->
+      <div #cursorsLayer class="cursors-layer" aria-hidden="true"></div>
+
+      <!-- ── Panel de voz ──────────────────────────────────────────── -->
+      @if (showVoicePanel) {
+        <div class="voice-panel" role="region" aria-label="Transcripción de voz">
+          <div class="voice-panel-header">
+            <span class="voice-panel-title">
+              @if (isRecording) {
+                <span class="voice-recording-dot" title="Grabando"></span>
+              }
+              Agente de voz
+              <!-- Equalizer mini — visible sólo cuando el agente está hablando -->
+              <div class="audio-wave audio-wave--header" [class.active]="isSpeaking">
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+              </div>
+            </span>
+            <button class="voice-panel-close" (click)="showVoicePanel = false" title="Cerrar panel">✕</button>
+          </div>
+
+          <div class="voice-panel-body" #transcriptBody>
+            @if (voiceHistory.length === 0 && !interimTranscript && !voiceError) {
+              <p class="voice-placeholder">
+                {{ isRecording ? 'Escuchando… empieza a hablar' : 'Haz clic en el botón Voz para comenzar' }}
+              </p>
+            }
+            @if (voiceError) {
+              <p class="voice-error">⚠ {{ voiceError }}</p>
+            }
+            @for (entry of voiceHistory; track $index) {
+              <div [class]="'voice-bubble voice-bubble--' + entry.role">
+                @if (entry.role === 'ai') {
+                  <span class="voice-bubble-avatar">🤖</span>
+                }
+                <span class="voice-bubble-text">{{ entry.text }}</span>
+                @if (entry.role === 'user') {
+                  <span class="voice-bubble-avatar">🎤</span>
+                }
+              </div>
+            }
+            @if (interimTranscript) {
+              <span class="voice-interim">{{ interimTranscript }}</span>
+            }
+          </div>
+
+          <!-- Resultado del último comando ejecutado -->
+          @if (voiceIsExecuting) {
+            <div class="voice-cmd-result voice-cmd-result--loading">
+              <span class="voice-cmd-spinner"></span> Interpretando comando…
+            </div>
+          } @else if (voiceCommandResult) {
+            <div class="voice-cmd-result"
+                 [class.voice-cmd-result--ok]="voiceCommandResult.startsWith('✓')"
+                 [class.voice-cmd-result--err]="voiceCommandResult.startsWith('✗')"
+                 [class.voice-cmd-result--warn]="voiceCommandResult.startsWith('⚠') || voiceCommandResult.startsWith('ℹ')">
+              {{ voiceCommandResult }}
+            </div>
+          }
+
+          <div class="voice-panel-footer">
+
+            <!-- Izquierda: idioma + onda de audio completa cuando habla -->
+            <div class="voice-footer-left">
+              <span class="voice-lang-label">es-ES</span>
+              <div class="audio-wave" [class.active]="isSpeaking">
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+                <span class="wave-bar"></span>
+              </div>
+            </div>
+
+            <!-- Derecha: botón JARVIS + limpiar -->
+            <div class="voice-footer-right">
+              <button
+                class="voice-jarvis-btn"
+                [class.voice-jarvis-btn--listening]="isAgentListening"
+                (click)="onMicClick()"
+                [disabled]="isAgentListening || isSpeaking"
+                title="{{ isAgentListening ? 'Escuchando…' : 'Preguntar al agente JARVIS' }}"
+              >
+                @if (isAgentListening) {
+                  <span class="voice-jarvis-ring"></span>⏺
+                } @else {
+                  🎤
+                }
+              </button>
+              <button
+                class="voice-clear-btn"
+                (click)="clearTranscript()"
+                [disabled]="voiceHistory.length === 0 && !interimTranscript && !voiceError"
+                title="Limpiar transcripción"
+              >
+                Limpiar
+              </button>
+            </div>
+
+          </div>
+        </div>
+      }
+
+      @if (!selectedElement) {
+        <div class="canvas-hint">
+          Arrastra un elemento desde la paleta · Clic para seleccionar · Scroll para zoom
+        </div>
+      }
+    </div>
+
+    <!-- ── Properties Panel ─────────────────────────────────────────── -->
+    <aside class="props-panel">
+      @if (selectedElement) {
+        <div class="props-header">
+          <div class="props-title-group">
+            <div class="props-title-icon" [style.background]="elementColor">{{ elementIcon }}</div>
+            <h3>Propiedades</h3>
+          </div>
+          <button class="btn-close-props" (click)="clearSelection()">✕</button>
+        </div>
+
+        <div class="type-badge-row">
+          <span class="type-badge {{ elementClass }}">{{ selectedElement.type | slice: 5 }}</span>
+        </div>
+
+        <div class="props-body">
+
+          <!-- ══ FLECHA / SEQUENCE FLOW ══════════════════════════════════ -->
+          @if (isSequenceFlow) {
+            <div>
+              <div class="prop-section-title">Etiqueta de la flecha</div>
+              <div class="prop-group">
+                <label>Nombre visible</label>
+                <input type="text" [(ngModel)]="edgeProps.name" placeholder="Ej: Si requiere inspección" />
+              </div>
+            </div>
+            <div>
+              <div class="prop-section-title">Condición del gateway</div>
+              <div class="prop-group">
+                <label>Condición <span class="field-hint">(solo para flechas desde gateway exclusivo)</span></label>
+                <input
+                  type="text"
+                  [(ngModel)]="edgeProps.condition"
+                  placeholder="Ej: nombre_campo == valor"
+                />
+                <span class="field-hint">
+                  Formato: <code>nombre_campo == valor</code> — deja vacío para el camino por defecto
+                </span>
+              </div>
+            </div>
+            <button class="btn-apply" (click)="persistEdgeCondition()">✓ Guardar condición</button>
+          }
+
+          <!-- ══ NODO / TAREA / GATEWAY ══════════════════════════════════ -->
+          @if (!isSequenceFlow) {
+          <div>
+            <div class="prop-section-title">General</div>
+            <div class="prop-group">
+              <label>Nombre del nodo</label>
+              <input
+                type="text"
+                [(ngModel)]="nodeProps.name"
+                (ngModelChange)="updateNodeName()"
+                placeholder="Ej: Revisión técnica"
+              />
+            </div>
+          </div>
+
+          @if (isTaskNode) {
+          <div>
+            <div class="prop-section-title">Asignación</div>
+            <div class="prop-group">
+              <label>Departamento responsable</label>
+              <select [(ngModel)]="nodeProps.departmentId" (ngModelChange)="persistNodeProps()">
+                <option value="">— Sin asignar —</option>
+                @for (d of departments; track d.id) {
+                  <option [value]="d.id">{{ d.name }}</option>
+                }
+              </select>
+              @if (departments.length === 0) {
+                <span class="field-hint">Crea departamentos en el módulo Departamentos primero.</span>
+              }
+            </div>
+          </div>
+
+          <div>
+            <div class="prop-section-title">Tiempo de respuesta</div>
+            <div class="prop-group">
+              <label>SLA</label>
+              <div class="input-with-unit">
+                <input
+                  type="number"
+                  [(ngModel)]="nodeProps.slaHours"
+                  (ngModelChange)="persistNodeProps()"
+                  min="0"
+                  step="1"
+                  placeholder="0"
+                />
+                <span class="input-unit">horas</span>
+              </div>
+            </div>
+          </div>
+          } <!-- fin @if isTaskNode -->
+
+          <button class="btn-apply" (click)="persistNodeProps()">✓ Aplicar cambios</button>
+
+          <!-- ══ FORMULARIO DEL NODO — solo tareas ═════════════════════ -->
+          @if (isTaskNode) {
+          <div class="schema-section">
+            <div class="prop-section-title">Formulario del nodo</div>
+
+            @if (schemaLoading) {
+              <div class="schema-loading">
+                <span class="schema-spinner"></span> Cargando campos…
+              </div>
+            } @else {
+              <!-- Lista de campos existentes -->
+              @if (schemaFields.length > 0) {
+                <div class="field-list">
+                  @for (field of schemaFields; track $index) {
+                    <div class="field-row">
+                      <div class="field-info">
+                        <span class="field-label-text">{{ field.label }}</span>
+                        <span [class]="'field-type-badge ft-' + field.type.toLowerCase()">
+                          {{ field.type }}
+                        </span>
+                        @if (field.required) {
+                          <span class="field-required" title="Requerido">✱</span>
+                        }
+                      </div>
+                      <button
+                        class="btn-field-delete"
+                        (click)="deleteField($index)"
+                        title="Eliminar campo"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @else if (!showAddField) {
+                <p class="schema-empty">Sin campos configurados para este nodo</p>
+              }
+
+              <!-- Formulario inline "Agregar campo" -->
+              @if (showAddField) {
+                <form [formGroup]="addFieldForm" class="add-field-form" (ngSubmit)="saveField()">
+                  <div class="prop-group">
+                    <label>Etiqueta del campo <span class="required-star">*</span></label>
+                    <input formControlName="label" placeholder="Ej: Nombre del solicitante" />
+                    @if (addFieldForm.get('label')?.invalid && addFieldForm.get('label')?.touched) {
+                      <span class="field-error">Mínimo 2 caracteres</span>
+                    }
+                  </div>
+
+                  <div class="prop-group">
+                    <label>Tipo de campo</label>
+                    <select formControlName="type">
+                      <option value="TEXT">📝 Texto</option>
+                      <option value="TEXTAREA">📄 Área de texto</option>
+                      <option value="SELECT">🔽 Lista desplegable</option>
+                      <option value="CHECKBOX">☑ Casilla de verificación</option>
+                      <option value="FILE">📎 Archivo adjunto</option>
+                    </select>
+                  </div>
+
+                  @if (isSelectType) {
+                    <div class="prop-group">
+                      <label>Opciones <span class="required-star">*</span></label>
+                      <input
+                        formControlName="options"
+                        placeholder="Ej: Domiciliaria, Comercial, Industrial"
+                      />
+                      <span class="field-hint">Separa las opciones con coma</span>
+                      @if (
+                        addFieldForm.get('options')?.invalid && addFieldForm.get('options')?.touched
+                      ) {
+                        <span class="field-error">Ingresa al menos una opción</span>
+                      }
+                    </div>
+                  }
+
+                  @if (addFieldForm.get('type')?.value !== 'CHECKBOX' && addFieldForm.get('type')?.value !== 'FILE') {
+                    <div class="prop-group">
+                      <label>Texto de ayuda (placeholder)</label>
+                      <input
+                        formControlName="placeholder"
+                        placeholder="Ej: Ingrese el nombre completo…"
+                      />
+                    </div>
+                  }
+
+                  <div class="prop-group-inline">
+                    <label>Campo requerido</label>
+                    <label class="toggle-wrap">
+                      <input type="checkbox" formControlName="required" class="sr-only" />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="add-field-actions">
+                    <button type="button" class="btn-field-cancel" (click)="cancelAddField()">
+                      Cancelar
+                    </button>
+                    <button type="submit" class="btn-field-save">+ Agregar campo</button>
+                  </div>
+                </form>
+              }
+
+              <!-- Botón agregar / guardar -->
+              <div class="schema-actions">
+                @if (!showAddField) {
+                  <button class="btn-add-field" (click)="toggleAddField()">+ Agregar campo</button>
+                }
+                @if (schemaFields.length > 0 && !showAddField) {
+                  <button class="btn-save-schema" (click)="saveSchema()" [disabled]="savingSchema">
+                    @if (savingSchema) {
+                      <span class="schema-spinner"></span> Guardando…
+                    } @else {
+                      💾 Guardar formulario
+                    }
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          } <!-- fin @if isTaskNode formulario -->
+          <!-- ══ FIN FORMULARIO ════════════════════════════════════════ -->
+          } <!-- fin @if !isSequenceFlow -->
+        </div>
+      } @else {
+        <div class="props-empty">
+          <div class="props-empty-illustration">🖱️</div>
+          <h4>Sin selección</h4>
+          <p>Selecciona un elemento del diagrama para configurar sus propiedades</p>
+          <ul class="props-empty-tips">
+            <li><span class="tip-icon">1</span> Arrastra elementos desde la paleta izquierda</li>
+            <li>
+              <span class="tip-icon">2</span> Conecta elementos con las flechas que aparecen al
+              pasar el mouse
+            </li>
+            <li><span class="tip-icon">3</span> Haz clic en un elemento para editarlo aquí</li>
+          </ul>
+        </div>
+      }
+    </aside>
+  </div>
+
+  <!-- ══ STATUS BAR ═══════════════════════════════════════════════════════ -->
+  <div class="status-bar">
+    <div class="status-item"><span class="status-dot"></span> Motor BPMN activo</div>
+    @if (processName) {
+      <div class="status-item">{{ processName }}</div>
+    }
+    @if (processId) {
+      <div class="status-item">Proceso guardado</div>
+    }
+  </div>
+</div>

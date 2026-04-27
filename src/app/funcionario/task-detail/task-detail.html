@@ -1,0 +1,258 @@
+<div class="task-detail-page">
+
+  <div class="page-header">
+    <button class="btn-back" (click)="goBack()">← Volver</button>
+    <h1>{{ canProcess ? 'Procesar tarea' : 'Detalle de tarea' }}</h1>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <span class="spinner"></span>
+      <p>Cargando tarea…</p>
+    </div>
+  } @else if (!task) {
+    <div class="not-found">
+      <p>Tarea no encontrada.</p>
+      <button class="btn-back" (click)="goBack()">← Volver al listado</button>
+    </div>
+  } @else {
+
+    <!-- ══ BANNER DE ESTADO ══════════════════════════════════════════════ -->
+    @if (isCancelled) {
+      <div class="status-banner banner-rejected">
+        ❌ Trámite rechazado — el flujo terminó por rechazo en esta etapa
+      </div>
+    } @else if (isCompleted) {
+      <div class="status-banner banner-completed">
+        ✅ Trámite completado — todas las etapas fueron procesadas exitosamente
+      </div>
+    } @else if (!canProcess) {
+      <div class="status-banner banner-waiting">
+        🔄 Este trámite está siendo procesado por otro departamento — tu etapa ya fue completada
+      </div>
+    }
+
+    <div class="detail-layout">
+
+      <!-- ── Card izquierda: info del trámite ── -->
+      <div class="info-card">
+        <h3>Información del trámite</h3>
+        <dl class="info-list">
+          <dt>Código</dt>
+          <dd><code>{{ displayCode }}</code></dd>
+          <dt>Nodo</dt>
+          <dd>{{ task.nodeName ?? task.nodeId ?? currentNodeId ?? '—' }}</dd>
+          <dt>Proceso</dt>
+          <dd>{{ task.processName ?? '—' }}</dd>
+          <dt>Estado</dt>
+          <dd>
+            <span [class]="'badge badge-' + displayStatus.toLowerCase()">
+              {{ statusLabel }}
+            </span>
+          </dd>
+        </dl>
+
+        @if (clienteInfo) {
+          <h3 style="margin-top:1.25rem">Datos del cliente</h3>
+          <dl class="info-list">
+            @if (clienteInfo.nombre)   { <dt>Nombre</dt>    <dd>{{ clienteInfo.nombre }}</dd>   }
+            @if (clienteInfo.ci)       { <dt>CI</dt>        <dd>{{ clienteInfo.ci }}</dd>       }
+            @if (clienteInfo.telefono) { <dt>Teléfono</dt>  <dd>{{ clienteInfo.telefono }}</dd> }
+            @if (clienteInfo.email)    { <dt>Email</dt>     <dd>{{ clienteInfo.email }}</dd>    }
+            @if (clienteInfo.direccion){ <dt>Dirección</dt> <dd>{{ clienteInfo.direccion }}</dd>}
+          </dl>
+        }
+      </div>
+
+      <!-- ── Card derecha: formulario o vista read-only ── -->
+      <div class="form-card">
+
+        @if (submitting) {
+          <div class="submitting-overlay"><span class="spinner"></span></div>
+        }
+
+        <!-- ══ MODO PROCESAMIENTO (canProcess = true) ══════════════════ -->
+        @if (canProcess) {
+          @if (formFields && formFields.length > 0) {
+            <h3>Formulario del nodo — completa los campos requeridos</h3>
+            <app-dynamic-form
+              [fields]="formFields"
+              submitLabel="Completar y enviar al siguiente paso ➜"
+              (formSubmit)="onSubmit($event)"
+            ></app-dynamic-form>
+          } @else {
+            <div class="no-form">
+              <p>Este nodo no tiene formulario configurado. Puedes completar la tarea directamente.</p>
+            </div>
+          }
+
+          <div class="observations-wrap">
+            <label class="obs-label">
+              📝 Observaciones <span class="obs-hint">(opcional — se envían al siguiente departamento)</span>
+            </label>
+            <textarea
+              class="obs-textarea"
+              [(ngModel)]="observations"
+              name="observations"
+              rows="3"
+              placeholder="Ej: El cliente presentó todos los documentos. Requiere visita técnica urgente…"
+            ></textarea>
+          </div>
+
+          @if (!formFields || formFields.length === 0) {
+            <button class="btn-complete" (click)="completeWithoutForm()" [disabled]="submitting">
+              Completar tarea y avanzar al siguiente paso ➜
+            </button>
+          }
+        }
+
+        <!-- ══ MODO READ-ONLY (canProcess = false) ═════════════════════ -->
+        @if (!canProcess) {
+          <div class="readonly-header">
+            <span class="readonly-icon">✅</span>
+            <h3>Tarea completada</h3>
+          </div>
+
+          @if (submittedEntries().length > 0) {
+            <div class="submitted-fields">
+              <p class="submitted-label">Datos que enviaste en esta etapa:</p>
+              @for (entry of submittedEntries(); track entry.key) {
+                <div class="submitted-row">
+                  <span class="submitted-key">{{ entry.key }}</span>
+                  <span class="submitted-val">
+                    @if (entry.value === true) { Sí }
+                    @else if (entry.value === false) { No }
+                    @else if (entry.value && entry.value.toString().startsWith('http')) {
+                      <a [href]="entry.value" target="_blank" class="submitted-link">Ver archivo ↗</a>
+                    } @else {
+                      {{ entry.value ?? '—' }}
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+          } @else if (isCompleted) {
+            <p class="no-submission">✅ El trámite fue completado exitosamente. No hay datos adicionales para mostrar.</p>
+          } @else {
+            <p class="no-submission">🔄 El trámite continúa en otro departamento. Tu etapa ya fue completada.</p>
+          }
+
+          @if (submittedObservations) {
+            <div class="submitted-observations">
+              <span class="obs-label">📝 Observaciones enviadas:</span>
+              <p>{{ submittedObservations }}</p>
+            </div>
+          }
+        }
+
+      </div>
+    </div>
+
+    <!-- ── Diagrama BPMN ── -->
+    @if (bpmnXml) {
+      <div class="diagram-section">
+        <h3>Flujo del proceso</h3>
+        <div class="diagram-wrap">
+          <app-bpmn-diagram [xml]="bpmnXml" [highlightId]="currentNodeId" />
+        </div>
+      </div>
+    }
+
+    <!-- ══ CHAT FLOTANTE DEL ASISTENTE ══════════════════════════════════════ -->
+
+    <!-- Botón FAB -->
+    <button
+      class="chat-fab"
+      (click)="toggleChat()"
+      [attr.aria-label]="isChatOpen ? 'Cerrar asistente' : 'Abrir asistente'"
+    >
+      @if (isChatOpen) { <span>✕</span> } @else { <span>💬</span> }
+    </button>
+
+    <!-- Panel de chat -->
+    @if (isChatOpen) {
+      <div class="chat-panel" role="dialog" aria-label="Asistente SAGUAPAC">
+
+        <!-- Header -->
+        <div class="chat-header">
+          <div class="chat-header-info">
+
+            <!-- Avatar animado: pulsa suavemente cuando el agente habla -->
+            <div class="chat-avatar" [class.speaking]="isSpeaking">
+              <span class="chat-avatar-glow"></span>
+              <span class="chat-avatar-core">🤖</span>
+            </div>
+
+            <div>
+              <span class="chat-title">Asistente SAGUAPAC</span>
+              <span class="chat-subtitle">
+                @if (isSpeaking) { Respondiendo… } @else { Pregunta sobre este trámite }
+              </span>
+            </div>
+          </div>
+          <button class="chat-close-btn" (click)="toggleChat()" aria-label="Cerrar">✕</button>
+        </div>
+
+        <!-- Mensajes -->
+        <div class="chat-body" #chatBody>
+          @for (msg of chatMessages; track $index) {
+            <div class="msg-row" [class.msg-row--user]="msg.role === 'user'">
+              @if (msg.role === 'assistant') {
+                <span class="msg-icon">🤖</span>
+              }
+              <div
+                class="msg-bubble"
+                [class.bubble--user]="msg.role === 'user'"
+                [class.bubble--assistant]="msg.role === 'assistant'"
+              >{{ msg.content }}</div>
+            </div>
+          }
+
+          <!-- Indicador "Escribiendo..." -->
+          @if (chatLoading) {
+            <div class="msg-row">
+              <span class="msg-icon">🤖</span>
+              <div class="msg-bubble bubble--assistant bubble--typing">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Input -->
+        <div class="chat-footer">
+          <input
+            class="chat-input"
+            name="chatInput"
+            [(ngModel)]="chatInput"
+            [placeholder]="isMicListening ? 'Escuchando…' : 'Escribe o usa el micrófono…'"
+            [disabled]="chatLoading || isMicListening"
+            (keydown.enter)="sendMessage()"
+            autocomplete="off"
+          />
+          <button
+            class="chat-mic-btn"
+            (click)="listenForChat()"
+            [disabled]="chatLoading"
+            [class.chat-mic-btn--listening]="isMicListening"
+            aria-label="Hablar"
+          >
+            @if (isMicListening) { <span class="mic-pulse">⏺</span> } @else { <span>🎤</span> }
+          </button>
+          <button
+            class="chat-send-btn"
+            (click)="sendMessage()"
+            [disabled]="chatLoading || isMicListening || !chatInput.trim()"
+            aria-label="Enviar"
+          >➤</button>
+        </div>
+
+      </div>
+    }
+    <!-- ══ FIN CHAT ══════════════════════════════════════════════════════════ -->
+
+  }
+
+</div>

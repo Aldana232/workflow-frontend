@@ -1,0 +1,239 @@
+/* ── Shell ── */
+.consulta-shell {
+  min-height: 100dvh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.consulta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: rgba(255,255,255,.05);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.brand-icon { font-size: 1.4rem; }
+
+.btn-login {
+  font-size: .85rem;
+  font-weight: 600;
+  color: #a5b4fc;
+  text-decoration: none;
+  padding: .4rem 1rem;
+  border: 1px solid rgba(165, 180, 252, .4);
+  border-radius: 8px;
+  transition: background .15s, color .15s;
+}
+
+.btn-login:hover {
+  background: rgba(165, 180, 252, .15);
+  color: #fff;
+}
+
+/* ── Main ── */
+.consulta-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem 4rem;
+  gap: 1.5rem;
+}
+
+/* ── Search card ── */
+.search-card {
+  background: rgba(255,255,255,.07);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 560px;
+  text-align: center;
+}
+
+.search-card h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 .5rem;
+}
+
+.search-card p {
+  font-size: .9rem;
+  color: #94a3b8;
+  margin: 0 0 1.75rem;
+}
+
+.search-form { width: 100%; }
+
+.search-row {
+  display: flex;
+  gap: .5rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: .7rem 1rem;
+  border: 1.5px solid rgba(255,255,255,.15);
+  border-radius: 12px;
+  background: rgba(255,255,255,.08);
+  color: #f1f5f9;
+  font-size: .95rem;
+  outline: none;
+  transition: border-color .15s, background .15s;
+}
+
+.search-input::placeholder { color: #64748b; }
+.search-input:focus {
+  border-color: #818cf8;
+  background: rgba(255,255,255,.12);
+}
+.search-input:disabled { opacity: .6; }
+
+.btn-search {
+  padding: .7rem 1.5rem;
+  background: #4f46e5;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.btn-search:hover:not(:disabled) { background: #4338ca; }
+.btn-search:disabled { opacity: .5; cursor: not-allowed; }
+
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Result cards ── */
+.result-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 560px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.25);
+}
+
+.result-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: .5rem;
+}
+
+.nf-icon { font-size: 2.5rem; }
+.result-not-found h3 { font-size: 1.1rem; color: #1e293b; margin: 0; }
+.result-not-found p  { font-size: .875rem; color: #64748b; margin: 0; }
+
+/* ── Result header ── */
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.code-label { display: block; font-size: .72rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+.code-value { font-size: 1.2rem; font-weight: 700; color: #1e293b; }
+
+.status-badge {
+  font-size: .78rem;
+  font-weight: 700;
+  padding: .35rem .9rem;
+  border-radius: 999px;
+  letter-spacing: .03em;
+}
+.status-pending   { background: #fef9c3; color: #854d0e; }
+.status-progress  { background: #dbeafe; color: #1d4ed8; }
+.status-completed { background: #dcfce7; color: #166534; }
+.status-rejected  { background: #fee2e2; color: #991b1b; }
+
+/* ── Meta ── */
+.result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.meta-item { display: flex; flex-direction: column; gap: .15rem; }
+.meta-label { font-size: .72rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+.meta-value { font-size: .875rem; color: #1e293b; font-weight: 500; }
+
+/* ── History ── */
+.history-section h3 {
+  font-size: .88rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin: 0 0 .75rem;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-left: 2px solid #e2e8f0;
+  margin-left: .5rem;
+}
+
+.history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .5rem 0 .5rem .85rem;
+  position: relative;
+}
+
+.h-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: 2px solid #fff;
+  position: absolute;
+  left: -6px;
+  top: .75rem;
+  flex-shrink: 0;
+}
+
+.history-item.completed .h-dot { background: #059669; }
+
+.h-body { display: flex; flex-direction: column; gap: .15rem; }
+.h-node  { font-size: .875rem; font-weight: 600; color: #1e293b; }
+.h-dates { font-size: .78rem; color: #64748b; }

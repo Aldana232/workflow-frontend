@@ -1,0 +1,168 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Procesos</h1>
+      <p>Catálogo de procesos del sistema</p>
+    </div>
+    <button class="btn-primary" (click)="newProcess()">+ Nuevo proceso</button>
+  </header>
+
+  @if (loading) {
+    <div class="loading-state">
+      <span class="spinner"></span>
+      <p>Cargando procesos…</p>
+    </div>
+  } @else if (processes.length === 0) {
+    <div class="empty-state">
+      <p>No hay procesos registrados.</p>
+      <button class="btn-primary" (click)="newProcess()">+ Crear el primero</button>
+    </div>
+  } @else {
+    <div class="processes-grid">
+      @for (p of processes; track p.id) {
+        <div class="process-card" [class.card-selected]="selectedProcess?.id === p.id">
+          <div class="card-header">
+            <div>
+              <p class="process-name">{{ p.name }}</p>
+              <span class="process-version">{{ p.version }}</span>
+            </div>
+            <span [class]="'badge badge-' + statusMod(p.status)">{{ statusMod(p.status) }}</span>
+          </div>
+
+          <p class="card-meta">
+            Trámites activos: <strong>{{ p.activeTramites }}</strong>
+          </p>
+
+          <div class="card-actions">
+            <button class="btn-tramites" (click)="viewTramites(p)">📋 Trámites</button>
+            <button class="btn-design"   (click)="design(p)">✏️ Diseñar</button>
+            @if (statusMod(p.status) === 'DRAFT') {
+              <button class="btn-publish" (click)="publish(p)">🚀 Publicar</button>
+            }
+            @if (statusMod(p.status) === 'ACTIVO') {
+              <button class="btn-deactivate" (click)="deactivate(p)" title="Desactivar proceso">⏸ Desactivar</button>
+            }
+            <button class="btn-delete" (click)="deleteProcess(p)" title="Eliminar proceso">🗑</button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- ── Panel de trámites del proceso seleccionado ── -->
+    @if (selectedProcess) {
+      <div class="tramites-panel">
+        <div class="tramites-panel-header">
+          <h2>Trámites — {{ selectedProcess.name }}</h2>
+          <button class="btn-close-panel" (click)="closeTramites()">✕ Cerrar</button>
+        </div>
+
+        @if (loadingTramites) {
+          <div class="loading-state">
+            <span class="spinner"></span>
+            <p>Cargando trámites…</p>
+          </div>
+        } @else if (tramites.length === 0) {
+          <p class="empty-tramites">No hay trámites registrados para este proceso aún.</p>
+        } @else {
+          <div class="tramites-table-wrap">
+            <table class="tramites-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Cliente</th>
+                  <th>Nodo actual</th>
+                  <th>Estado</th>
+                  <th>Inicio</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of tramites; track t.tramiteId) {
+                  <tr>
+                    <td><code class="tram-code">{{ t.code }}</code></td>
+                    <td>{{ t.clienteNombre ?? '—' }}</td>
+                    <td><span class="node-chip">{{ t.currentNodeLabel ?? t.currentNodeId ?? '—' }}</span></td>
+                    <td>
+                      <span [class]="'tram-badge ' + tramiteStatusClass(t.status)">
+                        {{ tramiteStatusLabel(t.status) }}
+                      </span>
+                    </td>
+                    <td class="date-cell">
+                      {{ t.startedAt ? (t.startedAt | slice:0:10) : '—' }}
+                    </td>
+                    <td class="actions-cell">
+                      <button class="btn-view-detail" (click)="viewDetail(t)" title="Ver detalle">👁</button>
+                      <button class="btn-delete-tram" (click)="deleteTramite(t)" title="Eliminar trámite">🗑</button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- ── Panel de detalle de trámite ── -->
+      @if (loadingDetail) {
+        <div class="detail-panel">
+          <div class="loading-state"><span class="spinner"></span><p>Cargando detalle…</p></div>
+        </div>
+      } @else if (detailTramite) {
+        <div class="detail-panel">
+          <div class="tramites-panel-header">
+            <h2>Detalle — <code class="tram-code">{{ detailTramite.code }}</code></h2>
+            <button class="btn-close-panel" (click)="closeDetail()">✕ Cerrar</button>
+          </div>
+
+          <div class="detail-body">
+
+            <div class="detail-section">
+              <h3>Estado del trámite</h3>
+              <span [class]="'tram-badge tram-badge-lg ' + tramiteStatusClass(detailTramite.status)">
+                {{ tramiteStatusLabel(detailTramite.status) }}
+              </span>
+              <p class="detail-meta">Nodo actual: <strong>{{ detailNodeLabel ?? detailTramite.currentNodeId ?? '—' }}</strong></p>
+              <p class="detail-meta">Creado: <strong>{{ detailTramite.createdAt ? (detailTramite.createdAt | slice:0:10) : '—' }}</strong></p>
+              @if (detailTramite.completedDate) {
+                <p class="detail-meta">Finalizado: <strong>{{ detailTramite.completedDate | slice:0:10 }}</strong></p>
+              }
+            </div>
+
+            @if (detailTramite.clienteInfo) {
+              <div class="detail-section">
+                <h3>Datos del cliente</h3>
+                <dl class="detail-dl">
+                  @if (detailTramite.clienteInfo.nombre)    { <dt>Nombre</dt>    <dd>{{ detailTramite.clienteInfo.nombre }}</dd>    }
+                  @if (detailTramite.clienteInfo.ci)        { <dt>CI</dt>        <dd>{{ detailTramite.clienteInfo.ci }}</dd>        }
+                  @if (detailTramite.clienteInfo.telefono)  { <dt>Teléfono</dt>  <dd>{{ detailTramite.clienteInfo.telefono }}</dd>  }
+                  @if (detailTramite.clienteInfo.email)     { <dt>Email</dt>     <dd>{{ detailTramite.clienteInfo.email }}</dd>     }
+                  @if (detailTramite.clienteInfo.direccion) { <dt>Dirección</dt> <dd>{{ detailTramite.clienteInfo.direccion }}</dd> }
+                </dl>
+              </div>
+            }
+
+            <div class="detail-section">
+              <h3>Historial de acciones</h3>
+              @if (detailHistoryEntries().length === 0) {
+                <p class="detail-meta">Sin historial registrado.</p>
+              } @else {
+                <ul class="history-list">
+                  @for (entry of detailHistoryEntries(); track $index) {
+                    <li class="history-item">
+                      <span class="history-dot"></span>
+                      <div>
+                        <p class="history-action">{{ entry.action }}</p>
+                        <p class="history-time">{{ entry.timestamp ? (entry.timestamp | slice:0:16) : '' }}</p>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

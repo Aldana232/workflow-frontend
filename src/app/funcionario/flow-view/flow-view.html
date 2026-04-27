@@ -1,0 +1,99 @@
+<div class="flow-page">
+
+  <div class="flow-header">
+    <button class="btn-back" (click)="goBack()">← Volver</button>
+    <div class="header-info">
+      <h1>Flujo del trámite</h1>
+      @if (tramite) {
+        <span class="tramite-badge">{{ tramite.code }}</span>
+      }
+    </div>
+    @if (tramite) {
+      <button class="btn-process" (click)="goProcess()">✏️ Procesar tarea</button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <span class="spinner"></span>
+      <p>Cargando flujo…</p>
+    </div>
+  } @else {
+
+    <div class="flow-body">
+
+      <!-- Panel izquierdo: progreso textual -->
+      <div class="progress-panel">
+
+        <!-- Resumen -->
+        <div class="summary-card">
+          <div class="summary-title">Estado actual</div>
+          <div class="current-node-name">{{ currentNodeLabel }}</div>
+          <div class="summary-sub">
+            Proceso: <strong>{{ process?.name ?? '—' }}</strong>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" [style.width.%]="progressPct"></div>
+          </div>
+          <div class="progress-label">{{ progressPct }}% completado ({{ completedCount }}/{{ steps.length }} pasos)</div>
+        </div>
+
+        <!-- Lista de pasos -->
+        <div class="steps-list">
+          <div class="steps-title">Pasos del flujo</div>
+          @for (step of steps; track step.id) {
+            <div [class]="'step-item step-' + step.state">
+              <span class="step-icon">{{ stateIcon(step.state) }}</span>
+              <div class="step-body">
+                <span class="step-label">{{ step.label }}</span>
+                <span class="step-type">{{ typeLabel(step.type) }}</span>
+              </div>
+              @if (step.state === 'current') {
+                <span class="step-current-tag">Aquí</span>
+              }
+            </div>
+          }
+          @if (steps.length === 0) {
+            <p class="no-steps">No se encontraron pasos en el flujo.</p>
+          }
+        </div>
+
+        <!-- Historial -->
+        @if (tramite?.history?.length) {
+          <div class="history-card">
+            <div class="steps-title">Historial de acciones</div>
+            @for (h of tramite.history; track $index) {
+              <div class="history-item">
+                <span class="history-dot"></span>
+                <div>
+                  <div class="history-action">{{ h.action }}</div>
+                  <div class="history-ts">{{ formatTs(h.timestamp) }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+
+      <!-- Panel derecho: diagrama BPMN -->
+      <div class="diagram-panel">
+        <div class="diagram-title">
+          Diagrama del proceso
+          <span class="diagram-hint">El nodo resaltado indica la posición actual</span>
+        </div>
+        @if (bpmnXml) {
+          <div class="diagram-wrap">
+            <app-bpmn-diagram [xml]="bpmnXml" [highlightId]="currentNodeId" />
+          </div>
+        } @else {
+          <div class="no-diagram">
+            <span>📋</span>
+            <p>Este proceso no tiene diagrama BPMN.</p>
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+</div>

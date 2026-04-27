@@ -1,0 +1,114 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Funcionarios</h1>
+      <p>Gestión de usuarios del sistema ({{ users.length }} en total)</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">+ Nuevo funcionario</button>
+  </header>
+
+  @if (loading) {
+    <div class="empty-state"><span class="spinner"></span><p>Cargando…</p></div>
+  } @else if (users.length === 0) {
+    <div class="empty-state">
+      <div style="font-size:3rem">👥</div>
+      <h3>Sin funcionarios</h3>
+      <p>Aún no hay usuarios registrados en el sistema.</p>
+    </div>
+  } @else {
+    <div class="table-card">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre completo</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Departamento</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of users; track u.id) {
+              <tr>
+                <td class="name-cell">
+                  <span class="avatar">{{ fullName(u).charAt(0).toUpperCase() }}</span>
+                  {{ fullName(u) }}
+                </td>
+                <td>{{ u.email }}</td>
+                <td><span class="badge badge-role">{{ u.role }}</span></td>
+                <td>{{ deptName(u.departmentId) }}</td>
+                <td>
+                  <span [class]="u.active ? 'badge badge-active' : 'badge badge-inactive'">
+                    {{ u.active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-toggle" (click)="toggleActive(u)">
+                    {{ u.active ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
+
+@if (showModal) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Nuevo funcionario</h2>
+        <button class="btn-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="form.firstName" placeholder="Nombre" />
+        </div>
+        <div class="form-group">
+          <label>Apellido</label>
+          <input type="text" [(ngModel)]="form.lastName" placeholder="Apellido" />
+        </div>
+        <div class="form-group full">
+          <label>Correo electrónico *</label>
+          <input type="email" [(ngModel)]="form.email" placeholder="usuario@empresa.com" />
+        </div>
+        <div class="form-group full">
+          <label>Rol</label>
+          <select [(ngModel)]="form.role">
+            <option value="FUNCIONARIO">FUNCIONARIO</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Departamento</label>
+          <select [(ngModel)]="form.departmentId">
+            <option value="">Sin departamento</option>
+            @for (d of departments; track d.id) {
+              <option [value]="d.id">{{ d.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Contraseña *</label>
+          <input type="password" [(ngModel)]="form.password" placeholder="Mínimo 6 caracteres" />
+        </div>
+        <div class="form-group">
+          <label>Confirmar contraseña *</label>
+          <input type="password" [(ngModel)]="form.confirmPassword" placeholder="Repite la contraseña" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeModal()">Cancelar</button>
+        <button class="btn-save" [disabled]="!formValid" (click)="save()">Guardar</button>
+      </div>
+    </div>
+  </div>
+}

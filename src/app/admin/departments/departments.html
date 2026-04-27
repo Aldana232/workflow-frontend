@@ -1,0 +1,187 @@
+<div class="page">
+
+  <!-- ── Cabecera ── -->
+  <header class="page-header">
+    <div>
+      <h1>Departamentos</h1>
+      <p>Gestiona los departamentos y asigna funcionarios a cada uno.</p>
+    </div>
+    <button class="btn-primary" (click)="openCreate()">+ Nuevo departamento</button>
+  </header>
+
+  <!-- ── Carga ── -->
+  @if (loading) {
+    <div class="empty-state"><span class="spinner"></span><p>Cargando…</p></div>
+  } @else if (departments.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🏢</div>
+      <h3>Sin departamentos</h3>
+      <p>Crea el primer departamento para empezar a asignar funcionarios.</p>
+    </div>
+  } @else {
+
+    <!-- ── Grid de tarjetas ── -->
+    <div class="dept-grid">
+      @for (d of departments; track d.id) {
+        <div [class]="'dept-card' + (selected?.id === d.id ? ' dept-card--active' : '') + (!d.active ? ' dept-card--inactive' : '')"
+             (click)="selectDept(d)">
+          <div class="dept-card-icon">🏢</div>
+          <div class="dept-card-info">
+            <span class="dept-name">{{ d.name }}</span>
+            <span class="dept-desc">{{ d.description || 'Sin descripción' }}</span>
+          </div>
+          <div class="dept-card-meta">
+            <span class="user-count">{{ userCount(d) }} funcionario(s)</span>
+            @if (!d.active) { <span class="badge-inactive">Inactivo</span> }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- ── Panel de detalle ── -->
+    @if (selected) {
+      <div class="detail-panel">
+
+        <div class="detail-header">
+          <div>
+            <h2>{{ selected.name }}</h2>
+            <p class="detail-desc">{{ selected.description || 'Sin descripción' }}</p>
+          </div>
+          <div class="detail-actions">
+            <button class="btn-outline" (click)="openEdit()">✏️ Editar</button>
+            <button class="btn-danger-outline" (click)="deactivateDept()" [disabled]="!selected.active">
+              🚫 Desactivar
+            </button>
+            <button class="btn-primary" (click)="openAssign()">+ Asignar funcionario</button>
+          </div>
+        </div>
+
+        <div class="users-section">
+          <h3>Funcionarios asignados ({{ deptUsers.length }})</h3>
+
+          @if (deptUsers.length === 0) {
+            <div class="no-users">
+              <span>👥</span>
+              <p>No hay funcionarios en este departamento.</p>
+              <button class="btn-primary" (click)="openAssign()">Asignar primer funcionario</button>
+            </div>
+          } @else {
+            <div class="users-table-wrap">
+              <table class="users-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (u of deptUsers; track u.id) {
+                    <tr>
+                      <td class="user-name-cell">
+                        <span class="user-avatar">{{ fullName(u).charAt(0).toUpperCase() }}</span>
+                        {{ fullName(u) }}
+                      </td>
+                      <td>{{ u.email }}</td>
+                      <td><span class="role-badge">{{ u.role }}</span></td>
+                      <td>
+                        <span [class]="u.active ? 'status-dot active' : 'status-dot inactive'">
+                          {{ u.active ? 'Activo' : 'Inactivo' }}
+                        </span>
+                      </td>
+                      <td>
+                        <button class="btn-remove" (click)="removeUser(u)">Quitar</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+</div>
+
+<!-- ── Modal: Crear departamento ── -->
+@if (showCreateDept) {
+  <div class="modal-overlay" (click)="showCreateDept = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Nuevo departamento</h2>
+        <button class="btn-close" (click)="showCreateDept = false">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="deptForm.name" placeholder="Ej: Atención al Cliente" />
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="deptForm.description" rows="2" placeholder="Descripción opcional del departamento"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showCreateDept = false">Cancelar</button>
+        <button class="btn-save" [disabled]="!deptForm.name.trim()" (click)="createDept()">Crear</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Modal: Editar departamento ── -->
+@if (showEditDept) {
+  <div class="modal-overlay" (click)="showEditDept = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Editar departamento</h2>
+        <button class="btn-close" (click)="showEditDept = false">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="editForm.name" />
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="editForm.description" rows="2"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showEditDept = false">Cancelar</button>
+        <button class="btn-save" [disabled]="!editForm.name.trim()" (click)="saveEdit()">Guardar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Modal: Asignar funcionario ── -->
+@if (showAssignUser) {
+  <div class="modal-overlay" (click)="showAssignUser = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Asignar funcionario a "{{ selected?.name }}"</h2>
+        <button class="btn-close" (click)="showAssignUser = false">✕</button>
+      </div>
+
+      @if (unassignedUsers.length === 0) {
+        <p class="no-options">Todos los funcionarios ya están asignados a este departamento.</p>
+      } @else {
+        <div class="form-group">
+          <label>Selecciona un funcionario</label>
+          <select [(ngModel)]="assignUserId">
+            <option value="" disabled>— Elige un funcionario —</option>
+            @for (u of unassignedUsers; track u.id) {
+              <option [value]="u.id">{{ fullName(u) }} · {{ u.email }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showAssignUser = false">Cancelar</button>
+        <button class="btn-save" [disabled]="!assignUserId" (click)="assignUser()">Asignar</button>
+      </div>
+    </div>
+  </div>
+}

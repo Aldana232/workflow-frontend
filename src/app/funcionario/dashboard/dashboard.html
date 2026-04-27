@@ -1,0 +1,94 @@
+<div class="dashboard-page">
+
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Mis Tareas</h1>
+      <p>Bienvenido, <strong>{{ userName }}</strong>. Aquí están tus tareas pendientes.</p>
+    </div>
+    <div class="header-actions">
+      <span class="badge-count">{{ tasks.length }} tarea(s)</span>
+      @if (canInitiate) {
+        <a class="btn-primary" routerLink="/funcionario/nuevo-tramite">
+          + Nuevo trámite
+        </a>
+      }
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="empty-state">
+      <span class="spinner"></span>
+      <p>Cargando tareas…</p>
+    </div>
+  } @else if (tasks.length === 0) {
+    <div class="empty-state">
+      @if (canInitiate) {
+        <h3>Sin trámites pendientes</h3>
+        <p>No tienes trámites activos por el momento. Puedes crear uno nuevo.</p>
+        <a class="btn-primary" routerLink="/funcionario/nuevo-tramite">+ Crear nuevo trámite</a>
+      } @else {
+        <h3>Sin tareas asignadas</h3>
+        <p>Tu departamento no tiene tareas pendientes en este momento.<br>Las tareas aparecerán aquí cuando lleguen del departamento anterior.</p>
+      }
+    </div>
+  } @else {
+    <div class="tasks-grid">
+      @for (t of tasks; track t.id) {
+        <div [class]="'task-card ' + slaClass(t)">
+
+          <div class="card-accent"></div>
+
+          <div class="card-body">
+
+            <div class="card-top">
+              <div class="card-title-group">
+                <code class="tramite-code">{{ t.tramiteCode }}</code>
+                <span class="process-name">{{ t.processName }}</span>
+              </div>
+              <span [class]="'sla-pill ' + slaClass(t)">{{ slaLabel(t) }}</span>
+            </div>
+
+            <!-- Indicador de posición en el flujo -->
+            <div class="flow-indicator" [class.flow-indicator-done]="!t.canProcess">
+              <span class="flow-label">
+                @if (t.canProcess) { Paso actual — pendiente de procesar }
+                @else if (t.status === 'COMPLETED') { Trámite completado }
+                @else { Etapa completada — en otro departamento }
+              </span>
+              <div class="flow-node-badge">
+                <span [class]="t.canProcess ? 'flow-dot' : 'flow-dot flow-dot-done'"></span>
+                <span class="flow-node-name">{{ t.nodeName }}</span>
+              </div>
+            </div>
+
+            <div class="card-meta">
+              <span class="meta-item">📅 {{ formatDate(t.arrivedAt) }}</span>
+              <span class="meta-item">🏢 {{ getDeptName(t.departmentId) }}</span>
+            </div>
+
+            <div class="card-actions">
+              <button
+                class="btn-process"
+                [class.btn-process-done]="!t.canProcess"
+                (click)="openTask(t)"
+              >
+                @if (t.canProcess) {
+                  ✏️ Procesar tarea
+                } @else if (t.status === 'COMPLETED') {
+                  ✅ Ver tarea completada
+                } @else {
+                  👁 Ver detalle
+                }
+              </button>
+              <button class="btn-flow" (click)="openFlow(t)">
+                🔍 Ver flujo
+              </button>
+            </div>
+
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

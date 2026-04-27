@@ -1,0 +1,232 @@
+<div class="analytics-page">
+
+  <!-- ══ HEADER ═══════════════════════════════════════════════════════════ -->
+  <div class="page-header">
+    <div>
+      <h1>Analítica</h1>
+      <p>Métricas generales del sistema de gestión de trámites</p>
+    </div>
+    <button class="btn-export" (click)="exportToExcel()" [disabled]="exporting">
+      @if (exporting) { ⏳ Exportando… } @else { 📥 Exportar Excel }
+    </button>
+  </div>
+
+  <!-- ══ SUMMARY CARDS ════════════════════════════════════════════════════ -->
+  @if (summaryLoading) {
+    <div class="summary-loading">
+      <span class="summary-spinner"></span> Cargando métricas…
+    </div>
+  } @else if (summaryError) {
+    <div class="summary-error">
+      ⚠️ No se pudieron cargar las métricas del resumen. Mostrando datos de ejemplo.
+    </div>
+  }
+
+  <div class="stats-grid">
+    @for (s of stats; track s.label) {
+      <div [class]="'stat-card stat-' + s.mod">
+        <div class="stat-body">
+          <span class="stat-value">{{ s.value }}</span>
+          <span class="stat-label">{{ s.label }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ══ NODE PERFORMANCE CHART ════════════════════════════════════════════ -->
+  <div class="chart-card chart-card--full">
+    <div class="chart-header">
+      <div class="chart-title-group">
+        <h3>⏱ Rendimiento por nodo</h3>
+        <span class="chart-subtitle">Tiempo promedio por etapa del proceso · SLA = {{ slaHours }}h</span>
+      </div>
+
+      <div class="process-selector-wrap">
+        <label class="selector-label" for="processSelect">Proceso</label>
+        <select
+          id="processSelect"
+          class="process-select"
+          [(ngModel)]="selectedProcessId"
+          (ngModelChange)="onProcessChange()"
+        >
+          <option value="">— Selecciona un proceso —</option>
+          @for (p of processes; track p.id) {
+            <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    @if (chartLoading) {
+      <div class="chart-state">
+        <span class="summary-spinner"></span>
+        <span>Cargando datos del proceso…</span>
+      </div>
+    }
+
+    <!-- Error / empty -->
+    @else if (chartError) {
+      <div class="chart-state chart-state--error">
+        ⚠️ No se pudieron cargar los datos de este proceso o no tiene nodos con actividad registrada.
+      </div>
+    }
+
+    <!-- Empty (nothing selected) -->
+    @else if (!selectedProcessId) {
+      <div class="chart-state chart-state--empty">
+        <span class="chart-empty-icon">📊</span>
+        <span>Selecciona un proceso para ver el rendimiento por nodo</span>
+      </div>
+    }
+
+    <!-- ECharts -->
+    @else if (chartOptions) {
+      <div class="sla-legend">
+        <span class="sla-dot sla-ok"></span> Dentro del SLA
+        <span class="sla-dot sla-over" style="margin-left:1rem"></span> Excede SLA
+        <span class="sla-ref">— — Línea de referencia SLA</span>
+      </div>
+      <div
+        echarts
+        [options]="chartOptions"
+        class="echarts-container"
+      ></div>
+    }
+  </div>
+
+  <!-- ══ STATIC CHARTS ════════════════════════════════════════════════════ -->
+  <div class="charts-row">
+
+    <div class="chart-card">
+      <h3>Trámites por proceso</h3>
+      <div class="bar-list">
+        @for (item of processLoad; track item.label) {
+          <div class="bar-row">
+            <span class="bar-label">{{ item.label }}</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="item.pct" [style.background]="item.color"></div>
+            </div>
+            <span class="bar-value">{{ item.value }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Carga por departamento</h3>
+      <div class="bar-list">
+        @for (item of deptLoad; track item.label) {
+          <div class="bar-row">
+            <span class="bar-label">{{ item.label }}</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="item.pct" [style.background]="item.color"></div>
+            </div>
+            <span class="bar-value">{{ item.value }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ ACTIVE TRAMITES TABLE ════════════════════════════════════════════ -->
+  <div class="table-card">
+
+    <div class="table-header">
+      <div class="table-title-group">
+        <h3>📋 Trámites activos</h3>
+        @if (!tramitesLoading && !tramitesError) {
+          <span class="table-subtitle">
+            {{ filteredTramites.length }} de {{ activeTramites.length }} trámites
+          </span>
+        }
+      </div>
+
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="tramiteSearch"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Buscar por código o departamento…"
+        />
+        @if (tramiteSearch) {
+          <button class="search-clear" (click)="tramiteSearch = ''; onSearchChange()">✕</button>
+        }
+      </div>
+    </div>
+
+    <!-- Loading -->
+    @if (tramitesLoading) {
+      <div class="table-state">
+        <span class="summary-spinner"></span> Cargando trámites activos…
+      </div>
+    }
+
+    <!-- Error -->
+    @else if (tramitesError) {
+      <div class="table-state table-state--error">
+        ⚠️ No se pudieron cargar los trámites activos.
+      </div>
+    }
+
+    <!-- Empty -->
+    @else if (filteredTramites.length === 0) {
+      <div class="table-state table-state--empty">
+        @if (tramiteSearch) {
+          <span class="chart-empty-icon">🔍</span>
+          <span>Sin resultados para <b>"{{ tramiteSearch }}"</b></span>
+        } @else {
+          <span class="chart-empty-icon">📭</span>
+          <span>No hay trámites activos en este momento</span>
+        }
+      </div>
+    }
+
+    <!-- Table -->
+    @else {
+      <div class="table-wrap">
+        <table class="tramites-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Proceso</th>
+              <th>Nodo actual</th>
+              <th>Departamento</th>
+              <th>Esperando</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of filteredTramites; track t.code) {
+              <tr class="table-row" [class.row--over-sla]="isOverSla(t.waitingMinutes)">
+                <td>
+                  <span class="code-badge">{{ t.code }}</span>
+                </td>
+                <td class="td-process">{{ t.processName }}</td>
+                <td>
+                  <span class="node-chip">{{ t.currentNode }}</span>
+                </td>
+                <td class="td-dept">{{ t.departmentName }}</td>
+                <td [class.wait--over]="isOverSla(t.waitingMinutes)" class="td-wait">
+                  {{ formatWaitTime(t.waitingMinutes) }}
+                </td>
+                <td>
+                  @if (isOverSla(t.waitingMinutes)) {
+                    <span class="status-badge status-badge--late">⚠ Retrasado</span>
+                  } @else {
+                    <span class="status-badge status-badge--ok">✓ En tiempo</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  </div>
+
+</div>

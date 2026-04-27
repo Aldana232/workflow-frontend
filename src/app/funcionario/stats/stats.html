@@ -1,0 +1,98 @@
+<div class="stats-page" id="stats-print-area">
+
+  <div class="page-header">
+    <div>
+      <h1>Mis Estadísticas</h1>
+      <p>Rendimiento de <strong>{{ userName }}</strong> · Departamento: {{ department }}</p>
+    </div>
+    <div class="export-actions no-print">
+      <button class="btn-export btn-excel" (click)="exportExcel()">Exportar Excel</button>
+      <button class="btn-export btn-pdf"   (click)="exportPdf()">Exportar PDF</button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <span class="spinner"></span>
+      <p>Cargando estadísticas…</p>
+    </div>
+  } @else if (error) {
+    <div class="error-state">
+      <p>No se pudieron cargar las estadísticas. Intenta recargar la página.</p>
+    </div>
+  } @else {
+
+    <!-- Cards -->
+    <div class="cards-grid">
+      @for (c of cards; track c.label) {
+        <div [class]="'stat-card stat-' + c.mod">
+          <div class="stat-body">
+            <span class="stat-value">{{ c.value }}</span>
+            <span class="stat-label">{{ c.label }}</span>
+            <span class="stat-sub">{{ c.sub }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Monthly chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2>Tareas completadas por mes</h2>
+        <span class="chart-hint">Últimos 6 meses</span>
+      </div>
+      @if (monthlyBars.length === 0) {
+        <p class="empty-msg">Sin actividad registrada aún.</p>
+      } @else {
+        <div class="bar-chart">
+          @for (bar of monthlyBars; track bar.month) {
+            <div class="bar-col">
+              <span class="bar-count">{{ bar.completed }}</span>
+              <div class="bar-track">
+                <div class="bar-fill" [style.height.%]="bar.pct"></div>
+              </div>
+              <span class="bar-month">{{ bar.month }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Recent activity -->
+    <div class="table-card">
+      <h2>Actividad reciente</h2>
+      @if (recentActivity.length === 0) {
+        <p class="empty-msg">Sin actividad registrada aún.</p>
+      } @else {
+        <div class="table-wrapper">
+          <table id="activity-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Proceso</th>
+                <th>Nodo</th>
+                <th>Completado</th>
+                <th>Resultado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of recentActivity; track row.code + row.completedAt) {
+                <tr>
+                  <td><code>{{ row.code }}</code></td>
+                  <td>{{ row.process }}</td>
+                  <td>{{ row.node }}</td>
+                  <td class="date-cell">{{ row.completedAt }}</td>
+                  <td>
+                    <span [class]="'result-badge ' + resultClass(row.result)">{{ row.result }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+  }
+
+</div>

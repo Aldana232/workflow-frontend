@@ -1,0 +1,105 @@
+<div class="consulta-shell">
+
+  <header class="consulta-header">
+    <div class="header-brand">
+      <span class="brand-icon">🔄</span>
+      <span class="brand-name">WorkflowApp</span>
+    </div>
+    <a routerLink="/login" class="btn-login">Iniciar sesión</a>
+  </header>
+
+  <main class="consulta-main">
+
+    <div class="search-card">
+      <h1>Consulta tu trámite</h1>
+      <p>Ingresa el código de tu trámite para ver su estado actual</p>
+
+      <form class="search-form" (ngSubmit)="search()">
+        <div class="search-row">
+          <input
+            type="text"
+            [(ngModel)]="code"
+            name="code"
+            placeholder="Ej: TRM-0001"
+            class="search-input"
+            autocomplete="off"
+            [disabled]="loading"
+          />
+          <button type="submit" class="btn-search" [disabled]="loading || !code.trim()">
+            @if (loading) {
+              <span class="spinner"></span>
+            } @else {
+              Consultar
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+
+    @if (searched && notFound) {
+      <div class="result-card result-not-found">
+        <div class="nf-icon">🔍</div>
+        <h3>Trámite no encontrado</h3>
+        <p>No existe un trámite con el código <strong>{{ code }}</strong>. Verifica el código e intenta nuevamente.</p>
+      </div>
+    }
+
+    @if (tramite) {
+      <div class="result-card">
+
+        <div class="result-header">
+          <div class="result-code">
+            <span class="code-label">Código</span>
+            <span class="code-value">{{ tramite.code }}</span>
+          </div>
+          <span [class]="'status-badge status-' + statusMod(tramite.status)">
+            {{ statusLabel(tramite.status) }}
+          </span>
+        </div>
+
+        <div class="result-meta">
+          <div class="meta-item">
+            <span class="meta-label">Inicio</span>
+            <span class="meta-value">{{ tramite.startedAt | slice:0:10 }}</span>
+          </div>
+          @if (tramite.completedAt) {
+            <div class="meta-item">
+              <span class="meta-label">Finalizado</span>
+              <span class="meta-value">{{ tramite.completedAt | slice:0:10 }}</span>
+            </div>
+          }
+          <div class="meta-item">
+            <span class="meta-label">Nodo actual</span>
+            <span class="meta-value">{{ tramite.currentNodeId }}</span>
+          </div>
+        </div>
+
+        @if (tramite.history && tramite.history.length) {
+          <div class="history-section">
+            <h3>Historial de pasos</h3>
+            <ol class="history-list">
+              @for (entry of tramite.history; track trackHistory($index, entry)) {
+                <li class="history-item" [class.completed]="!!entry.completedAt">
+                  <div class="h-dot"></div>
+                  <div class="h-body">
+                    <span class="h-node">{{ entry.nodeName }}</span>
+                    <span class="h-dates">
+                      Entró: {{ entry.arrivedAt | slice:0:10 }}
+                      @if (entry.completedAt) {
+                        · Completó: {{ entry.completedAt | slice:0:10 }}
+                        · {{ entry.durationMinutes }} min
+                      }
+                    </span>
+                  </div>
+                </li>
+              }
+            </ol>
+          </div>
+        }
+
+      </div>
+    }
+
+  </main>
+
+</div>

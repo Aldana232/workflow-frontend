@@ -1,0 +1,132 @@
+<div class="nt-page">
+
+  <div class="nt-header">
+    <button class="btn-back" (click)="goBack()">← Volver</button>
+    <div>
+      <h1>Nuevo Trámite</h1>
+      <p>Completa los datos del cliente e inicia el proceso</p>
+    </div>
+  </div>
+
+  <!-- ══ CÓDIGO GENERADO ══════════════════════════════════════════════════ -->
+  @if (codigoGenerado) {
+    <div class="success-banner">
+      <span class="success-icon">✅</span>
+      <div>
+        <strong>Trámite registrado exitosamente</strong>
+        <div class="codigo-wrap">
+          Código: <span class="codigo">{{ codigoGenerado }}</span>
+          <span class="codigo-hint">Guarda este código para consultar el estado</span>
+        </div>
+      </div>
+      <button class="btn-go-tasks" (click)="goBack()">Ver mis tareas →</button>
+    </div>
+  }
+
+  <!-- ══ FORMULARIO ═══════════════════════════════════════════════════════ -->
+  @if (!codigoGenerado) {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="nt-form">
+
+      <!-- Proceso -->
+      <div class="form-card">
+        <h3 class="card-title">⚙️ Proceso a iniciar</h3>
+        <div class="field-group">
+          <label>Proceso <span class="req">*</span></label>
+          <select formControlName="processId" [class.invalid]="err('processId')">
+            <option value="">— Selecciona un proceso activo —</option>
+            @for (p of processes; track p.id) {
+              <option [value]="p.id">{{ p.name }}</option>
+            }
+          </select>
+          @if (err('processId')) {
+            <span class="field-error">Selecciona un proceso</span>
+          }
+        </div>
+      </div>
+
+      <!-- Datos del cliente -->
+      <div class="form-card">
+        <h3 class="card-title">👤 Datos del cliente</h3>
+
+        <div class="fields-grid">
+
+          <div class="field-group">
+            <label>Nombre completo <span class="req">*</span></label>
+            <input
+              formControlName="nombre"
+              placeholder="Ej: Roberto Fernández"
+              [class.invalid]="err('nombre')"
+            />
+            @if (err('nombre')) {
+              <span class="field-error">Mínimo 3 caracteres</span>
+            }
+          </div>
+
+          <div class="field-group">
+            <label>Carnet de identidad <span class="req">*</span></label>
+            <input
+              formControlName="ci"
+              placeholder="Ej: 5432198"
+              [class.invalid]="err('ci')"
+            />
+            @if (err('ci')) {
+              <span class="field-error">Mínimo 5 caracteres</span>
+            }
+          </div>
+
+          <div class="field-group">
+            <label>Teléfono <span class="req">*</span></label>
+            <input
+              formControlName="telefono"
+              placeholder="Ej: 72345678"
+              [class.invalid]="err('telefono')"
+            />
+            @if (err('telefono')) {
+              <span class="field-error">Mínimo 7 dígitos</span>
+            }
+          </div>
+
+          <div class="field-group">
+            <label>Correo electrónico <span class="req">*</span></label>
+            <input
+              formControlName="email"
+              type="email"
+              placeholder="Ej: roberto@gmail.com"
+              [class.invalid]="err('email')"
+            />
+            @if (err('email')) {
+              <span class="field-error">Email inválido</span>
+            }
+          </div>
+
+          <div class="field-group field-group--full">
+            <label>Dirección <span class="req">*</span></label>
+            <input
+              formControlName="direccion"
+              placeholder="Ej: Calle Sucre 234, Santa Cruz"
+              [class.invalid]="err('direccion')"
+            />
+            @if (err('direccion')) {
+              <span class="field-error">Mínimo 5 caracteres</span>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="goBack()">Cancelar</button>
+        <button type="submit" class="btn-submit" [disabled]="submitting">
+          @if (submitting) {
+            <span class="spinner"></span> Creando trámite…
+          } @else {
+            🚀 Iniciar trámite
+          }
+        </button>
+      </div>
+
+    </form>
+  }
+
+</div>

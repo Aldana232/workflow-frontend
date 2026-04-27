@@ -1,0 +1,97 @@
+:host { display: flex; flex-direction: column; height: 100%; }
+
+.pv-shell { display: flex; flex-direction: column; height: 100%; background: #f8fafc; }
+
+/* ── Toolbar ── */
+.pv-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  height: 52px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #2d2d50;
+  flex-shrink: 0;
+  gap: 1rem;
+}
+
+.pv-toolbar-left { display: flex; align-items: center; gap: .75rem; }
+
+.pv-name  { font-size: .95rem; font-weight: 600; color: #e2e8f0; }
+.pv-version { font-size: .75rem; color: #64748b; }
+
+.pv-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 999px;
+  letter-spacing: .03em;
+}
+.pv-badge-activo     { background: #dcfce7; color: #166534; }
+.pv-badge-draft      { background: #f1f5f9; color: #475569; }
+.pv-badge-deprecated { background: #fee2e2; color: #991b1b; }
+
+.pv-toolbar-right { display: flex; gap: .5rem; }
+
+.btn-edit {
+  padding: .4rem 1rem;
+  background: #4f46e5;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: .84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-edit:hover:not(:disabled) { background: #4338ca; }
+.btn-edit:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn-back {
+  padding: .4rem 1rem;
+  background: rgba(255,255,255,.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 6px;
+  font-size: .84rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-back:hover { background: rgba(255,255,255,.15); }
+
+/* ── Body ── */
+.pv-body { flex: 1; overflow: hidden; position: relative; }
+
+.pv-diagram { display: block; width: 100%; height: 100%; }
+
+/* ── States ── */
+.pv-loading,
+.pv-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: .75rem;
+  color: #94a3b8;
+}
+
+.pv-empty-icon { font-size: 3rem; }
+.pv-empty p { font-size: .9rem; margin: 0; }
+
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── BPMN highlight ── */
+:host ::ng-deep .highlight-current .djs-visual > rect,
+:host ::ng-deep .highlight-current .djs-visual > circle {
+  fill: #FF8C00 !important;
+  stroke: #E65C00 !important;
+}

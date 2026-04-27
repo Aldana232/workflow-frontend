@@ -1,0 +1,94 @@
+<div class="settings-page">
+
+  <div class="page-header">
+    <h1>⚙️ Configuración</h1>
+    <p>Preferencias del sistema y notificaciones</p>
+  </div>
+
+  <div class="settings-layout">
+
+    <!-- System Info -->
+    <div class="settings-card">
+      <h2 class="card-title">ℹ️ Información del sistema</h2>
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-key">Empresa</span>
+          <span class="info-val">{{ company }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Versión</span>
+          <span class="info-val badge-version">v{{ systemVersion }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Entorno</span>
+          <span class="info-val badge-env">{{ environment }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Base de datos</span>
+          <span class="info-val">MongoDB Atlas</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Motor de workflow</span>
+          <span class="info-val">WorkflowEngine v1.0</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Notificaciones</span>
+          <span class="info-val">WebSocket (STOMP)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification preferences -->
+    <div class="settings-card">
+      <h2 class="card-title">🔔 Preferencias de notificaciones</h2>
+      <div class="notif-list">
+        @for (pref of notifPrefs; track pref.key) {
+          <div class="notif-item">
+            <div class="notif-text">
+              <span class="notif-label">{{ pref.label }}</span>
+              <span class="notif-desc">{{ pref.description }}</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="pref.enabled" />
+              <span class="toggle-track">
+                <span class="toggle-thumb"></span>
+              </span>
+            </label>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Display preferences -->
+    <div class="settings-card">
+      <h2 class="card-title">🖥️ Preferencias de visualización</h2>
+      <div class="pref-form">
+        <div class="form-row">
+          <label class="pref-label">Elementos por página</label>
+          <select class="pref-select" [(ngModel)]="itemsPerPage">
+            <option [value]="5">5</option>
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="pref-label">Formato de fecha</label>
+          <select class="pref-select" [(ngModel)]="dateFormat">
+            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+            <option value="YYYY-MM-DD">YYYY-MM-DD (ISO)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="settings-actions">
+      <button class="btn-reset" (click)="resetSettings()">↺ Restaurar por defecto</button>
+      <button class="btn-save" (click)="saveSettings()">💾 Guardar configuración</button>
+    </div>
+
+  </div>
+
+</div>

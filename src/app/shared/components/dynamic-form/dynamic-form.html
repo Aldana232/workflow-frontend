@@ -1,0 +1,129 @@
+@if (form) {
+  <form class="dyn-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+    @for (field of fields; track field.name) {
+      <div class="field-wrap" [class.has-error]="isInvalid(field.name)">
+
+        @if (field.type !== 'CHECKBOX') {
+          <label [for]="field.name" class="field-label">
+            {{ field.label }}
+            @if (field.required) { <span class="req-mark">*</span> }
+          </label>
+        }
+
+        @switch (field.type) {
+
+          @case ('TEXT') {
+            <input
+              [id]="field.name"
+              type="text"
+              class="field-input"
+              [formControlName]="field.name"
+              [placeholder]="field.placeholder ?? ''"
+              autocomplete="off"
+            />
+          }
+
+          @case ('TEXTAREA') {
+            <textarea
+              [id]="field.name"
+              class="field-input field-textarea"
+              [formControlName]="field.name"
+              [placeholder]="field.placeholder ?? ''"
+              rows="4"
+            ></textarea>
+          }
+
+          @case ('SELECT') {
+            <div class="select-wrap">
+              <select
+                [id]="field.name"
+                class="field-input field-select"
+                [formControlName]="field.name"
+              >
+                <option value="">— Seleccionar —</option>
+                @for (opt of (field.options ?? []); track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          }
+
+          @case ('CHECKBOX') {
+            <label class="checkbox-label" [for]="field.name">
+              <input
+                [id]="field.name"
+                type="checkbox"
+                class="checkbox-input"
+                [formControlName]="field.name"
+              />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-text">
+                {{ field.label }}
+                @if (field.required) { <span class="req-mark">*</span> }
+              </span>
+            </label>
+          }
+
+          @case ('FILE') {
+            <div class="file-wrap">
+              @if (fileStates[field.name].uploading) {
+                <div class="file-uploading">
+                  <span class="upload-spinner"></span>
+                  <span>Subiendo archivo…</span>
+                </div>
+              } @else if (fileStates[field.name].fileName) {
+                <div class="file-done">
+                  <span class="file-icon">📎</span>
+                  <span class="file-name">{{ fileStates[field.name].fileName }}</span>
+                  <label [for]="field.name + '_input'" class="btn-reupload">Cambiar</label>
+                </div>
+              } @else {
+                <label [for]="field.name + '_input'" class="btn-upload">
+                  <span>☁</span> Subir archivo
+                  @if (field.required) { <span class="req-mark">*</span> }
+                </label>
+              }
+              <input
+                [id]="field.name + '_input'"
+                type="file"
+                class="file-hidden"
+                [disabled]="fileStates[field.name].uploading"
+                (change)="onFileChange(field, $event)"
+              />
+              @if (fileStates[field.name].error) {
+                <span class="field-error">{{ fileStates[field.name].error }}</span>
+              }
+            </div>
+          }
+
+        }
+
+        @if (field.type !== 'FILE' && isInvalid(field.name)) {
+          <span class="field-error">
+            @if (getControl(field.name).hasError('required')) {
+              Este campo es obligatorio.
+            }
+          </span>
+        }
+
+        <!-- AI hint from JARVIS — shown after the field loses focus + debounce -->
+        @if (aiHints[field.name]) {
+          <span class="field-ai-hint">
+            <span class="ai-hint-icon">🤖</span>
+            {{ aiHints[field.name] }}
+          </span>
+        }
+
+      </div>
+    }
+
+    <div class="form-footer">
+      <button type="submit" class="btn-submit" [disabled]="form.invalid">
+        {{ submitLabel }}
+      </button>
+    </div>
+
+  </form>
+}

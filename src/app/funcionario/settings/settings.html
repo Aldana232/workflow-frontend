@@ -1,0 +1,160 @@
+<div class="settings-page">
+
+  <div class="page-header">
+    <h1>Configuración</h1>
+    <p>Administra tu perfil, seguridad y preferencias</p>
+  </div>
+
+  <div class="settings-body">
+
+    <!-- Sidebar de tabs -->
+    <nav class="settings-nav">
+      <button [class]="'nav-tab' + (activeTab==='profile' ? ' active' : '')"
+              (click)="setTab('profile')">
+        👤 Perfil
+      </button>
+      <button [class]="'nav-tab' + (activeTab==='security' ? ' active' : '')"
+              (click)="setTab('security')">
+        🔒 Seguridad
+      </button>
+      <button [class]="'nav-tab' + (activeTab==='preferences' ? ' active' : '')"
+              (click)="setTab('preferences')">
+        ⚙️ Preferencias
+      </button>
+    </nav>
+
+    <!-- Contenido del tab -->
+    <div class="settings-content">
+
+      <!-- ── PERFIL ── -->
+      @if (activeTab === 'profile') {
+        <div class="tab-section">
+          <h2>Información de perfil</h2>
+
+          <div class="profile-header">
+            <div class="avatar">{{ userInitial }}</div>
+            <div>
+              <div class="profile-name">{{ user?.name ?? user?.email ?? '—' }}</div>
+              <div class="profile-role">{{ roleLabel }}</div>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ user?.email ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Rol</span>
+              <span class="info-value">
+                <span class="role-badge">{{ roleLabel }}</span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Departamento</span>
+              <span class="info-value mono">{{ user?.departmentId ?? '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Empresa</span>
+              <span class="info-value mono">{{ user?.companyId ?? '—' }}</span>
+            </div>
+          </div>
+
+          <div class="info-note">
+            ℹ️ Para actualizar tu información de perfil, contacta al administrador del sistema.
+          </div>
+        </div>
+      }
+
+      <!-- ── SEGURIDAD ── -->
+      @if (activeTab === 'security') {
+        <div class="tab-section">
+          <h2>Cambiar contraseña</h2>
+          <p class="tab-desc">Usa una contraseña segura de al menos 6 caracteres.</p>
+
+          <form class="pw-form" (ngSubmit)="changePassword()">
+            <div class="field-group">
+              <label>Contraseña actual</label>
+              <input type="password" [(ngModel)]="pwForm.currentPassword"
+                     name="currentPw" placeholder="••••••••" />
+            </div>
+            <div class="field-group">
+              <label>Nueva contraseña</label>
+              <input type="password" [(ngModel)]="pwForm.newPassword"
+                     name="newPw" placeholder="••••••••" />
+            </div>
+            <div class="field-group">
+              <label>Confirmar nueva contraseña</label>
+              <input type="password" [(ngModel)]="pwForm.confirmPassword"
+                     name="confirmPw" placeholder="••••••••" />
+            </div>
+            <button type="submit" class="btn-save" [disabled]="pwLoading">
+              @if (pwLoading) { Guardando… } @else { 🔒 Cambiar contraseña }
+            </button>
+          </form>
+
+          <div class="security-tips">
+            <div class="tips-title">Recomendaciones de seguridad</div>
+            <ul>
+              <li>Usa al menos 8 caracteres</li>
+              <li>Combina letras mayúsculas, minúsculas y números</li>
+              <li>No reutilices contraseñas anteriores</li>
+              <li>No compartas tu contraseña con nadie</li>
+            </ul>
+          </div>
+        </div>
+      }
+
+      <!-- ── PREFERENCIAS ── -->
+      @if (activeTab === 'preferences') {
+        <div class="tab-section">
+          <h2>Preferencias</h2>
+          <p class="tab-desc">Personaliza tu experiencia en la plataforma.</p>
+
+          <div class="prefs-list">
+
+            <div class="pref-item">
+              <div class="pref-info">
+                <span class="pref-label">Notificaciones por email</span>
+                <span class="pref-desc">Recibe alertas de nuevas tareas por correo</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" [(ngModel)]="prefs.emailNotifications" name="emailNotif" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="pref-item">
+              <div class="pref-info">
+                <span class="pref-label">Alertas de SLA</span>
+                <span class="pref-desc">Notificaciones cuando una tarea está por vencer</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" [(ngModel)]="prefs.slaAlerts" name="slaAlerts" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="pref-item">
+              <div class="pref-info">
+                <span class="pref-label">Idioma</span>
+                <span class="pref-desc">Idioma de la interfaz</span>
+              </div>
+              <select [(ngModel)]="prefs.language" name="lang" class="select-input">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+
+          </div>
+
+          <button class="btn-save" (click)="savePreferences()">
+            💾 Guardar preferencias
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>

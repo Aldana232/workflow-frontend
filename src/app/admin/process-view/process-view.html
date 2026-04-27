@@ -1,0 +1,42 @@
+<div class="pv-shell">
+
+  <div class="pv-toolbar">
+    <div class="pv-toolbar-left">
+      @if (process) {
+        <span class="pv-name">{{ process.name }}</span>
+        <span class="pv-version">{{ process.version ?? 'v1' }}</span>
+        <span [class]="'pv-badge pv-badge-' + statusMod(process.status)">
+          {{ process.status }}
+        </span>
+      } @else {
+        <span class="pv-name">Cargando proceso…</span>
+      }
+    </div>
+    <div class="pv-toolbar-right">
+      <button class="btn-edit" (click)="edit()" [disabled]="!process">
+        ✏️ Editar
+      </button>
+      <button class="btn-back" (click)="back()">
+        ← Volver
+      </button>
+    </div>
+  </div>
+
+  <div class="pv-body">
+    @if (loading) {
+      <div class="pv-loading">
+        <span class="spinner"></span>
+        <p>Cargando diagrama…</p>
+      </div>
+    } @else if (!bpmnXml) {
+      <div class="pv-empty">
+        <div class="pv-empty-icon">📋</div>
+        <p>Este proceso no tiene un diagrama BPMN guardado aún.</p>
+        <button class="btn-edit" (click)="edit()">✏️ Ir al diseñador</button>
+      </div>
+    } @else {
+      <app-bpmn-diagram [xml]="bpmnXml" class="pv-diagram" />
+    }
+  </div>
+
+</div>
