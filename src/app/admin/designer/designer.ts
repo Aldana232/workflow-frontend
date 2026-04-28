@@ -75,26 +75,26 @@ const EMPTY_XML = `<?xml version="1.0" encoding="UTF-8"?>
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Designer implements AfterViewInit, OnDestroy {
-  @ViewChild('bpmnCanvas',     { static: true  }) canvasRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('cursorsLayer',   { static: true  }) cursorsLayerRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('canvasWrapper',  { static: true  }) canvasWrapperRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('bpmnCanvas', { static: true }) canvasRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('cursorsLayer', { static: true }) cursorsLayerRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('canvasWrapper', { static: true }) canvasWrapperRef!: ElementRef<HTMLDivElement>;
   @ViewChild('transcriptBody', { static: false }) transcriptBodyRef?: ElementRef<HTMLDivElement>;
 
-  private route               = inject(ActivatedRoute);
-  private title               = inject(Title);
-  private authService         = inject(AuthService);
-  private voiceService        = inject(VoiceService);
-  private speechService       = inject(SpeechService);
-  private http                = inject(HttpClient);
-  private processService      = inject(ProcessService);
-  private tramiteService      = inject(TramiteService);
-  private formSchemaService   = inject(FormSchemaService);
-  private departmentService   = inject(DepartmentService);
+  private route = inject(ActivatedRoute);
+  private title = inject(Title);
+  private authService = inject(AuthService);
+  private voiceService = inject(VoiceService);
+  private speechService = inject(SpeechService);
+  private http = inject(HttpClient);
+  private processService = inject(ProcessService);
+  private tramiteService = inject(TramiteService);
+  private formSchemaService = inject(FormSchemaService);
+  private departmentService = inject(DepartmentService);
   private notificationService = inject(NotificationService);
-  private fb                  = inject(FormBuilder);
-  private toastr              = inject(ToastrService);
-  private zone                = inject(NgZone);
-  private destroyRef          = inject(DestroyRef);
+  private fb = inject(FormBuilder);
+  private toastr = inject(ToastrService);
+  private zone = inject(NgZone);
+  private destroyRef = inject(DestroyRef);
 
   private modeler: any = null;
   private cdr = inject(ChangeDetectorRef);
@@ -112,9 +112,9 @@ export class Designer implements AfterViewInit, OnDestroy {
   // ── Cursores colaborativos ────────────────────────────────────────────────
   /** clientId → elemento DOM del cursor en la capa overlay */
   private cursorElements = new Map<number, HTMLElement>();
-  private mousemoveHandler:     ((e: MouseEvent) => void) | null = null;
-  private mouseleaveHandler:    (() => void) | null = null;
-  private awarenessChangeHook:  (() => void) | null = null;
+  private mousemoveHandler: ((e: MouseEvent) => void) | null = null;
+  private mouseleaveHandler: (() => void) | null = null;
+  private awarenessChangeHook: (() => void) | null = null;
   private lastAwarenessMs = 0; // throttle cursor updates to ~25fps
   private analyzeOnCooldown = false; // evita repetir análisis si ya está en curso
 
@@ -122,20 +122,20 @@ export class Designer implements AfterViewInit, OnDestroy {
   collabPeers: { clientId: number; name: string; color: string }[] = [];
 
   // ── Agente JARVIS ─────────────────────────────────────────────────────────
-  isAgentListening    = false;   // true mientras SpeechService.listen() está activo
-  isSpeaking          = false;   // true mientras speechSynthesis está activo → activa audio wave
+  isAgentListening = false; // true mientras SpeechService.listen() está activo
+  isSpeaking = false; // true mientras speechSynthesis está activo → activa audio wave
   private analyzeSubject$ = new Subject<void>(); // canal para debounce del análisis
 
   // ── Agente de voz (Web Speech API) ────────────────────────────────────────
-  speechSupported     = typeof window !== 'undefined' &&
-                        !!(window.SpeechRecognition ?? window.webkitSpeechRecognition);
-  isRecording         = false;
-  showVoicePanel      = false;
+  speechSupported =
+    typeof window !== 'undefined' && !!(window.SpeechRecognition ?? window.webkitSpeechRecognition);
+  isRecording = false;
+  showVoicePanel = false;
   voiceHistory: Array<{ role: 'user' | 'ai'; text: string }> = [];
-  interimTranscript   = '';   // fragmento parcial en curso
-  voiceError          = '';
-  voiceCommandResult  = '';   // feedback de la última acción ejecutada
-  voiceIsExecuting    = false; // true mientras espera respuesta del backend
+  interimTranscript = ''; // fragmento parcial en curso
+  voiceError = '';
+  voiceCommandResult = ''; // feedback de la última acción ejecutada
+  voiceIsExecuting = false; // true mientras espera respuesta del backend
   private recognition: SpeechRecognition | null = null;
   private voiceFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -268,9 +268,10 @@ export class Designer implements AfterViewInit, OnDestroy {
     this.initAddFieldForm();
 
     // Saludo inicial del agente JARVIS (no bloquea la carga del canvas)
-    setTimeout(() => this.speechService.speak(
-      'Hola, soy tu asistente de diseño. ¿Cómo puedo ayudarte?'
-    ), 600);
+    setTimeout(
+      () => this.speechService.speak('Hola, soy tu asistente de diseño. ¿Cómo puedo ayudarte?'),
+      600,
+    );
 
     // Pipeline de análisis automático del diagrama con debounce de 1.2 s
     this.analyzeSubject$
@@ -294,7 +295,8 @@ export class Designer implements AfterViewInit, OnDestroy {
     });
 
     const stateId: string | undefined = (window.history.state as any)?.processId;
-    const paramId = this.route.snapshot.paramMap.get('id') ?? this.route.snapshot.queryParamMap.get('id');
+    const paramId =
+      this.route.snapshot.paramMap.get('id') ?? this.route.snapshot.queryParamMap.get('id');
 
     if (stateId) {
       this.processId = stateId;
@@ -311,7 +313,9 @@ export class Designer implements AfterViewInit, OnDestroy {
               this.processId = match.id;
               this.loadProcess(this.processId!);
             } else {
-              this.modeler.importXML(EMPTY_XML).then(() => { this.fitCanvas(); });
+              this.modeler.importXML(EMPTY_XML).then(() => {
+                this.fitCanvas();
+              });
               this.processName = '';
             }
           },
@@ -335,9 +339,9 @@ export class Designer implements AfterViewInit, OnDestroy {
     // debounceTime(800) agrupa ráfagas de eventos consecutivos en una sola llamada.
     this.notificationService.companyEvent$
       .pipe(
-        filter((event: WorkflowEvent) =>
-          !!this.processId &&
-          (!event.processId || event.processId === this.processId)
+        filter(
+          (event: WorkflowEvent) =>
+            !!this.processId && (!event.processId || event.processId === this.processId),
         ),
         debounceTime(800),
         takeUntilDestroyed(this.destroyRef),
@@ -384,10 +388,14 @@ export class Designer implements AfterViewInit, OnDestroy {
   }
 
   private toSlug(text: string): string {
-    return (text ?? '').toLowerCase()
-      .normalize('NFD').replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'proceso';
+    return (
+      (text ?? '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'proceso'
+    );
   }
 
   private loadProcess(id: string): void {
@@ -573,10 +581,10 @@ export class Designer implements AfterViewInit, OnDestroy {
   persistEdgeCondition(): void {
     if (!this.selectedElement || !this.isSequenceFlow) return;
     try {
-      const modeling  = this.modeler.get('modeling');
-      const moddle    = this.modeler.get('moddle');
-      const condBody  = (this.edgeProps.condition ?? '').trim();
-      const nameVal   = (this.edgeProps.name ?? '').trim();
+      const modeling = this.modeler.get('modeling');
+      const moddle = this.modeler.get('moddle');
+      const condBody = (this.edgeProps.condition ?? '').trim();
+      const nameVal = (this.edgeProps.name ?? '').trim();
 
       const props: any = {};
       if (nameVal !== (this.selectedElement.businessObject?.name ?? '')) {
@@ -814,11 +822,11 @@ export class Designer implements AfterViewInit, OnDestroy {
   /** Inicializa el ReactiveForm del diálogo "Agregar campo" */
   private initAddFieldForm(): void {
     this.addFieldForm = this.fb.group({
-      label:       ['', [Validators.required, Validators.minLength(2)]],
-      type:        ['TEXT' as FormField['type'], Validators.required],
-      required:    [false],
+      label: ['', [Validators.required, Validators.minLength(2)]],
+      type: ['TEXT' as FormField['type'], Validators.required],
+      required: [false],
       placeholder: [''],
-      options:     [''],  // solo se valida cuando type === SELECT
+      options: [''], // solo se valida cuando type === SELECT
     });
 
     // Validación dinámica: options requerida solo si SELECT
@@ -832,13 +840,14 @@ export class Designer implements AfterViewInit, OnDestroy {
 
   /** Convierte un texto en snake_case ASCII (para usar como name/id de campo) */
   private slugify(text: string): string {
-    return (text ?? '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')   // quitar tildes
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '')
-      || 'campo';
+    return (
+      (text ?? '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '') // quitar tildes
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'campo'
+    );
   }
 
   /** Carga el FormSchema existente para el nodo; si no hay, inicializa vacío */
@@ -863,13 +872,25 @@ export class Designer implements AfterViewInit, OnDestroy {
   toggleAddField(): void {
     this.showAddField = !this.showAddField;
     if (this.showAddField) {
-      this.addFieldForm.reset({ type: 'TEXT', required: false, label: '', placeholder: '', options: '' });
+      this.addFieldForm.reset({
+        type: 'TEXT',
+        required: false,
+        label: '',
+        placeholder: '',
+        options: '',
+      });
     }
   }
 
   cancelAddField(): void {
     this.showAddField = false;
-    this.addFieldForm.reset({ type: 'TEXT', required: false, label: '', placeholder: '', options: '' });
+    this.addFieldForm.reset({
+      type: 'TEXT',
+      required: false,
+      label: '',
+      placeholder: '',
+      options: '',
+    });
   }
 
   /** Valida el form inline y agrega el campo a la lista en memoria */
@@ -881,11 +902,11 @@ export class Designer implements AfterViewInit, OnDestroy {
     const slug = this.slugify((label as string).trim());
 
     const field: FormField = {
-      id:          slug,
-      name:        slug,
-      label:       (label as string).trim(),
-      type:        type as FormField['type'],
-      required:    !!required,
+      id: slug,
+      name: slug,
+      label: (label as string).trim(),
+      type: type as FormField['type'],
+      required: !!required,
       placeholder: (placeholder as string)?.trim() || undefined,
       ...(type === 'SELECT' && {
         options: (options as string)
@@ -909,7 +930,10 @@ export class Designer implements AfterViewInit, OnDestroy {
   saveSchema(): void {
     if (!this.selectedElement) return;
     if (!this.processId) {
-      this.toastr.warning('Guarda el proceso primero antes de guardar el formulario', '⚠️ Proceso sin guardar');
+      this.toastr.warning(
+        'Guarda el proceso primero antes de guardar el formulario',
+        '⚠️ Proceso sin guardar',
+      );
       return;
     }
     this.savingSchema = true;
@@ -952,14 +976,10 @@ export class Designer implements AfterViewInit, OnDestroy {
       const Y = await import('yjs');
       const { WebsocketProvider } = await import('y-websocket');
 
-      this.ydoc   = new Y.Doc();
-      this.yXml   = this.ydoc.getText('bpmnXml');
+      this.ydoc = new Y.Doc();
+      this.yXml = this.ydoc.getText('bpmnXml');
 
-      this.wsProvider = new WebsocketProvider(
-        environment.wsCollabUrl,
-        processId,
-        this.ydoc,
-      );
+      this.wsProvider = new WebsocketProvider(environment.wsCollabUrl, processId, this.ydoc);
 
       // Indicador de estado de conexión
       this.wsProvider.on('status', ({ status }: { status: string }) => {
@@ -1009,7 +1029,9 @@ export class Designer implements AfterViewInit, OnDestroy {
           // Liberar el bloqueo en el siguiente microtask para que bpmn-js
           // termine de procesar todos los eventos del importXML antes de
           // volver a escuchar commandStack.changed
-          queueMicrotask(() => { this.isApplyingRemote = false; });
+          queueMicrotask(() => {
+            this.isApplyingRemote = false;
+          });
         }
       });
 
@@ -1034,7 +1056,6 @@ export class Designer implements AfterViewInit, OnDestroy {
           }
         }, 300);
       });
-
     } catch (err) {
       console.warn('[Collab] No se pudo inicializar la colaboración:', err);
     }
@@ -1085,12 +1106,16 @@ export class Designer implements AfterViewInit, OnDestroy {
     if (!this.modeler) return;
 
     if (this.analyzeOnCooldown) {
-      this.showVoiceResult('ℹ El análisis acaba de ejecutarse. Espera unos segundos antes de volver a analizar.');
+      this.showVoiceResult(
+        'ℹ El análisis acaba de ejecutarse. Espera unos segundos antes de volver a analizar.',
+      );
       return;
     }
 
     this.analyzeOnCooldown = true;
-    setTimeout(() => { this.analyzeOnCooldown = false; }, 8_000);
+    setTimeout(() => {
+      this.analyzeOnCooldown = false;
+    }, 8_000);
 
     const localIssues = this.checkDiagramIssuesLocally();
     if (localIssues.length > 0) {
@@ -1100,27 +1125,34 @@ export class Designer implements AfterViewInit, OnDestroy {
       return;
     }
 
-    this.modeler.saveXML({ format: false }).then((result: { xml: string }) => {
-      this.http
-        .post<{ suggestions: string[] }>(
-          `${environment.apiUrl}/assistant/analyze-diagram`,
-          { xml: result.xml, processId: this.processId }
-        )
-        .subscribe({
-          next: (res) => {
-            if (res.suggestions?.length) {
-              const speech = res.suggestions.slice(0, 2).join('. ');
-              this.speechService.speak(speech);
-              this.showVoiceResult(`ℹ ${res.suggestions[0]}`);
-            } else {
-              const ok = 'El diagrama se ve bien. No se encontraron problemas.';
-              this.speechService.speak(ok);
-              this.showVoiceResult(`✓ ${ok}`);
-            }
-          },
-          error: () => { /* fallo silencioso */ },
-        });
-    }).catch(() => {});
+    this.modeler
+      .saveXML({ format: false })
+      .then((result: { xml: string }) => {
+        this.http
+          .post<{
+            suggestions: string[];
+          }>(`${environment.apiUrl}/assistant/analyze-diagram`, {
+            xml: result.xml,
+            processId: this.processId,
+          })
+          .subscribe({
+            next: (res) => {
+              if (res.suggestions?.length) {
+                const speech = res.suggestions.slice(0, 2).join('. ');
+                this.speechService.speak(speech);
+                this.showVoiceResult(`ℹ ${res.suggestions[0]}`);
+              } else {
+                const ok = 'El diagrama se ve bien. No se encontraron problemas.';
+                this.speechService.speak(ok);
+                this.showVoiceResult(`✓ ${ok}`);
+              }
+            },
+            error: () => {
+              /* fallo silencioso */
+            },
+          });
+      })
+      .catch(() => {});
   }
 
   /**
@@ -1135,9 +1167,10 @@ export class Designer implements AfterViewInit, OnDestroy {
     for (const el of elements) {
       if (
         el.type === '__implicitroot' ||
-        el.type === 'bpmn:Process'   ||
+        el.type === 'bpmn:Process' ||
         el.type === 'bpmn:SequenceFlow'
-      ) continue;
+      )
+        continue;
 
       const name = (el.businessObject?.name as string | undefined)?.trim() || el.id;
 
@@ -1176,7 +1209,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     }
 
     this.showVoicePanel = true;
-    this.voiceError     = '';
+    this.voiceError = '';
     this.cdr.markForCheck();
 
     if (!this.recognition) {
@@ -1203,14 +1236,14 @@ export class Designer implements AfterViewInit, OnDestroy {
     const SR = window.SpeechRecognition ?? window.webkitSpeechRecognition;
     this.recognition = new SR();
 
-    this.recognition!.continuous    = true;
+    this.recognition!.continuous = true;
     this.recognition!.interimResults = true;
-    this.recognition!.lang           = 'es-ES';
+    this.recognition!.lang = 'es-ES';
 
     this.recognition!.onstart = () => {
       this.zone.run(() => {
         this.isRecording = true;
-        this.voiceError  = '';
+        this.voiceError = '';
         this.cdr.markForCheck();
       });
     };
@@ -1242,7 +1275,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     // onend dispara cuando el browser para (timeout, error, o stop() manual)
     this.recognition!.onend = () => {
       this.zone.run(() => {
-        this.isRecording       = false;
+        this.isRecording = false;
         this.interimTranscript = '';
         this.cdr.markForCheck();
       });
@@ -1251,13 +1284,14 @@ export class Designer implements AfterViewInit, OnDestroy {
     this.recognition!.onerror = (event: SpeechRecognitionErrorEvent) => {
       this.zone.run(() => {
         const messages: Record<string, string> = {
-          'not-allowed':    'Permiso de micrófono denegado. Habilítalo en la configuración del navegador.',
-          'no-speech':      'No se detectó voz. Intenta hablar más cerca del micrófono.',
-          'network':        'Error de red al procesar el audio.',
-          'audio-capture':  'No se encontró ningún micrófono.',
+          'not-allowed':
+            'Permiso de micrófono denegado. Habilítalo en la configuración del navegador.',
+          'no-speech': 'No se detectó voz. Intenta hablar más cerca del micrófono.',
+          network: 'Error de red al procesar el audio.',
+          'audio-capture': 'No se encontró ningún micrófono.',
           'service-not-allowed': 'Servicio de voz no disponible en este contexto.',
         };
-        this.voiceError  = messages[event.error] ?? `Error de voz: ${event.error}`;
+        this.voiceError = messages[event.error] ?? `Error de voz: ${event.error}`;
         this.isRecording = false;
         this.cdr.markForCheck();
       });
@@ -1266,9 +1300,9 @@ export class Designer implements AfterViewInit, OnDestroy {
 
   /** Borra el historial de conversación */
   clearTranscript(): void {
-    this.voiceHistory      = [];
+    this.voiceHistory = [];
     this.interimTranscript = '';
-    this.voiceError        = '';
+    this.voiceError = '';
     window.speechSynthesis?.cancel();
     this.cdr.markForCheck();
   }
@@ -1411,7 +1445,9 @@ export class Designer implements AfterViewInit, OnDestroy {
       }
 
       case 'UNKNOWN':
-        this.showVoiceResult('⚠ Comando no reconocido — prueba: "agrega tarea", "conecta X con Y", "deshacer", "analizar", "para qué sirve el inicio", "guarda"');
+        this.showVoiceResult(
+          '⚠ Comando no reconocido — prueba: "agrega tarea", "conecta X con Y", "deshacer", "analizar", "para qué sirve el inicio", "guarda"',
+        );
         break;
 
       default:
@@ -1429,15 +1465,15 @@ export class Designer implements AfterViewInit, OnDestroy {
    */
   private vcAddNode(cmd: VoiceCommand): void {
     try {
-      const bpmnType    = cmd.bpmnType ?? 'bpmn:Task';
-      const factory     = this.modeler.get('elementFactory');
-      const modeling    = this.modeler.get('modeling');
-      const canvas      = this.modeler.get('canvas');
-      const root        = canvas.getRootElement();
-      const position    = this.vcCalcNextPosition();
+      const bpmnType = cmd.bpmnType ?? 'bpmn:Task';
+      const factory = this.modeler.get('elementFactory');
+      const modeling = this.modeler.get('modeling');
+      const canvas = this.modeler.get('canvas');
+      const root = canvas.getRootElement();
+      const position = this.vcCalcNextPosition();
 
-      const shape       = factory.createShape({ type: bpmnType });
-      const newElement  = modeling.createShape(shape, position, root);
+      const shape = factory.createShape({ type: bpmnType });
+      const newElement = modeling.createShape(shape, position, root);
 
       if (cmd.nodeName) {
         modeling.updateLabel(newElement, cmd.nodeName);
@@ -1523,7 +1559,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     }
 
     const dept = this.departments.find(
-      d => d.name.toLowerCase() === (cmd.departmentName ?? '').toLowerCase()
+      (d) => d.name.toLowerCase() === (cmd.departmentName ?? '').toLowerCase(),
     );
     if (!dept) {
       this.showVoiceResult(`✗ Departamento '${cmd.departmentName}' no existe en la lista cargada`);
@@ -1531,7 +1567,10 @@ export class Designer implements AfterViewInit, OnDestroy {
     }
 
     const current = this.nodePropsMap[el.id] ?? {
-      name: el.businessObject?.name ?? '', departmentId: '', slaHours: 0, formSchemaId: ''
+      name: el.businessObject?.name ?? '',
+      departmentId: '',
+      slaHours: 0,
+      formSchemaId: '',
     };
     this.nodePropsMap[el.id] = { ...current, departmentId: dept.id };
     this.showVoiceResult(`✓ Nodo '${cmd.nodeName}' asignado al departamento '${dept.name}'`);
@@ -1542,9 +1581,7 @@ export class Designer implements AfterViewInit, OnDestroy {
    * Si no se especificó nombre, usa el elemento actualmente seleccionado.
    */
   private vcSetSla(cmd: VoiceCommand): void {
-    const el = cmd.nodeName
-      ? this.vcFindByName(cmd.nodeName)
-      : this.selectedElement;
+    const el = cmd.nodeName ? this.vcFindByName(cmd.nodeName) : this.selectedElement;
 
     if (!el) {
       this.showVoiceResult(`✗ No se encontró el nodo '${cmd.nodeName ?? '(seleccionado)'}'`);
@@ -1552,7 +1589,10 @@ export class Designer implements AfterViewInit, OnDestroy {
     }
 
     const current = this.nodePropsMap[el.id] ?? {
-      name: el.businessObject?.name ?? '', departmentId: '', slaHours: 0, formSchemaId: ''
+      name: el.businessObject?.name ?? '',
+      departmentId: '',
+      slaHours: 0,
+      formSchemaId: '',
     };
     this.nodePropsMap[el.id] = { ...current, slaHours: cmd.slaHours ?? 0 };
     this.showVoiceResult(`✓ SLA de '${el.businessObject?.name}' actualizado a ${cmd.slaHours}h`);
@@ -1571,7 +1611,9 @@ export class Designer implements AfterViewInit, OnDestroy {
         this.selectedElement = el;
         this.nodeProps = this.nodePropsMap[el.id] ?? {
           name: el.businessObject?.name ?? '',
-          departmentId: '', slaHours: 0, formSchemaId: '',
+          departmentId: '',
+          slaHours: 0,
+          formSchemaId: '',
         };
         this.cdr.markForCheck();
       });
@@ -1589,13 +1631,15 @@ export class Designer implements AfterViewInit, OnDestroy {
    */
   private vcFindByName(name: string | undefined | null): any | null {
     if (!name?.trim()) return null;
-    const registry  = this.modeler.get('elementRegistry');
+    const registry = this.modeler.get('elementRegistry');
     const lowerName = name.toLowerCase().trim();
 
-    return registry.getAll().find((el: any) => {
-      const elName = (el.businessObject?.name ?? '').toLowerCase().trim();
-      return elName === lowerName;
-    }) ?? null;
+    return (
+      registry.getAll().find((el: any) => {
+        const elName = (el.businessObject?.name ?? '').toLowerCase().trim();
+        return elName === lowerName;
+      }) ?? null
+    );
   }
 
   /**
@@ -1608,17 +1652,20 @@ export class Designer implements AfterViewInit, OnDestroy {
    */
   private vcCalcNextPosition(): { x: number; y: number } {
     const registry = this.modeler.get('elementRegistry');
-    const shapes   = registry.getAll().filter((el: any) =>
-      el.width > 0 &&
-      el.type !== '__implicitroot' &&
-      el.type !== 'bpmn:Process' &&
-      el.type !== 'bpmn:SequenceFlow'
-    );
+    const shapes = registry
+      .getAll()
+      .filter(
+        (el: any) =>
+          el.width > 0 &&
+          el.type !== '__implicitroot' &&
+          el.type !== 'bpmn:Process' &&
+          el.type !== 'bpmn:SequenceFlow',
+      );
 
     if (shapes.length === 0) return { x: 300, y: 200 };
 
     const rightmost = shapes.reduce((max: any, el: any) =>
-      (el.x + el.width) > (max.x + max.width) ? el : max
+      el.x + el.width > max.x + max.width ? el : max,
     );
 
     return {
@@ -1652,14 +1699,23 @@ export class Designer implements AfterViewInit, OnDestroy {
   private speakResponse(text: string): void {
     if (!('speechSynthesis' in window) || !text.trim()) return;
     window.speechSynthesis.cancel();
-    const utt   = new SpeechSynthesisUtterance(text);
-    utt.lang    = 'es-ES';
-    utt.rate    = 1.05;
-    utt.pitch   = 1.0;
-    utt.volume  = 1.0;
-    utt.onstart = () => { this.isSpeaking = true;  this.cdr.markForCheck(); };
-    utt.onend   = () => { this.isSpeaking = false; this.cdr.markForCheck(); };
-    utt.onerror = () => { this.isSpeaking = false; this.cdr.markForCheck(); };
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'es-ES';
+    utt.rate = 1.05;
+    utt.pitch = 1.0;
+    utt.volume = 1.0;
+    utt.onstart = () => {
+      this.isSpeaking = true;
+      this.cdr.markForCheck();
+    };
+    utt.onend = () => {
+      this.isSpeaking = false;
+      this.cdr.markForCheck();
+    };
+    utt.onerror = () => {
+      this.isSpeaking = false;
+      this.cdr.markForCheck();
+    };
     window.speechSynthesis.speak(utt);
   }
 
@@ -1680,7 +1736,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     const color = this.generateCursorColor(clientId);
 
     awareness.setLocalState({
-      user:   { name: currentUser?.name ?? 'Admin', color },
+      user: { name: currentUser?.name ?? 'Admin', color },
       cursor: null,
     });
 
@@ -1691,10 +1747,10 @@ export class Designer implements AfterViewInit, OnDestroy {
       this.lastAwarenessMs = now;
 
       const bpmnCanvas = this.modeler.get('canvas');
-      const viewbox    = bpmnCanvas.viewbox();
-      const rect       = this.canvasWrapperRef.nativeElement.getBoundingClientRect();
+      const viewbox = bpmnCanvas.viewbox();
+      const rect = this.canvasWrapperRef.nativeElement.getBoundingClientRect();
       const x = (e.clientX - rect.left) / viewbox.scale + viewbox.x;
-      const y = (e.clientY - rect.top)  / viewbox.scale + viewbox.y;
+      const y = (e.clientY - rect.top) / viewbox.scale + viewbox.y;
       awareness.setLocalStateField('cursor', { x, y });
     };
 
@@ -1725,8 +1781,8 @@ export class Designer implements AfterViewInit, OnDestroy {
     if (!this.cursorsLayerRef) return;
 
     const states: Map<number, any> = awareness.getStates();
-    const localId: number          = awareness.clientID;
-    const layer                    = this.cursorsLayerRef.nativeElement;
+    const localId: number = awareness.clientID;
+    const layer = this.cursorsLayerRef.nativeElement;
 
     // Eliminar cursores de usuarios que ya no están
     const toRemove: number[] = [];
@@ -1739,7 +1795,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     }
 
     const bpmnCanvas = this.modeler.get('canvas');
-    const viewbox    = bpmnCanvas.viewbox();
+    const viewbox = bpmnCanvas.viewbox();
 
     // Construir lista de peers para la toolbar
     const peers: { clientId: number; name: string; color: string }[] = [];
@@ -1813,7 +1869,9 @@ export class Designer implements AfterViewInit, OnDestroy {
   private buildCursorElement(name: string, color: string): HTMLElement {
     const wrap = document.createElement('div');
     wrap.style.cssText = [
-      'position:absolute', 'left:0', 'top:0',
+      'position:absolute',
+      'left:0',
+      'top:0',
       'pointer-events:none',
       'transition:transform 60ms linear',
       'will-change:transform',
@@ -1892,16 +1950,23 @@ export class Designer implements AfterViewInit, OnDestroy {
     if (this.mousemoveHandler)
       this.canvasWrapperRef?.nativeElement.removeEventListener('mousemove', this.mousemoveHandler);
     if (this.mouseleaveHandler)
-      this.canvasWrapperRef?.nativeElement.removeEventListener('mouseleave', this.mouseleaveHandler);
+      this.canvasWrapperRef?.nativeElement.removeEventListener(
+        'mouseleave',
+        this.mouseleaveHandler,
+      );
     if (this.awarenessChangeHook && this.wsProvider?.awareness)
       this.wsProvider.awareness.off('change', this.awarenessChangeHook);
 
     // Detener reconocimiento de voz si está activo
     if (this.recognition) {
-      this.recognition.onend    = null; // evitar que onend reactive el estado
+      this.recognition.onend = null; // evitar que onend reactive el estado
       this.recognition.onresult = null;
-      this.recognition.onerror  = null;
-      try { this.recognition.abort(); } catch { /* ignore */ }
+      this.recognition.onerror = null;
+      try {
+        this.recognition.abort();
+      } catch {
+        /* ignore */
+      }
       this.recognition = null;
     }
     if (this.voiceFeedbackTimer) clearTimeout(this.voiceFeedbackTimer);
