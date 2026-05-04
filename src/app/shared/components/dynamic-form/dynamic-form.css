@@ -201,6 +201,23 @@
   white-space: nowrap;
 }
 
+.file-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid #bbf7d0;
+}
+
+.file-link {
+  font-size: .78rem;
+  color: #4f46e5;
+  font-weight: 600;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
 .btn-reupload {
   font-size: .78rem;
   color: #4f46e5;

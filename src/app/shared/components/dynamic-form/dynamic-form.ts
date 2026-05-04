@@ -29,6 +29,7 @@ export interface FormField {
 interface FileState {
   uploading: boolean;
   fileName: string | null;
+  fileUrl: string | null;
   error: string | null;
 }
 
@@ -81,7 +82,7 @@ export class DynamicForm implements OnInit, OnChanges {
       controls[field.name] = new FormControl(initial, validators);
 
       if (field.type === 'FILE') {
-        this.fileStates[field.name] = { uploading: false, fileName: null, error: null };
+        this.fileStates[field.name] = { uploading: false, fileName: null, fileUrl: null, error: null };
       }
     }
     this.form = new FormGroup(controls);
@@ -158,29 +159,36 @@ export class DynamicForm implements OnInit, OnChanges {
     state.uploading = true;
     state.error = null;
     state.fileName = null;
+    state.fileUrl = null;
     this.getControl(field.name).setValue(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const fd = new FormData();
+      fd.append('file', file);
 
       const res = await firstValueFrom(
-        this.http.post<{ fileUrl: string; fileName: string }>(
-          `${environment.apiUrl}/files/upload`,
-          formData
+        this.http.post<{ url: string; fileName: string }>(
+          'https://api.workflow-demo.site/api/files/upload',
+          fd
         )
       );
 
-      if (!res?.fileUrl) throw new Error('No se recibió URL del archivo');
+      if (!res?.url) throw new Error('No se recibió URL del archivo');
 
-      this.getControl(field.name).setValue(res.fileUrl);
+      this.getControl(field.name).setValue(res.url);
       state.fileName = res.fileName ?? file.name;
+      state.fileUrl  = res.url;
     } catch {
       state.error = 'Error al subir el archivo. Intente nuevamente.';
       if (field.required) this.getControl(field.name).setErrors({ uploadFailed: true });
     } finally {
       state.uploading = false;
     }
+  }
+
+  isImageUrl(url: string | null): boolean {
+    if (!url) return false;
+    return /\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(url);
   }
 
   submit(): void {

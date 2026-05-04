@@ -75,8 +75,18 @@
                 </div>
               } @else if (fileStates[field.name].fileName) {
                 <div class="file-done">
-                  <span class="file-icon">📎</span>
+                  @if (isImageUrl(fileStates[field.name].fileUrl)) {
+                    <img class="file-thumb"
+                         [src]="fileStates[field.name].fileUrl!"
+                         [alt]="fileStates[field.name].fileName ?? ''" />
+                  } @else {
+                    <span class="file-icon">📎</span>
+                  }
                   <span class="file-name">{{ fileStates[field.name].fileName }}</span>
+                  <a [href]="fileStates[field.name].fileUrl"
+                     target="_blank"
+                     rel="noopener"
+                     class="file-link">Ver</a>
                   <label [for]="field.name + '_input'" class="btn-reupload">Cambiar</label>
                 </div>
               } @else {
