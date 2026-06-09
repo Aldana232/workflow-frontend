@@ -148,6 +148,20 @@
       </div>
     </div>
 
+    <!-- ── Documentos del trámite ── -->
+    <div style="margin-top: 2rem;">
+      <h3 style="font-size: .9rem; font-weight: 700; color: #64748b; text-transform: uppercase;
+                 letter-spacing: .05em; margin: 0 0 .75rem;">📎 Documentos</h3>
+      <app-document-manager
+        [tramiteId]="tramite?.id"
+        [tramiteCode]="tramite?.code"
+        [companyId]="tramite?.companyId"
+        [nodeId]="task?.nodeId || currentNodeId"
+        [nodeName]="task?.nodeName || 'Nodo actual'"
+        [canUpload]="true"
+      />
+    </div>
+
     <!-- ── Diagrama BPMN ── -->
     @if (bpmnXml) {
       <div class="diagram-section">

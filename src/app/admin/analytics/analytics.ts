@@ -12,6 +12,8 @@ import {
 } from '../../core/services/analytics';
 import { AuthService } from '../../core/services/auth';
 import { ProcessService } from '../../core/services/process';
+import { AiAnalyticsComponent } from '../../shared/components/ai-analytics/ai-analytics.component';
+import { VoiceReportComponent } from '../../shared/components/voice-report/voice-report.component';
 
 interface StatCard {
   label: string;
@@ -31,7 +33,7 @@ const DEFAULT_SLA_MINUTES = DEFAULT_SLA_HOURS * 60;
 
 @Component({
   selector: 'app-analytics',
-  imports: [FormsModule, NgxEchartsDirective],
+  imports: [FormsModule, NgxEchartsDirective, AiAnalyticsComponent, VoiceReportComponent],
   templateUrl: './analytics.html',
   styleUrl: './analytics.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -89,6 +91,7 @@ export class Analytics implements OnInit {
 
   // ────────────────────────────────────────────────────────────────────────
   ngOnInit(): void {
+    console.log('Usuario actual completo:', this.auth.getCurrentUser());
     this.loadSummary();
     this.loadProcesses();
     this.loadActiveTramites();
@@ -305,6 +308,15 @@ export class Analytics implements OnInit {
   isOverSla(minutes: number): boolean {
     return minutes > DEFAULT_SLA_MINUTES;
   }
+
+  // ── AI helpers ───────────────────────────────────────────────────────────
+  get currentCompanyId(): string {
+    if (this.processes && this.processes.length > 0) {
+      return this.processes[0].companyId || '';
+    }
+    return '';
+  }
+  get firstProcessId(): string { return this.processes[0]?.id ?? ''; }
 
   // ── Export ────────────────────────────────────────────────────────────────
   exportToExcel(): void {

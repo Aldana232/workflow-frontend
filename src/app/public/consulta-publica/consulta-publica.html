@@ -70,7 +70,7 @@
           }
           <div class="meta-item">
             <span class="meta-label">Nodo actual</span>
-            <span class="meta-value">{{ tramite.currentNodeId }}</span>
+            <span class="meta-value">{{ currentNodeLabel(tramite) }}</span>
           </div>
         </div>
 
@@ -78,16 +78,22 @@
           <div class="history-section">
             <h3>Historial de pasos</h3>
             <ol class="history-list">
-              @for (entry of tramite.history; track trackHistory($index, entry)) {
+              @for (entry of tramite.history; track entry._trackId) {
                 <li class="history-item" [class.completed]="!!entry.completedAt">
                   <div class="h-dot"></div>
                   <div class="h-body">
-                    <span class="h-node">{{ entry.nodeName }}</span>
+                    <span class="h-node">
+                      {{ entry.nodeName?.trim() || ('Paso ' + (entry._trackId! + 1)) }}
+                    </span>
                     <span class="h-dates">
-                      Entró: {{ entry.arrivedAt | slice:0:10 }}
-                      @if (entry.completedAt) {
-                        · Completó: {{ entry.completedAt | slice:0:10 }}
-                        · {{ entry.durationMinutes }} min
+                      @if (entry.arrivedAt) {
+                        Entró: {{ entry.arrivedAt | slice:0:10 }}
+                        @if (entry.completedAt) {
+                          · Completó: {{ entry.completedAt | slice:0:10 }}
+                          · {{ entry.durationMinutes }} min
+                        }
+                      } @else {
+                        En proceso
                       }
                     </span>
                   </div>
@@ -99,6 +105,10 @@
 
       </div>
     }
+
+    <!-- ── Asistente inteligente ── -->
+    <h2 class="agent-heading">¿Necesitas ayuda? Consulta al asistente</h2>
+    <app-policy-agent />
 
   </main>
 

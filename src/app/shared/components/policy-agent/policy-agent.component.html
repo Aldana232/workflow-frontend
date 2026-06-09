@@ -1,0 +1,99 @@
+<div class="agent-card">
+
+  <!-- Header -->
+  <div class="agent-header">
+    <span class="agent-icon">🤖</span>
+    <div class="agent-title-group">
+      <h3 class="agent-title">Asistente Saguapac</h3>
+      <span class="agent-sub">Te ayudo a encontrar el trámite correcto</span>
+    </div>
+    @if (isListening) {
+      <span class="listening-badge">🎙 Escuchando…</span>
+    }
+  </div>
+
+  <!-- Chat body -->
+  <div class="chat-body" #chatBody>
+
+    @for (msg of messages; track msg.id) {
+
+      @if (msg.role === 'agent') {
+        <div class="bubble-row bubble-row--agent">
+          <span class="bbl-avatar">🤖</span>
+          <div class="bubble bubble--agent">
+            @if (msg.processName) {
+              <div class="rec-card">
+                <p class="rec-intro">Te recomiendo iniciar el siguiente trámite:</p>
+                <div class="rec-name">{{ msg.processName }}</div>
+                <div class="rec-confidence">
+                  <span class="conf-label">Confianza</span>
+                  <div class="conf-track">
+                    <div class="conf-fill" [style.width.%]="msg.confidence"></div>
+                  </div>
+                  <span class="conf-pct">{{ msg.confidence }}%</span>
+                </div>
+                @if (msg.reason) {
+                  <p class="rec-reason">{{ msg.reason }}</p>
+                }
+              </div>
+            } @else {
+              <p class="bbl-text">{{ msg.text }}</p>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="bubble-row bubble-row--user">
+          <div class="bubble bubble--user">
+            <p class="bbl-text">{{ msg.text }}</p>
+          </div>
+        </div>
+      }
+
+    }
+
+    @if (isThinking) {
+      <div class="bubble-row bubble-row--agent">
+        <span class="bbl-avatar">🤖</span>
+        <div class="bubble bubble--agent bubble--typing">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="thinking-text">Analizando tu consulta…</span>
+        </div>
+      </div>
+    }
+
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    @if (voiceError) {
+      <p class="voice-error">⚠ {{ voiceError }}</p>
+    }
+    <div class="input-row">
+      <textarea
+        class="chat-input"
+        [(ngModel)]="inputText"
+        (keydown)="onKeydown($event)"
+        placeholder="Describe tu necesidad… (Ej: Quiero solicitar conexión de agua)"
+        rows="2"
+        [disabled]="isThinking"
+      ></textarea>
+      <button
+        class="btn-mic"
+        [class.btn-mic--active]="isListening"
+        (click)="listenVoice()"
+        [disabled]="isListening || isThinking"
+        title="Dictar mensaje"
+      >🎙</button>
+      <button
+        class="btn-send"
+        (click)="sendMessage()"
+        [disabled]="!inputText.trim() || isThinking"
+        title="Enviar"
+      >➤</button>
+    </div>
+    <p class="input-hint">Enter para enviar · Shift+Enter para nueva línea</p>
+  </div>
+
+</div>

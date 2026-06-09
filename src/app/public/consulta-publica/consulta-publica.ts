@@ -3,14 +3,15 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { TramiteService } from '../../core/services/tramite';
-import { Tramite, HistoryEntry } from '../../core/models/tramite.model';
+import { Tramite } from '../../core/models/tramite.model';
+import { PolicyAgentComponent } from '../../shared/components/policy-agent/policy-agent.component';
 
 /** Intervalo de refresco automático en ms (12 segundos) */
 const POLL_MS = 12_000;
 
 @Component({
   selector: 'app-consulta-publica',
-  imports: [FormsModule, RouterLink, SlicePipe],
+  imports: [FormsModule, RouterLink, SlicePipe, PolicyAgentComponent],
   templateUrl: './consulta-publica.html',
   styleUrl: './consulta-publica.css',
 })
@@ -50,7 +51,7 @@ export class ConsultaPublica implements OnInit, OnDestroy {
 
     this.tramiteService.getByCode(this.code.trim()).subscribe({
       next: (t: Tramite) => {
-        this.tramite  = t;
+        this.tramite  = this.tagHistory(t);
         this.loading  = false;
         this.searched = true;
         // Activar refresco automático si el trámite todavía está en curso
@@ -73,7 +74,7 @@ export class ConsultaPublica implements OnInit, OnDestroy {
       if (!this.tramite?.code) return;
       this.tramiteService.getByCode(this.tramite.code).subscribe({
         next: (t: Tramite) => {
-          this.tramite = t;
+          this.tramite = this.tagHistory(t);
           // Detener polling cuando el trámite llega a estado final
           if (t.status === 'COMPLETED' || t.status === 'CANCELLED') {
             this.stopPolling();
@@ -112,7 +113,25 @@ export class ConsultaPublica implements OnInit, OnDestroy {
     return map[status] ?? 'pending';
   }
 
-  trackHistory(_: number, entry: HistoryEntry): string {
-    return entry.nodeId;
+  private tagHistory(t: Tramite): Tramite {
+    return {
+      ...t,
+      history: (t.history ?? []).map((e, i) => ({ ...e, _trackId: i })),
+    };
+  }
+
+  /** Devuelve el nombre legible del nodo actual, con fallback al ID limpio. */
+  currentNodeLabel(tramite: Tramite): string {
+    const id = tramite.currentNodeId;
+    if (!id) return 'No disponible';
+    // Buscar en el historial un entry con ese nodeId que tenga nombre
+    const match = tramite.history?.find(h => h.nodeId === id && h.nodeName?.trim());
+    if (match?.nodeName) return match.nodeName;
+    // Limpiar prefijos técnicos del BPMN engine (Activity_, Gateway_, Event_…)
+    const cleaned = id
+      .replace(/^(Activity|Gateway|Event|Task|UserTask|ServiceTask)_/i, '')
+      .replace(/_/g, ' ')
+      .trim();
+    return cleaned || id;
   }
 }

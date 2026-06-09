@@ -4,6 +4,7 @@ import { SlicePipe } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { ProcessService } from '../../core/services/process';
 import { TramiteService } from '../../core/services/tramite';
+import { DocumentManagerComponent } from '../../shared/components/document-manager/document-manager.component';
 
 interface ProcessCard {
   id: string;
@@ -15,7 +16,7 @@ interface ProcessCard {
 
 @Component({
   selector: 'app-processes',
-  imports: [SlicePipe],
+  imports: [SlicePipe, DocumentManagerComponent],
   templateUrl: './processes.html',
   styleUrl: './processes.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -12,10 +12,11 @@ import { AssistantService, ChatMessage } from '../../core/services/assistant';
 import { SpeechService } from '../../core/services/speech';
 import { DynamicForm, FormField } from '../../shared/components/dynamic-form/dynamic-form';
 import { BpmnDiagram } from '../../shared/components/bpmn-diagram/bpmn-diagram';
+import { DocumentManagerComponent } from '../../shared/components/document-manager/document-manager.component';
 
 @Component({
   selector: 'app-task-detail',
-  imports: [DynamicForm, BpmnDiagram, FormsModule],
+  imports: [DynamicForm, BpmnDiagram, FormsModule, DocumentManagerComponent],
   templateUrl: './task-detail.html',
   styleUrl: './task-detail.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

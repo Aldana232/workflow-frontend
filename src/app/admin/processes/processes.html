@@ -160,6 +160,18 @@
               }
             </div>
 
+            <!-- ── Documentos del trámite ── -->
+            <div class="detail-section detail-section--full">
+              <app-document-manager
+                [tramiteId]="detailTramite.id"
+                [tramiteCode]="detailTramite.code"
+                [companyId]="detailTramite.companyId || ''"
+                [nodeId]="''"
+                [nodeName]="''"
+                [canUpload]="false"
+              />
+            </div>
+
           </div>
         </div>
       }

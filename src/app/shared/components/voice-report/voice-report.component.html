@@ -1,0 +1,294 @@
+<div class="vr-card">
+
+  <!-- ── Header ── -->
+  <div class="vr-header">
+    <div class="vr-header-left">
+      <span class="vr-icon">🎙</span>
+      <div>
+        <h3 class="vr-title">Reportes por Voz</h3>
+        <span class="vr-subtitle">Habla o escribe para generar un reporte con IA</span>
+      </div>
+    </div>
+    @if (isListening) {
+      <span class="vr-listening-badge">
+        <span class="vr-pulse"></span> Escuchando…
+      </span>
+    }
+  </div>
+
+  <!-- ── Panel de entrada ── -->
+  <div class="vr-input-area">
+    <div class="vr-input-row">
+      <input
+        type="text"
+        class="vr-input"
+        [(ngModel)]="voiceInput"
+        placeholder="Ej: Muéstrame los cuellos de botella del proceso"
+        [disabled]="isGenerating || isListening"
+        (keydown.enter)="generateReport()"
+      />
+      <button
+        class="vr-btn vr-btn-mic"
+        [class.vr-btn-mic--active]="isListening"
+        (click)="startListening()"
+        [disabled]="isListening || isGenerating"
+        title="Dictar por voz"
+      >🎙</button>
+      <button
+        class="vr-btn vr-btn-generate"
+        (click)="generateReport()"
+        [disabled]="!voiceInput.trim() || isGenerating"
+      >
+        @if (isGenerating) {
+          <span class="vr-spinner"></span>
+        } @else {
+          Generar
+        }
+      </button>
+    </div>
+
+    <!-- Ejemplos de comandos -->
+    <div class="vr-examples">
+      <span class="vr-examples-label">Ejemplos:</span>
+      <button class="vr-chip" (click)="useExample('Muéstrame los cuellos de botella')">Cuellos de botella</button>
+      <button class="vr-chip" (click)="useExample('Dame los trámites urgentes')">Trámites urgentes</button>
+      <button class="vr-chip" (click)="useExample('Rendimiento por departamento')">Por departamento</button>
+      <button class="vr-chip" (click)="useExample('Anomalías detectadas')">Anomalías</button>
+      <button class="vr-chip" (click)="useExample('Trámites activos en espera')">Activos</button>
+      <button class="vr-chip" (click)="useExample('Resumen general')">Resumen</button>
+    </div>
+  </div>
+
+  <!-- ── Error ── -->
+  @if (errorMessage) {
+    <div class="vr-error">⚠ {{ errorMessage }}</div>
+  }
+
+  <!-- ── Loading ── -->
+  @if (isGenerating) {
+    <div class="vr-loading">
+      <span class="vr-spinner"></span>
+      Generando reporte…
+    </div>
+  }
+
+  <!-- ── Resultado ── -->
+  @if (reportData && !isGenerating) {
+    <div class="vr-result">
+
+      <div class="vr-result-header">
+        <span class="vr-result-badge">{{ reportTypeLabel }}</span>
+        <div class="export-buttons">
+          <button class="btn-export btn-pdf" (click)="exportToPDF()">
+            📄 Exportar PDF
+          </button>
+          <button class="btn-export btn-word" (click)="exportToWord()">
+            📝 Exportar Word
+          </button>
+        </div>
+      </div>
+
+      <!-- ── RESUMEN GENERAL ── -->
+      @if (reportType === 'summary') {
+        <div class="vr-stats-grid">
+          <div class="vr-stat">
+            <span class="vr-stat-value">{{ summaryData?.totalActiveTramites ?? '—' }}</span>
+            <span class="vr-stat-label">Trámites activos</span>
+          </div>
+          <div class="vr-stat">
+            <span class="vr-stat-value">{{ summaryData?.totalCompletedThisMonth ?? '—' }}</span>
+            <span class="vr-stat-label">Completados este mes</span>
+          </div>
+          <div class="vr-stat vr-stat--purple">
+            <span class="vr-stat-value">
+              {{ ((summaryData?.avgDurationMinutes ?? 0) / 60) | number:'1.1-1' }}h
+            </span>
+            <span class="vr-stat-label">Tiempo promedio</span>
+          </div>
+          <div class="vr-stat">
+            <span class="vr-stat-value">{{ summaryData?.totalActiveProcesses ?? '—' }}</span>
+            <span class="vr-stat-label">Procesos activos</span>
+          </div>
+        </div>
+      }
+
+      <!-- ── CUELLOS DE BOTELLA ── -->
+      @if (reportType === 'bottlenecks') {
+        @if (bottleneckItems.length === 0) {
+          <div class="vr-empty">
+            <span class="vr-empty-icon">✅</span>
+            <p>No se detectaron cuellos de botella</p>
+          </div>
+        } @else {
+          <ul class="vr-item-list">
+            @for (b of bottleneckItems; track b.nodeId; let i = $index) {
+              <li class="vr-item" [class.vr-item--danger]="b.isBottleneck">
+                <div class="vr-item-top">
+                  <span class="vr-item-name">Nodo {{ i + 1 }}</span>
+                  @if (b.isBottleneck) {
+                    <span class="vr-badge vr-badge--danger">Cuello de botella</span>
+                  } @else {
+                    <span class="vr-badge vr-badge--ok">Normal</span>
+                  }
+                </div>
+                <div class="vr-progress-row">
+                  <span class="vr-progress-label">Duración prom.</span>
+                  <div class="vr-progress-track">
+                    <div
+                      class="vr-progress-fill"
+                      [style.width.%]="durationPct(b, bottleneckItems)"
+                      [style.background]="b.isBottleneck ? '#ef4444' : '#10b981'"
+                    ></div>
+                  </div>
+                  <span class="vr-progress-value">{{ b.avgDuration | number:'1.0-1' }} min</span>
+                </div>
+                @if (b.recommendation) {
+                  <p class="vr-item-reason">{{ b.recommendation }}</p>
+                }
+              </li>
+            }
+          </ul>
+        }
+      }
+
+      <!-- ── ANOMALÍAS ── -->
+      @if (reportType === 'anomalies') {
+        @if (anomalyItems.length === 0) {
+          <div class="vr-empty vr-empty--ok">
+            <span class="vr-empty-icon">✅</span>
+            <p>Sin anomalías detectadas</p>
+          </div>
+        } @else {
+          <ul class="vr-item-list">
+            @for (a of anomalyItems; track a.tramiteId) {
+              @if (a.isAnomalous) {
+                <li class="vr-item vr-item--danger">
+                  <div class="vr-item-top">
+                    <span class="vr-code">{{ a.code }}</span>
+                    <div class="vr-item-chips">
+                      <span class="vr-chip-meta">⏳ {{ formatWait(a.minutesWaiting) }}</span>
+                      <span class="vr-badge vr-badge--danger">Anómalo</span>
+                    </div>
+                  </div>
+                  @if (a.reason) {
+                    <p class="vr-item-reason">{{ a.reason }}</p>
+                  }
+                </li>
+              }
+            }
+          </ul>
+        }
+      }
+
+      <!-- ── PRIORIDAD ── -->
+      @if (reportType === 'priority') {
+        @if (priorityItems.length === 0) {
+          <div class="vr-empty">
+            <span class="vr-empty-icon">📭</span>
+            <p>Sin trámites priorizados</p>
+          </div>
+        } @else {
+          <ul class="vr-item-list">
+            @for (t of priorityItems; track t._id; let i = $index) {
+              <li class="vr-item vr-item--priority">
+                <div class="vr-item-top">
+                  <div class="vr-item-name-row">
+                    <span class="vr-priority-rank">#{{ i + 1 }}</span>
+                    <span class="vr-code">{{ t.code }}</span>
+                  </div>
+                  <span
+                    class="vr-badge"
+                    [style.background]="priorityBg(t.priorityLevel)"
+                    [style.color]="priorityColor(t.priorityLevel)"
+                  >{{ t.priorityLevel }}</span>
+                </div>
+                <div class="vr-progress-row">
+                  <span class="vr-progress-label">Prioridad</span>
+                  <div class="vr-progress-track">
+                    <div
+                      class="vr-progress-fill"
+                      [style.width.%]="t.priorityScore * 100"
+                      [style.background]="priorityColor(t.priorityLevel)"
+                    ></div>
+                  </div>
+                  <span class="vr-progress-value">{{ (t.priorityScore * 100) | number:'1.0-0' }}%</span>
+                </div>
+                @if (t.minutesWaiting) {
+                  <div class="vr-item-chips">
+                    <span class="vr-chip-meta">⏳ {{ formatWait(t.minutesWaiting) }} en espera</span>
+                  </div>
+                }
+                @if (t.priorityReason) {
+                  <p class="vr-item-reason">{{ t.priorityReason }}</p>
+                }
+              </li>
+            }
+          </ul>
+        }
+      }
+
+      <!-- ── TRÁMITES ACTIVOS ── -->
+      @if (reportType === 'active') {
+        @if (activeItems.length === 0) {
+          <div class="vr-empty">
+            <span class="vr-empty-icon">📭</span>
+            <p>No hay trámites activos</p>
+          </div>
+        } @else {
+          <ul class="vr-item-list">
+            @for (t of activeItems; track t.code) {
+              <li class="vr-item">
+                <div class="vr-item-top">
+                  <span class="vr-code">{{ t.code }}</span>
+                  <span class="vr-chip-meta">⏳ {{ formatWait(t.waitingMinutes) }}</span>
+                </div>
+                <div class="vr-item-chips">
+                  <span class="vr-chip-meta">{{ t.processName }}</span>
+                  <span class="vr-chip-meta">{{ t.departmentName }}</span>
+                  <span class="vr-chip-meta">📍 {{ t.currentNode }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      }
+
+      <!-- ── DEPARTAMENTOS ── -->
+      @if (reportType === 'department') {
+        @if (departmentItems.length === 0) {
+          <div class="vr-empty">
+            <span class="vr-empty-icon">🏢</span>
+            <p>Sin datos de departamento disponibles</p>
+          </div>
+        } @else {
+          <ul class="vr-item-list">
+            @for (d of departmentItems; track d.departmentId ?? d.name; let i = $index) {
+              <li class="vr-item">
+                <div class="vr-item-top">
+                  <div class="vr-item-name-row">
+                    <span class="vr-priority-rank">#{{ i + 1 }}</span>
+                    <span class="vr-item-name">{{ d.departmentName ?? d.name ?? '—' }}</span>
+                  </div>
+                  @if (d.activeTramites ?? d.totalTramites) {
+                    <span class="vr-chip-meta">{{ d.activeTramites ?? d.totalTramites }} trámites</span>
+                  }
+                </div>
+                @if (d.avgWaitMinutes) {
+                  <div class="vr-progress-row">
+                    <span class="vr-progress-label">Espera prom.</span>
+                    <div class="vr-progress-track">
+                      <div class="vr-progress-fill" [style.width.%]="60" style="background:#4f46e5"></div>
+                    </div>
+                    <span class="vr-progress-value">{{ formatWait(d.avgWaitMinutes) }}</span>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      }
+
+    </div>
+  }
+
+</div>

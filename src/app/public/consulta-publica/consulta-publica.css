@@ -237,3 +237,12 @@
 .h-body { display: flex; flex-direction: column; gap: .15rem; }
 .h-node  { font-size: .875rem; font-weight: 600; color: #1e293b; }
 .h-dates { font-size: .78rem; color: #64748b; }
+
+/* ── Agent section heading ── */
+.agent-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: .5rem 0 0;
+  text-align: center;
+}

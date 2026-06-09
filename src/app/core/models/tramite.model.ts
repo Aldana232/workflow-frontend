@@ -12,8 +12,9 @@ export interface Tramite {
 
 export interface HistoryEntry {
   nodeId: string;
-  nodeName: string;
-  arrivedAt: string;
-  completedAt: string;
+  nodeName?: string;
+  arrivedAt?: string;
+  completedAt?: string;
   durationMinutes: number;
+  _trackId?: number;
 }

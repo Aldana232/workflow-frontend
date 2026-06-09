@@ -1,0 +1,171 @@
+<div class="doc-manager">
+
+  <!-- ── Header ── -->
+  <div class="doc-header">
+    <div class="doc-header-left">
+      <span class="doc-icon">🗂️</span>
+      <div>
+        <h3 class="doc-title">Documentos del trámite</h3>
+        <span class="doc-count">{{ documents.length }} archivo{{ documents.length !== 1 ? 's' : '' }}</span>
+      </div>
+    </div>
+    <button
+      *ngIf="canUpload && !showUploadForm"
+      class="btn-upload-trigger"
+      (click)="showUploadForm = true"
+    >
+      ＋ Subir documento
+    </button>
+  </div>
+
+  <!-- ── Error banner ── -->
+  <div *ngIf="errorMessage" class="error-banner">
+    ⚠️ {{ errorMessage }}
+  </div>
+
+  <!-- ── Formulario de subida ── -->
+  <div *ngIf="showUploadForm" class="upload-form">
+    <div class="upload-form-title">Nuevo documento</div>
+
+    <div class="form-row">
+      <label class="form-label">Archivo</label>
+      <div class="file-pick-wrap">
+        <label class="file-pick-btn">
+          📁 {{ selectedFileName || 'Seleccionar archivo' }}
+          <input type="file" accept="*/*" (change)="onFileSelected($event)" class="file-hidden" />
+        </label>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Categoría</label>
+      <div class="select-wrap">
+        <select class="form-select" [(ngModel)]="selectedCategory">
+          <option value="FORMULARIO">FORMULARIO</option>
+          <option value="ANEXO">ANEXO</option>
+          <option value="EVIDENCIA">EVIDENCIA</option>
+          <option value="REPORTE">REPORTE</option>
+        </select>
+        <span class="select-arrow">▾</span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Descripción</label>
+      <input
+        type="text"
+        class="form-input"
+        [(ngModel)]="description"
+        placeholder="Descripción opcional del documento"
+      />
+    </div>
+
+    <div class="upload-actions">
+      <button class="btn-cancel" (click)="cancelUpload()" [disabled]="isUploading">
+        Cancelar
+      </button>
+      <button class="btn-submit" (click)="uploadDocument()" [disabled]="isUploading || !selectedFileName">
+        <span *ngIf="isUploading" class="btn-spinner"></span>
+        {{ isUploading ? 'Subiendo...' : 'Subir' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Estado de carga ── -->
+  <div *ngIf="isLoading" class="loading-state">
+    <span class="spinner"></span>
+    Cargando documentos...
+  </div>
+
+  <!-- ── Estado vacío ── -->
+  <div *ngIf="!isLoading && documents.length === 0 && !showUploadForm" class="empty-state">
+    <span class="empty-icon">📂</span>
+    <p class="empty-text">No hay documentos subidos aún</p>
+    <p class="empty-sub">Los documentos adjuntados al trámite aparecerán aquí</p>
+  </div>
+
+  <!-- ── Lista de documentos ── -->
+  <ul *ngIf="!isLoading && documents.length > 0" class="doc-list">
+    <li *ngFor="let doc of documents" class="doc-item">
+
+      <!-- Fila principal -->
+      <div class="doc-row">
+        <span class="doc-file-icon">{{ getFileIcon(doc.mimeType) }}</span>
+
+        <div class="doc-info">
+          <span class="doc-filename">{{ doc.fileName }}</span>
+
+          <!-- Chips de categoría, tamaño, fecha -->
+          <div class="doc-meta">
+            <span class="badge" [ngClass]="{
+              'badge-formulario': doc.category === 'FORMULARIO',
+              'badge-anexo':      doc.category === 'ANEXO',
+              'badge-evidencia':  doc.category === 'EVIDENCIA',
+              'badge-reporte':    doc.category === 'REPORTE'
+            }">{{ doc.category }}</span>
+            <span class="doc-size">{{ formatFileSize(doc.fileSize) }}</span>
+            <span class="doc-date">{{ formatDate(doc.createdAt) }}</span>
+          </div>
+
+          <!-- Contexto: nodo | departamento | encargado -->
+          <div class="doc-context">
+            <span class="ctx-chip ctx-node" *ngIf="doc.nodeName || doc.nodeId">
+              📍 {{ doc.nodeName || doc.nodeId }}
+            </span>
+            <span class="ctx-chip ctx-dept" *ngIf="doc.departmentName">
+              🏢 {{ doc.departmentName }}
+            </span>
+            <span class="ctx-chip ctx-user">
+              👤 {{ doc.uploadedByName || doc.uploadedBy || '—' }}
+            </span>
+          </div>
+
+          <p *ngIf="doc.description" class="doc-description">{{ doc.description }}</p>
+        </div>
+
+        <div class="doc-actions">
+          <button
+            class="btn-icon btn-events"
+            (click)="toggleEvents(doc.id)"
+            [title]="expandedDocId === doc.id ? 'Ocultar eventos' : 'Ver historial'"
+          >
+            {{ expandedDocId === doc.id ? '▲' : '▼' }}
+            <span class="btn-label">{{ doc.events?.length ?? 0 }}</span>
+          </button>
+          <button class="btn-icon btn-download" (click)="downloadDocument(doc)" title="Descargar">
+            ↓
+          </button>
+          <button
+            *ngIf="canUpload"
+            class="btn-icon btn-delete"
+            (click)="deleteDocument(doc)"
+            title="Eliminar documento"
+          >
+            🗑
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel de eventos expandible -->
+      <div *ngIf="expandedDocId === doc.id" class="events-panel">
+        <div class="events-header">Historial de eventos</div>
+        <ul *ngIf="doc.events && doc.events.length > 0; else noEvents" class="events-list">
+          <li *ngFor="let ev of doc.events" class="event-item">
+            <span class="event-dot"></span>
+            <div class="event-body">
+              <span class="event-type">{{ ev.eventType }}</span>
+              <span class="event-user">{{ ev.userName }}</span>
+              <p *ngIf="ev.description" class="event-desc">{{ ev.description }}</p>
+              <span class="event-time">{{ formatDate(ev.timestamp) }}</span>
+            </div>
+          </li>
+        </ul>
+        <ng-template #noEvents>
+          <p class="events-empty">Sin eventos registrados</p>
+        </ng-template>
+      </div>
+
+    </li>
+  </ul>
+
+</div>

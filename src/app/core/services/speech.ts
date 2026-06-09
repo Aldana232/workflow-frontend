@@ -14,19 +14,21 @@ export class SpeechService {
 
   // ── Síntesis de voz ────────────────────────────────────────────────────────
 
-  /** Vocaliza el texto en español usando la Web Speech Synthesis API. */
-  speak(text: string): void {
+  /** Vocaliza el texto en español. Llama onEnd cuando termina (útil para re-escuchar). */
+  speak(text: string, onEnd?: () => void): void {
     if (!('speechSynthesis' in window)) {
       console.warn('[SpeechService] speechSynthesis no está disponible en este navegador.');
+      onEnd?.();
       return;
     }
-    window.speechSynthesis.cancel(); // cancela cualquier locución en curso
+    window.speechSynthesis.cancel();
 
     const utterance   = new SpeechSynthesisUtterance(text);
     utterance.lang    = 'es-ES';
-    utterance.rate    = 0.9;  // ligeramente más lento para mejor comprensión
+    utterance.rate    = 0.9;
     utterance.pitch   = 1.0;
     utterance.volume  = 1.0;
+    utterance.onend   = () => onEnd?.();
 
     window.speechSynthesis.speak(utterance);
   }
@@ -55,42 +57,57 @@ export class SpeechService {
         return;
       }
 
-      const recognition = new SR();
-      recognition.lang        = 'es-ES';
-      recognition.continuous  = false;   // para después del primer enunciado completo
-      recognition.interimResults = false; // solo resultados finales
+      // Cancelar TTS antes de iniciar el micrófono
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
 
-      // Emite el primer resultado final y completa
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const text = event.results[0]?.[0]?.transcript?.trim() ?? '';
-        if (text) {
-          observer.next(text);
-        }
-        observer.complete();
-      };
+      let recognition: SpeechRecognition | null = null;
 
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        const messages: Record<string, string> = {
-          'not-allowed':         'Permiso de micrófono denegado.',
-          'no-speech':           'No se detectó voz.',
-          'network':             'Error de red al procesar el audio.',
-          'audio-capture':       'No se encontró micrófono.',
-          'service-not-allowed': 'Servicio de voz no disponible.',
+      const startRecognition = () => {
+        recognition = new SR();
+        recognition.lang           = 'es-ES';
+        recognition.continuous     = false;
+        recognition.interimResults = false;
+
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
+          const text = event.results[0]?.[0]?.transcript?.trim() ?? '';
+          if (text) observer.next(text);
+          observer.complete();
         };
-        const msg = messages[event.error] ?? `Error de reconocimiento: ${event.error}`;
-        console.warn('[SpeechService]', msg);
-        observer.error(new Error(msg));
+
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+          // aborted: Chrome aún vaciaba el buffer de TTS — silenciar, el usuario puede reintentar
+          // no-speech: el usuario no dijo nada — silenciar también
+          if (event.error === 'aborted' || event.error === 'no-speech') {
+            observer.complete();
+            return;
+          }
+          const messages: Record<string, string> = {
+            'not-allowed':         'Permiso de micrófono denegado. Habilítalo en la configuración del navegador.',
+            'audio-capture':       'No se encontró micrófono.',
+            'network':             'Error de red al procesar el audio.',
+            'service-not-allowed': 'Servicio de voz no disponible.',
+          };
+          const msg = messages[event.error] ?? `Error de reconocimiento: ${event.error}`;
+          console.warn('[SpeechService]', msg);
+          observer.error(new Error(msg));
+        };
+
+        recognition.onend = () => observer.complete();
+        recognition.start();
       };
 
-      // onend dispara siempre al final (incluso tras error); si el observer
-      // ya completó/falló, esta llamada es ignorada por RxJS.
-      recognition.onend = () => observer.complete();
+      // Esperar 200 ms para que Chrome vacíe el buffer de audio de TTS
+      // antes de arrancar el reconocimiento (evita el error "aborted")
+      const timerId = setTimeout(startRecognition, 200);
 
-      recognition.start();
-
-      // Función de limpieza: al cancelar la suscripción se aborta el reconocimiento
+      // Limpieza: cancelar el timer si la suscripción se destruye antes de arrancar
       return () => {
-        try { recognition.abort(); } catch { /* ya estaba detenido */ }
+        clearTimeout(timerId);
+        if (recognition) {
+          try { recognition.abort(); } catch { /* ya detenido */ }
+        }
       };
     });
   }

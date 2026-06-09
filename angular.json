@@ -18,7 +18,9 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "polyfills": ["zone.js"],
+            "polyfills": [
+              "zone.js"
+            ],
             "assets": [
               {
                 "glob": "**/*",
@@ -30,6 +32,9 @@
               "node_modules/ngx-toastr/toastr.css",
               "node_modules/bpmn-js/dist/assets/diagram-js.css",
               "node_modules/bpmn-js/dist/assets/bpmn-font/css/bpmn.css"
+            ],
+            "allowedCommonJsDependencies": [
+              "jspdf-autotable"
             ]
           },
           "configurations": {
@@ -52,7 +57,8 @@
                   "maximumError": "40kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,

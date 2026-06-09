@@ -57,4 +57,41 @@ export class AnalyticsService {
         catchError(() => of([]))
       );
   }
+
+  // ── Analytics endpoints (empresa) ───────────────────────────────────────────
+
+  /** GET /api/analytics/bottlenecks/{companyId} — cuellos de botella por empresa */
+  getAnalyticsBottlenecks(companyId: string): Observable<any> {
+    return this.http
+      .get<any>(`${this.base}/analytics/bottlenecks/${companyId}`)
+      .pipe(catchError(() => of([])));
+  }
+
+  /** GET /api/analytics/department-performance/{companyId} — rendimiento por departamento */
+  getDepartmentPerformance(companyId: string): Observable<any> {
+    return this.http
+      .get<any>(`${this.base}/analytics/department-performance/${companyId}`)
+      .pipe(
+        map((r: any) => r?.data ?? r ?? []),
+        catchError(() => of([]))
+      );
+  }
+
+  // ── AI endpoints ────────────────────────────────────────────────────────────
+
+  getAiBottlenecks(processId: string): Observable<any> {
+    return this.http.get(`${this.base}/ai/bottlenecks/${processId}`);
+  }
+
+  getAiAnomalies(companyId: string): Observable<any> {
+    return this.http.get(`${this.base}/ai/anomalies/${companyId}`);
+  }
+
+  getAiPriority(companyId: string): Observable<any> {
+    return this.http.get(`${this.base}/ai/priority/${companyId}`);
+  }
+
+  recommendPolicy(description: string, companyId: string): Observable<any> {
+    return this.http.post(`${this.base}/ai/recommend-policy`, { description, companyId });
+  }
 }
