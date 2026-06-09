@@ -3,10 +3,10 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - npm install --legacy-peer-deps
     build:
       commands:
-        - npm run build
+        - npm run build -- --configuration production
   artifacts:
     baseDirectory: dist/workflow-frontend/browser
     files:
