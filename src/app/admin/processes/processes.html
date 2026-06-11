@@ -160,15 +160,39 @@
               }
             </div>
 
-            <!-- ── Documentos del trámite ── -->
+            <!-- ── Gestión Documental ── -->
             <div class="detail-section detail-section--full">
+              <div class="doc-mgmt-header">
+                <h3>📎 Gestión Documental</h3>
+                <div class="node-selector-wrap">
+                  <label class="node-selector-label">Nodo destino para subir:</label>
+                  @if (loadingNodes) {
+                    <span class="node-loading">
+                      <span class="spinner-xs"></span> Cargando nodos…
+                    </span>
+                  } @else {
+                    <select class="node-selector" (change)="selectNode($event)">
+                      <option value="">— Todos los nodos (solo lectura) —</option>
+                      @for (node of processNodes; track node.id) {
+                        <option [value]="node.id">{{ node.label ?? node.name }}</option>
+                      }
+                    </select>
+                  }
+                  @if (selectedNodeId) {
+                    <span class="node-selected-chip">
+                      📍 {{ selectedNodeName }} · subida habilitada
+                    </span>
+                  }
+                </div>
+              </div>
+
               <app-document-manager
                 [tramiteId]="detailTramite.id"
                 [tramiteCode]="detailTramite.code"
                 [companyId]="detailTramite.companyId || ''"
-                [nodeId]="''"
-                [nodeName]="''"
-                [canUpload]="false"
+                [nodeId]="selectedNodeId"
+                [nodeName]="selectedNodeName"
+                [canUpload]="selectedNodeId !== ''"
               />
             </div>
 

@@ -1,4 +1,4 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.sidebar--open]="isOpen">
   <div class="sidebar-section">
     <span class="section-label">MENÚ</span>
     @for (item of menuItems; track item.route) {
@@ -6,7 +6,9 @@
         class="nav-item"
         [routerLink]="item.route"
         [routerLinkActive]="'active'"
+        [title]="item.label"
       >
+        <span class="nav-icon">{{ item.icon }}</span>
         <span class="nav-label">{{ item.label }}</span>
       </a>
     }

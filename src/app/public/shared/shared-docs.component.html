@@ -1,0 +1,112 @@
+<div class="shared-page">
+
+  <!-- ── Cargando ── -->
+  <div *ngIf="isLoading" class="state-card">
+    <div class="state-spinner"></div>
+    <p class="state-text">Verificando enlace...</p>
+  </div>
+
+  <!-- ── Expirado ── -->
+  <div *ngIf="!isLoading && isExpired" class="state-card state-card--error">
+    <span class="state-icon">⏰</span>
+    <h2 class="state-title">Link expirado</h2>
+    <p class="state-text">Este enlace de acceso ha vencido. Solicite uno nuevo al encargado del trámite.</p>
+  </div>
+
+  <!-- ── Inválido ── -->
+  <div *ngIf="!isLoading && isInvalid" class="state-card state-card--error">
+    <span class="state-icon">🚫</span>
+    <h2 class="state-title">Enlace no válido</h2>
+    <p class="state-text">Este enlace no existe o fue revocado. Solicite un nuevo enlace al encargado.</p>
+  </div>
+
+  <!-- ── Contenido ── -->
+  <div *ngIf="!isLoading && !isExpired && !isInvalid" class="shared-content">
+
+    <!-- Header / branding -->
+    <header class="shared-header">
+      <div class="brand">
+        <span class="brand-icon">💧</span>
+        <span class="brand-name">Saguapac</span>
+      </div>
+      <div class="badge-public">Vista pública · Solo lectura</div>
+    </header>
+
+    <!-- Info del trámite -->
+    <div class="tramite-card">
+      <div class="tramite-top">
+        <div>
+          <h1 class="tramite-title">Documentos del trámite</h1>
+          <span *ngIf="tramiteCode" class="tramite-code">{{ tramiteCode }}</span>
+        </div>
+        <div *ngIf="expiresAt" class="expires-chip">
+          ⏱ Acceso hasta {{ formatDate(expiresAt) }}
+        </div>
+      </div>
+
+      <!-- Metadatos del trámite si vienen -->
+      <dl *ngIf="tramite" class="tramite-meta">
+        <ng-container *ngIf="tramite.companyName">
+          <dt>Empresa</dt>
+          <dd>{{ tramite.companyName }}</dd>
+        </ng-container>
+        <ng-container *ngIf="tramite.processName">
+          <dt>Proceso</dt>
+          <dd>{{ tramite.processName }}</dd>
+        </ng-container>
+        <ng-container *ngIf="tramite.status">
+          <dt>Estado</dt>
+          <dd><span class="status-pill status-{{ tramite.status | lowercase }}">{{ tramite.status }}</span></dd>
+        </ng-container>
+        <ng-container *ngIf="tramite.startedAt">
+          <dt>Iniciado</dt>
+          <dd>{{ formatDate(tramite.startedAt) }}</dd>
+        </ng-container>
+      </dl>
+    </div>
+
+    <!-- Lista de documentos -->
+    <div class="docs-section">
+      <h2 class="docs-heading">
+        Archivos adjuntos
+        <span class="docs-count">{{ documents.length }}</span>
+      </h2>
+
+      <div *ngIf="documents.length === 0" class="empty-docs">
+        <span class="empty-icon">📂</span>
+        <p>No hay documentos adjuntos en este trámite.</p>
+      </div>
+
+      <ul *ngIf="documents.length > 0" class="doc-list">
+        <li *ngFor="let doc of documents" class="doc-item">
+          <span class="doc-file-icon">{{ getFileIcon(doc.mimeType) }}</span>
+          <div class="doc-info">
+            <span class="doc-name">{{ doc.fileName }}</span>
+            <div class="doc-meta">
+              <span class="doc-badge doc-badge--{{ (doc.category || 'ANEXO') | lowercase }}">
+                {{ doc.category || 'ANEXO' }}
+              </span>
+              <span class="doc-size">{{ formatFileSize(doc.fileSize) }}</span>
+              <span class="doc-date">{{ formatDate(doc.createdAt) }}</span>
+            </div>
+            <div class="doc-context" *ngIf="doc.nodeName || doc.departmentName || doc.uploadedByName">
+              <span class="ctx-chip ctx-node" *ngIf="doc.nodeName">📍 {{ doc.nodeName }}</span>
+              <span class="ctx-chip ctx-dept" *ngIf="doc.departmentName">🏢 {{ doc.departmentName }}</span>
+              <span class="ctx-chip ctx-user" *ngIf="doc.uploadedByName">👤 {{ doc.uploadedByName }}</span>
+            </div>
+            <p *ngIf="doc.description" class="doc-desc">{{ doc.description }}</p>
+          </div>
+          <button class="btn-open" (click)="openFile(doc)" [disabled]="!doc.fileUrl" title="Abrir / Descargar">
+            ↗ Abrir
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Footer -->
+    <footer class="shared-footer">
+      Este enlace fue generado por el sistema de gestión de trámites de Saguapac.
+    </footer>
+  </div>
+
+</div>

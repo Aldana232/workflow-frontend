@@ -41,6 +41,12 @@ export class Processes implements OnInit {
   detailNodeLabel: string | null = null;
   loadingDetail = false;
 
+  // Selector de nodo para gestión documental
+  processNodes: any[]     = [];
+  loadingNodes            = false;
+  selectedNodeId: string  = '';
+  selectedNodeName: string = '';
+
   ngOnInit(): void {
     this.processService.getAll().subscribe({
       next: (data: any[]) => {
@@ -74,15 +80,19 @@ export class Processes implements OnInit {
   }
 
   viewTramites(p: ProcessCard): void {
-    this.selectedProcess = p;
-    this.detailTramite = null;
-    this.tramites = [];
-    this.loadingTramites = true;
+    this.selectedProcess  = p;
+    this.detailTramite    = null;
+    this.tramites         = [];
+    this.loadingTramites  = true;
+    this.processNodes     = [];
+    this.selectedNodeId   = '';
+    this.selectedNodeName = '';
     this.cdr.markForCheck();
 
+    // Carga trámites y nodos del proceso en paralelo
     this.tramiteService.getAllTramitesByProcess(p.id).subscribe({
       next: (data: any[]) => {
-        this.tramites = data;
+        this.tramites        = data;
         this.loadingTramites = false;
         this.cdr.markForCheck();
       },
@@ -91,19 +101,37 @@ export class Processes implements OnInit {
         this.cdr.markForCheck();
       },
     });
+
+    this.loadingNodes = true;
+    this.processService.getById(p.id).subscribe({
+      next: (proc: any) => {
+        this.processNodes = proc.nodes ?? [];
+        this.loadingNodes = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loadingNodes = false;
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   closeTramites(): void {
-    this.selectedProcess = null;
-    this.detailTramite = null;
-    this.tramites = [];
+    this.selectedProcess  = null;
+    this.detailTramite    = null;
+    this.tramites         = [];
+    this.processNodes     = [];
+    this.selectedNodeId   = '';
+    this.selectedNodeName = '';
     this.cdr.markForCheck();
   }
 
   viewDetail(t: any): void {
-    this.loadingDetail = true;
-    this.detailTramite = null;
-    this.detailNodeLabel = t.currentNodeLabel ?? null;
+    this.loadingDetail    = true;
+    this.detailTramite    = null;
+    this.detailNodeLabel  = t.currentNodeLabel ?? null;
+    this.selectedNodeId   = '';
+    this.selectedNodeName = '';
     this.cdr.markForCheck();
 
     this.tramiteService.getById(t.tramiteId).subscribe({
@@ -120,8 +148,18 @@ export class Processes implements OnInit {
   }
 
   closeDetail(): void {
-    this.detailTramite = null;
-    this.detailNodeLabel = null;
+    this.detailTramite    = null;
+    this.detailNodeLabel  = null;
+    this.selectedNodeId   = '';
+    this.selectedNodeName = '';
+    this.cdr.markForCheck();
+  }
+
+  selectNode(event: Event): void {
+    const nodeId = (event.target as HTMLSelectElement).value;
+    const node   = this.processNodes.find(n => n.id === nodeId);
+    this.selectedNodeId   = node?.id ?? '';
+    this.selectedNodeName = node?.label ?? node?.name ?? '';
     this.cdr.markForCheck();
   }
 

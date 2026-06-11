@@ -56,6 +56,9 @@
       <button class="vr-chip" (click)="useExample('Anomalías detectadas')">Anomalías</button>
       <button class="vr-chip" (click)="useExample('Trámites activos en espera')">Activos</button>
       <button class="vr-chip" (click)="useExample('Resumen general')">Resumen</button>
+      <button class="vr-chip" (click)="voiceInput = 'trámites de enero'; generateReport()">Enero</button>
+      <button class="vr-chip" (click)="voiceInput = 'trámites de mayo'; generateReport()">Mayo</button>
+      <button class="vr-chip" (click)="voiceInput = 'reporte por proceso'; generateReport()">Por proceso</button>
     </div>
   </div>
 
@@ -286,6 +289,56 @@
             }
           </ul>
         }
+      }
+
+      <!-- ── POR FECHA ── -->
+      @if (reportType === 'bydate') {
+        <div class="vr-result-section">
+          <p class="vr-stat-line">Total trámites: <strong>{{ reportData?.total || 0 }}</strong></p>
+          <p class="vr-stat-line">Completados: <strong>{{ reportData?.completed || 0 }}</strong></p>
+          <p class="vr-stat-line">Activos: <strong>{{ reportData?.active || 0 }}</strong></p>
+          <div class="vr-list">
+            @for (t of (reportData?.tramites || []); track t.code) {
+              <div class="vr-item">
+                <span class="vr-code">{{ t.code }}</span>
+                <span class="vr-badge vr-badge--neutral">{{ t.status }}</span>
+                <span class="vr-chip-meta">{{ t.nombre }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ── POR CLIENTE ── -->
+      @if (reportType === 'byclient') {
+        <div class="vr-result-section">
+          <p class="vr-stat-line">Cliente buscado: <strong>{{ reportData?.name || '—' }}</strong></p>
+          <p class="vr-stat-line">Total encontrados: <strong>{{ reportData?.total || 0 }}</strong></p>
+          <div class="vr-list">
+            @for (t of (reportData?.tramites || []); track t.code) {
+              <div class="vr-item">
+                <span class="vr-code">{{ t.code }}</span>
+                <span class="vr-badge vr-badge--neutral">{{ t.status }}</span>
+                <span class="vr-chip-meta">{{ t['clienteInfo']?.nombre }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ── POR PROCESO ── -->
+      @if (reportType === 'byprocess') {
+        <div class="vr-result-section">
+          <div class="vr-list">
+            @for (p of (reportData || []); track p.processId) {
+              <div class="vr-item">
+                <span class="vr-code">{{ p.processId }}</span>
+                <span class="vr-chip-meta">Total: {{ p.total }} | Completados: {{ p.completed }} | Activos: {{ p.active }}</span>
+                <span class="vr-chip-meta">Duración prom: {{ p.avgDurationMinutes?.toFixed(0) }} min</span>
+              </div>
+            }
+          </div>
+        </div>
       }
 
     </div>

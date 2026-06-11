@@ -481,7 +481,29 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 560px) {
-  .progress-row { grid-template-columns: 80px 1fr 60px; }
-  .ai-header    { flex-direction: column; align-items: flex-start; }
+@media (max-width: 767px) {
+  .ai-header     { flex-direction: column; align-items: flex-start; gap: .5rem; }
+  .tab-content   { padding: .6rem .85rem .85rem; }
+
+  /* Tabs: scroll horizontal con scrollbar oculta */
+  .tab-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn { padding: .6rem .85rem; font-size: .78rem; }
+
+  /* Stats grid colapsa a 2 columnas */
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Items en columna */
+  .item-row { flex-direction: column; align-items: flex-start; gap: .35rem; }
+  .progress-row { grid-template-columns: 70px 1fr 52px; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid    { grid-template-columns: 1fr !important; }
+  .progress-row  { grid-template-columns: 60px 1fr 48px; }
 }

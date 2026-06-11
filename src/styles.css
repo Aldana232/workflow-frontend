@@ -22,3 +22,32 @@ app-root {
   fill: #1e3a8a !important;
   font-weight: 600 !important;
 }
+
+/* ══ Utilidades responsivas ════════════════════════════════════════════════ */
+/* Breakpoints: móvil < 768px | tablet 768-1024px | desktop > 1024px        */
+
+/* Tabla con scroll horizontal en móvil */
+.responsive-table {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+/* Ocultar en móvil */
+.hide-mobile { display: none !important; }
+@media (min-width: 768px) {
+  .hide-mobile { display: revert !important; }
+}
+
+/* Ocultar en desktop */
+.hide-desktop { display: block; }
+@media (min-width: 1024px) {
+  .hide-desktop { display: none !important; }
+}
+
+/* Padding de página responsivo */
+@media (max-width: 767px) {
+  .page, [class*="page"] {
+    padding: 1rem !important;
+  }
+}

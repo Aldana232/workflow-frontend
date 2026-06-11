@@ -246,3 +246,49 @@
   margin: .5rem 0 0;
   text-align: center;
 }
+
+/* ── Responsive móvil ── */
+@media (max-width: 767px) {
+  .consulta-header {
+    padding: .75rem 1rem;
+  }
+
+  .consulta-main {
+    padding: 1.5rem .75rem 3rem;
+  }
+
+  .search-card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 14px;
+    max-width: 100%;
+  }
+
+  .search-card h1 { font-size: 1.35rem; }
+
+  .search-row {
+    flex-direction: column;
+  }
+
+  .btn-search {
+    width: 100%;
+    justify-content: center;
+    padding: .75rem;
+  }
+
+  .result-card {
+    max-width: 100%;
+    padding: 1.25rem 1rem;
+    border-radius: 12px;
+  }
+
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .5rem;
+  }
+
+  /* El agente (policy-agent) ocupa todo el ancho */
+  app-policy-agent {
+    width: 100%;
+  }
+}

@@ -189,8 +189,20 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── Responsive ── */
-@media (max-width: 1024px) { .processes-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px)  { .page { padding: 16px; } .processes-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1024px) {
+  .processes-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 767px) {
+  .page               { padding: 1rem; }
+  .page-header        { flex-direction: column; align-items: flex-start; gap: .5rem; }
+  .processes-grid     { grid-template-columns: 1fr; }
+  .tramites-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tramites-panel-header { flex-direction: column; align-items: flex-start; gap: .5rem; }
+  .detail-body        { grid-template-columns: 1fr; }
+  .detail-section--full { grid-column: 1; }
+  .card-actions       { flex-wrap: wrap; }
+}
 
 /* ── Botón Trámites ── */
 .btn-tramites {
@@ -405,4 +417,91 @@
   font-size: .75rem;
   color: #94a3b8;
   margin: 2px 0 0;
+}
+
+/* ── Gestión Documental — selector de nodo ── */
+.doc-mgmt-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.doc-mgmt-header h3 {
+  font-size: .82rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin: 0;
+}
+
+.node-selector-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.node-selector-label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.node-selector {
+  padding: .35rem .65rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: .82rem;
+  color: #1e293b;
+  background: #f8fafc;
+  cursor: pointer;
+  outline: none;
+  transition: border-color .2s;
+  min-width: 240px;
+}
+.node-selector:focus { border-color: #4f46e5; background: #fff; }
+
+.node-loading {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .78rem;
+  color: #94a3b8;
+}
+
+.spinner-xs {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+.node-selected-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .doc-mgmt-header    { flex-direction: column; align-items: flex-start; }
+  .node-selector-wrap { width: 100%; }
+  .node-selector      { width: 100%; min-width: unset; }
 }

@@ -17,6 +17,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./public/consulta-publica/consulta-publica').then(m => m.ConsultaPublica),
   },
+  {
+    path: 'shared/:token',
+    loadComponent: () =>
+      import('./public/shared/shared-docs.component').then(m => m.SharedDocsComponent),
+  },
 
   // ── Admin (rol: ADMIN) ────────────────────────────────────────────────────
   {

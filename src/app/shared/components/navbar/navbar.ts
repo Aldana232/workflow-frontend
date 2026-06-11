@@ -1,4 +1,4 @@
-import { Component, inject, HostListener } from '@angular/core';
+import { Component, inject, HostListener, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 
@@ -12,7 +12,11 @@ export class Navbar {
   private authService = inject(AuthService);
   private router      = inject(Router);
 
+  @Output() hamburgerClick = new EventEmitter<void>();
+
   showMenu = false;
+
+  onHamburger(): void { this.hamburgerClick.emit(); }
 
   get user() { return this.authService.getCurrentUser(); }
   get userName(): string { return this.user?.name ?? 'Usuario'; }

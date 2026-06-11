@@ -94,4 +94,16 @@ export class AnalyticsService {
   recommendPolicy(description: string, companyId: string): Observable<any> {
     return this.http.post(`${this.base}/ai/recommend-policy`, { description, companyId });
   }
+
+  getReportByDate(fromDate: string, toDate: string): Observable<any> {
+    return this.http.get(`${this.base}/ai/report/by-date?fromDate=${fromDate}&toDate=${toDate}`);
+  }
+
+  getReportByClient(name: string): Observable<any> {
+    return this.http.get(`${this.base}/ai/report/by-client?name=${name}`);
+  }
+
+  getSummaryByProcess(): Observable<any> {
+    return this.http.get(`${this.base}/ai/report/by-process`);
+  }
 }

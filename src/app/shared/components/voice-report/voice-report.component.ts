@@ -13,7 +13,8 @@ import { saveAs } from 'file-saver';
 import { AnalyticsService } from '../../../core/services/analytics';
 import { SpeechService } from '../../../core/services/speech';
 
-type ReportType = 'summary' | 'bottlenecks' | 'anomalies' | 'priority' | 'department' | 'active' | '';
+type ReportType = 'summary' | 'bottlenecks' | 'anomalies' | 'priority' | 'department' | 'active'
+                | 'bydate' | 'byclient' | 'byprocess' | '';
 type ExportFmt  = 'pdf' | 'word' | null;
 
 const TYPE_LABELS: Record<string, string> = {
@@ -23,6 +24,9 @@ const TYPE_LABELS: Record<string, string> = {
   priority:    '🔥 Trámites Prioritarios',
   department:  '🏢 Rendimiento por Departamento',
   active:      '📋 Trámites Activos',
+  bydate:      '📅 Reporte por Fecha',
+  byclient:    '👤 Reporte por Cliente',
+  byprocess:   '⚙ Estadísticas por Proceso',
 };
 
 @Component({
@@ -65,7 +69,6 @@ export class VoiceReportComponent {
   }
 
   // ── Clasificación inteligente por puntuación ─────────────────────────────
-  // Cada categoría tiene su propio vocabulario con peso. Gana la de mayor puntaje.
 
   private static readonly INTENT_MAP: Record<string, string[]> = {
     bottlenecks: [
@@ -128,7 +131,7 @@ export class VoiceReportComponent {
     for (const [category, keywords] of Object.entries(VoiceReportComponent.INTENT_MAP)) {
       for (const kw of keywords) {
         if (lower.includes(kw.normalize('NFD').replace(/[̀-ͯ]/g, ''))) {
-          scores[category] += kw.includes(' ') ? 2 : 1; // frases valen doble
+          scores[category] += kw.includes(' ') ? 2 : 1;
         }
       }
     }
@@ -140,12 +143,77 @@ export class VoiceReportComponent {
   // ── Lógica de comandos ───────────────────────────────────────────────────
 
   parseVoiceCommand(text: string, autoExport: ExportFmt = null): void {
-    const type = this.classifyIntent(text);
     this.errorMessage  = '';
     this.reportData    = null;
     this.pendingExport = autoExport;
     this.isGenerating  = true;
     this.cdr.detectChanges();
+
+    // ── Reporte por fecha ──────────────────────────────────────────────────
+    if (/fecha|mes|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|semana|hoy|ayer/i.test(text)) {
+      this.reportType = 'bydate';
+      const dates = this.extractDates(text);
+      this.analytics.getReportByDate(dates.from, dates.to).subscribe({
+        next: (data) => {
+          this.reportData   = data;
+          this.isGenerating = false;
+          this.cdr.detectChanges();
+          this.speakSummary();
+        },
+        error: () => {
+          this.errorMessage  = 'No se pudo generar el reporte por fecha.';
+          this.isGenerating  = false;
+          this.pendingExport = null;
+          this.cdr.detectChanges();
+        },
+      });
+      return;
+    }
+
+    // ── Reporte por cliente ────────────────────────────────────────────────
+    if (/cliente|persona|nombre|solicitante|quien/i.test(text)) {
+      this.reportType = 'byclient';
+      const name = this.extractClientName(text);
+      this.analytics.getReportByClient(name).subscribe({
+        next: (data) => {
+          this.reportData   = data;
+          this.isGenerating = false;
+          this.cdr.detectChanges();
+          this.speakSummary();
+        },
+        error: () => {
+          this.errorMessage  = 'No se pudo generar el reporte por cliente.';
+          this.isGenerating  = false;
+          this.pendingExport = null;
+          this.cdr.detectChanges();
+        },
+      });
+      return;
+    }
+
+    // ── Reporte por proceso ────────────────────────────────────────────────
+    if (/proceso|instalacion|reclamo|servicio|estadistica/i.test(text)) {
+      this.reportType = 'byprocess';
+      this.analytics.getSummaryByProcess().subscribe({
+        next: (data) => {
+          this.reportData   = data;
+          this.isGenerating = false;
+          this.cdr.detectChanges();
+          this.speakSummary();
+        },
+        error: () => {
+          this.errorMessage  = 'No se pudo generar el reporte por proceso.';
+          this.isGenerating  = false;
+          this.pendingExport = null;
+          this.cdr.detectChanges();
+        },
+      });
+      return;
+    }
+
+    // ── Tipos existentes — clasificación por scoring ───────────────────────
+    const type = this.classifyIntent(text);
+    this.reportType = type;
 
     let obs$: Observable<any>;
 
@@ -171,15 +239,12 @@ export class VoiceReportComponent {
         obs$ = this.analytics.getSummary(this.companyId);
     }
 
-    this.reportType = type;
-
     obs$.subscribe({
       next: (data: any) => {
         this.reportData   = data;
         this.isGenerating = false;
         this.cdr.detectChanges();
 
-        // Primero hablar el resumen, luego exportar automáticamente si venía por voz
         const fmt = this.pendingExport;
         this.pendingExport = null;
 
@@ -205,7 +270,33 @@ export class VoiceReportComponent {
   generateReport(): void {
     const text = this.voiceInput.trim();
     if (!text || this.isGenerating) return;
-    this.parseVoiceCommand(text, null); // botón manual → sin auto-export
+    this.parseVoiceCommand(text, null);
+  }
+
+  // ── Helpers de extracción ────────────────────────────────────────────────
+
+  extractDates(text: string): { from: string; to: string } {
+    const now = new Date();
+    const monthNames: Record<string, number> = {
+      enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5,
+      julio: 6, agosto: 7, septiembre: 8, octubre: 9, noviembre: 10, diciembre: 11,
+    };
+    for (const [name, month] of Object.entries(monthNames)) {
+      if (text.toLowerCase().includes(name)) {
+        const year = now.getFullYear();
+        const from = new Date(year, month, 1).toISOString().split('T')[0];
+        const to   = new Date(year, month + 1, 0).toISOString().split('T')[0];
+        return { from, to };
+      }
+    }
+    const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const to   = now.toISOString().split('T')[0];
+    return { from, to };
+  }
+
+  extractClientName(text: string): string {
+    const match = text.match(/(?:cliente|persona|nombre|de)\s+([a-záéíóúñ]+(?:\s+[a-záéíóúñ]+)?)/i);
+    return match ? match[1] : '';
   }
 
   // ── Voz ──────────────────────────────────────────────────────────────────
@@ -230,7 +321,6 @@ export class VoiceReportComponent {
       complete: () => {
         this.isListening = false;
         if (this.voiceInput.trim()) {
-          // Detectar formato pedido por voz; default → PDF
           const lower = this.voiceInput.toLowerCase();
           const fmt: ExportFmt = /word|docx|documento/.test(lower) ? 'word' : 'pdf';
           this.parseVoiceCommand(this.voiceInput, fmt);
@@ -240,22 +330,25 @@ export class VoiceReportComponent {
     });
   }
 
-  // ── TTS resumen (cuando NO hay auto-export) ───────────────────────────────
+  // ── TTS resumen ───────────────────────────────────────────────────────────
 
-  private speakSummary(type: ReportType, data: any): void {
+  private speakSummary(type?: ReportType, data?: any): void {
+    const t = type ?? this.reportType;
+    const d = data ?? this.reportData;
     let text = '';
-    switch (type) {
+
+    switch (t) {
       case 'summary': {
-        const d = data?.data ?? data;
-        if (d) {
-          text = `Resumen general: hay ${d.totalActiveTramites ?? 0} trámites activos, `
-               + `${d.totalCompletedThisMonth ?? 0} completados este mes, `
-               + `con un tiempo promedio de ${Math.round((d.avgDurationMinutes ?? 0) / 60)} horas.`;
+        const s = d?.data ?? d;
+        if (s) {
+          text = `Resumen general: hay ${s.totalActiveTramites ?? 0} trámites activos, `
+               + `${s.totalCompletedThisMonth ?? 0} completados este mes, `
+               + `con un tiempo promedio de ${Math.round((s.avgDurationMinutes ?? 0) / 60)} horas.`;
         }
         break;
       }
       case 'bottlenecks': {
-        const items    = data?.bottlenecks ?? [];
+        const items    = d?.bottlenecks ?? [];
         const critical = items.filter((b: any) => b.isBottleneck);
         text = critical.length > 0
           ? `Se detectaron ${critical.length} cuellos de botella. El más crítico tiene un promedio de ${Math.round(critical[0]?.avgDuration ?? 0)} minutos.`
@@ -263,7 +356,7 @@ export class VoiceReportComponent {
         break;
       }
       case 'anomalies': {
-        const items = data?.anomalies ?? [];
+        const items = d?.anomalies ?? [];
         const anom  = items.filter((a: any) => a.isAnomalous);
         text = anom.length > 0
           ? `Se detectaron ${anom.length} trámites con comportamiento anómalo que requieren revisión.`
@@ -271,7 +364,7 @@ export class VoiceReportComponent {
         break;
       }
       case 'priority': {
-        const items = data?.tramites ?? [];
+        const items = d?.tramites ?? [];
         const high  = items.filter((t: any) => t.priorityLevel === 'ALTA');
         text = high.length > 0
           ? `Hay ${high.length} trámites de alta prioridad que requieren atención urgente de un total de ${items.length}.`
@@ -279,17 +372,38 @@ export class VoiceReportComponent {
         break;
       }
       case 'department': {
-        const items = Array.isArray(data) ? data : (data?.data ?? []);
+        const items = Array.isArray(d) ? d : (d?.data ?? []);
         text = items.length > 0
           ? `El departamento con mayor actividad es ${items[0].departmentName ?? items[0].name ?? 'desconocido'}.`
           : 'No hay datos de departamentos disponibles.';
         break;
       }
       case 'active': {
-        const items = Array.isArray(data) ? data : (data?.data ?? []);
+        const items = Array.isArray(d) ? d : (d?.data ?? []);
         text = items.length > 0
           ? `Hay ${items.length} trámites activos en el sistema.`
           : 'No hay trámites activos en el sistema.';
+        break;
+      }
+      case 'bydate': {
+        const total = d?.total ?? 0;
+        text = total > 0
+          ? `Se encontraron ${total} trámites en el período seleccionado. ${d?.completed ?? 0} completados y ${d?.active ?? 0} activos.`
+          : 'No se encontraron trámites en ese período.';
+        break;
+      }
+      case 'byclient': {
+        const total = d?.total ?? 0;
+        text = total > 0
+          ? `Se encontraron ${total} trámites para el cliente ${d?.name ?? 'indicado'}.`
+          : 'No se encontraron trámites para ese cliente.';
+        break;
+      }
+      case 'byprocess': {
+        const list = Array.isArray(d) ? d : [];
+        text = list.length > 0
+          ? `Se generó el resumen de ${list.length} procesos. El más activo tiene ${list[0]?.total ?? 0} trámites.`
+          : 'No hay datos de procesos disponibles.';
         break;
       }
     }
@@ -306,6 +420,9 @@ export class VoiceReportComponent {
       active:      'Trámites Activos',
       department:  'Rendimiento por Departamento',
       summary:     'Resumen General',
+      bydate:      'Reporte por Fecha',
+      byclient:    'Reporte por Cliente',
+      byprocess:   'Estadísticas por Proceso',
     };
     return titles[this.reportType] || 'Reporte General';
   }
@@ -314,7 +431,6 @@ export class VoiceReportComponent {
     const doc   = new jsPDF();
     const fecha = new Date().toLocaleDateString('es-ES');
 
-    // Header
     doc.setFillColor(30, 41, 59);
     doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
@@ -382,12 +498,49 @@ export class VoiceReportComponent {
         theme: 'striped',
         headStyles: { fillColor: [30, 41, 59] },
       });
+    } else if (this.reportType === 'bydate' && this.reportData) {
+      autoTable(doc, {
+        startY,
+        head: [['Código', 'Estado', 'Cliente']],
+        body: (this.reportData.tramites ?? []).map((t: any) => [
+          t.code || '',
+          t.status || '',
+          t.nombre || '',
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [30, 41, 59] },
+      });
+    } else if (this.reportType === 'byclient' && this.reportData) {
+      autoTable(doc, {
+        startY,
+        head: [['Código', 'Estado', 'Cliente']],
+        body: (this.reportData.tramites ?? []).map((t: any) => [
+          t.code || '',
+          t.status || '',
+          t.clienteInfo?.nombre || '',
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [30, 41, 59] },
+      });
+    } else if (this.reportType === 'byprocess' && this.reportData) {
+      autoTable(doc, {
+        startY,
+        head: [['Proceso', 'Total', 'Completados', 'Activos', 'Duración Prom.']],
+        body: (Array.isArray(this.reportData) ? this.reportData : []).map((p: any) => [
+          p.processId || '',
+          p.total ?? 0,
+          p.completed ?? 0,
+          p.active ?? 0,
+          `${p.avgDurationMinutes?.toFixed(0) ?? 0} min`,
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [30, 41, 59] },
+      });
     } else {
       doc.setFontSize(12);
       doc.text('No hay datos disponibles para este reporte.', 15, startY);
     }
 
-    // Footer en cada página
     const pageCount = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -409,7 +562,7 @@ export class VoiceReportComponent {
       const dataRows: any[] = [];
 
       const cell = (text: string) =>
-        new TableCell({ children: [new Paragraph(text)] });
+        new TableCell({ children: [new Paragraph(String(text))] });
 
       const boldCell = (text: string) =>
         new TableCell({ children: [new Paragraph({ children: [new TextRun({ text, bold: true })] })] });
@@ -453,6 +606,35 @@ export class VoiceReportComponent {
             cell(t.processName || ''),
             cell(t.currentNode || ''),
             cell(`${Math.round(t.waitingMinutes || 0)} min`),
+          ]}));
+        });
+      } else if (this.reportType === 'bydate' && this.reportData) {
+        dataRows.push(new TableRow({ children: ['Código', 'Estado', 'Cliente'].map(boldCell) }));
+        (this.reportData.tramites ?? []).forEach((t: any) => {
+          dataRows.push(new TableRow({ children: [
+            cell(t.code || ''),
+            cell(t.status || ''),
+            cell(t.nombre || ''),
+          ]}));
+        });
+      } else if (this.reportType === 'byclient' && this.reportData) {
+        dataRows.push(new TableRow({ children: ['Código', 'Estado', 'Cliente'].map(boldCell) }));
+        (this.reportData.tramites ?? []).forEach((t: any) => {
+          dataRows.push(new TableRow({ children: [
+            cell(t.code || ''),
+            cell(t.status || ''),
+            cell(t.clienteInfo?.nombre || ''),
+          ]}));
+        });
+      } else if (this.reportType === 'byprocess' && this.reportData) {
+        dataRows.push(new TableRow({ children: ['Proceso', 'Total', 'Completados', 'Activos', 'Duración Prom.'].map(boldCell) }));
+        (Array.isArray(this.reportData) ? this.reportData : []).forEach((p: any) => {
+          dataRows.push(new TableRow({ children: [
+            cell(p.processId || ''),
+            cell(String(p.total ?? 0)),
+            cell(String(p.completed ?? 0)),
+            cell(String(p.active ?? 0)),
+            cell(`${p.avgDurationMinutes?.toFixed(0) ?? 0} min`),
           ]}));
         });
       }

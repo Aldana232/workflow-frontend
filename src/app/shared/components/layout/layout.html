@@ -1,7 +1,9 @@
-<div class="layout-shell">
-  <app-navbar />
+<div class="layout-shell" [class.sidebar-open]="sidebarOpen">
+  <app-navbar (hamburgerClick)="toggleSidebar()" />
   <div class="layout-body">
-    <app-sidebar />
+    <app-sidebar [isOpen]="sidebarOpen" />
+    <!-- Overlay oscuro — solo visible en móvil cuando sidebar está abierto -->
+    <div class="sidebar-overlay" (click)="closeSidebar()"></div>
     <main class="layout-main">
       <router-outlet />
     </main>

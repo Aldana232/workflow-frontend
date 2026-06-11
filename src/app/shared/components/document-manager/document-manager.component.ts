@@ -1,7 +1,9 @@
 import { Component, Input, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentService } from '../../../core/services/document.service';
+import { ShareService, ShareToken } from '../../../core/services/share.service';
 
 @Component({
   selector: 'app-document-manager',
@@ -19,23 +21,42 @@ export class DocumentManagerComponent implements OnInit {
   @Input() canUpload: boolean = true;
 
   private documentService = inject(DocumentService);
-  private cdr = inject(ChangeDetectorRef);
+  private shareService    = inject(ShareService);
+  private cdr             = inject(ChangeDetectorRef);
+  private sanitizer       = inject(DomSanitizer);
 
-  documents: any[] = [];
-  isLoading: boolean = false;
-  isUploading: boolean = false;
+  // ── Documentos ──────────────────────────────────────────────────────────
+  documents: any[]         = [];
+  isLoading: boolean       = false;
+  isUploading: boolean     = false;
   selectedCategory: string = 'ANEXO';
-  description: string = '';
-  showUploadForm: boolean = false;
-  uploadProgress: number = 0;
+  description: string      = '';
+  showUploadForm: boolean  = false;
+  uploadProgress: number   = 0;
   expandedDocId: string | null = null;
-  errorMessage: string = '';
+  errorMessage: string     = '';
 
   private selectedFile: File | null = null;
 
+  // ── Vista previa ─────────────────────────────────────────────────────────
+  selectedDoc: any    = null;
+  showPreview: boolean = false;
+
+  // ── Links compartibles ──────────────────────────────────────────────────
+  shareLinks: ShareToken[] = [];
+  shareSuccess: string     = '';
+  isGeneratingLink         = false;
+  showShareSection         = false;
+  loadingLinks             = false;
+
   ngOnInit(): void {
     this.loadDocuments();
+    if (this.canUpload && this.tramiteId) {
+      this.loadShareLinks();
+    }
   }
+
+  // ── Carga documentos ────────────────────────────────────────────────────
 
   loadDocuments(): void {
     if (!this.tramiteId) return;
@@ -47,14 +68,15 @@ export class DocumentManagerComponent implements OnInit {
         this.isLoading = false;
         this.cdr.markForCheck();
       },
-      error: (err) => {
-        console.error('Error al cargar documentos', err);
+      error: () => {
         this.errorMessage = 'No se pudieron cargar los documentos.';
         this.isLoading = false;
         this.cdr.markForCheck();
       },
     });
   }
+
+  // ── Subida ───────────────────────────────────────────────────────────────
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -71,46 +93,46 @@ export class DocumentManagerComponent implements OnInit {
     this.errorMessage = '';
     this.documentService
       .uploadDocument(this.selectedFile, {
-        tramiteId: this.tramiteId,
-        tramiteCode: this.tramiteCode,
-        companyId: this.companyId,
-        nodeId: this.nodeId,
-        nodeName: this.nodeName,
-        category: this.selectedCategory,
-        description: this.description,
+        tramiteId:    this.tramiteId,
+        tramiteCode:  this.tramiteCode,
+        companyId:    this.companyId,
+        nodeId:       this.nodeId,
+        nodeName:     this.nodeName,
+        category:     this.selectedCategory,
+        description:  this.description,
       })
       .subscribe({
         next: () => {
-          this.isUploading = false;
-          this.showUploadForm = false;
-          this.selectedFile = null;
-          this.description = '';
+          this.isUploading      = false;
+          this.showUploadForm   = false;
+          this.selectedFile     = null;
+          this.description      = '';
           this.selectedCategory = 'ANEXO';
           this.cdr.markForCheck();
           this.loadDocuments();
         },
-        error: (err) => {
-          console.error('Error al subir documento', err);
+        error: () => {
           this.errorMessage = 'Error al subir el documento. Intente nuevamente.';
-          this.isUploading = false;
+          this.isUploading  = false;
           this.cdr.markForCheck();
         },
       });
   }
 
+  // ── Descarga / eliminación ───────────────────────────────────────────────
+
   downloadDocument(doc: any): void {
     this.documentService.downloadDocument(doc.id).subscribe({
       next: (blob: Blob) => {
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.target   = '_blank';
         a.download = doc.fileName;
         a.click();
         URL.revokeObjectURL(url);
       },
-      error: (err) => {
-        console.error('Error al descargar documento', err);
+      error: () => {
         this.errorMessage = 'No se pudo descargar el documento.';
       },
     });
@@ -121,11 +143,11 @@ export class DocumentManagerComponent implements OnInit {
     this.documentService.deleteDocument(doc.id).subscribe({
       next: () => {
         if (this.expandedDocId === doc.id) this.expandedDocId = null;
+        if (this.selectedDoc?.id === doc.id) this.closePreview();
         this.cdr.markForCheck();
         this.loadDocuments();
       },
-      error: (err) => {
-        console.error('Error al eliminar documento', err);
+      error: () => {
         this.errorMessage = 'No se pudo eliminar el documento.';
         this.cdr.markForCheck();
       },
@@ -137,12 +159,107 @@ export class DocumentManagerComponent implements OnInit {
   }
 
   cancelUpload(): void {
-    this.showUploadForm = false;
-    this.selectedFile = null;
-    this.description = '';
+    this.showUploadForm   = false;
+    this.selectedFile     = null;
+    this.description      = '';
     this.selectedCategory = 'ANEXO';
-    this.errorMessage = '';
+    this.errorMessage     = '';
   }
+
+  // ── Vista previa ─────────────────────────────────────────────────────────
+
+  openPreview(doc: any): void {
+    this.selectedDoc  = doc;
+    this.showPreview  = true;
+  }
+
+  closePreview(): void {
+    this.selectedDoc = null;
+    this.showPreview = false;
+  }
+
+  getDocumentType(doc: any): 'image' | 'pdf' | 'excel' | 'word' | 'other' {
+    const mime = doc.mimeType || '';
+    const name = (doc.fileName || '').toLowerCase();
+    if (mime.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|svg)$/.test(name)) return 'image';
+    if (mime === 'application/pdf' || name.endsWith('.pdf')) return 'pdf';
+    if (mime.includes('spreadsheet') || mime.includes('excel') || /\.(xlsx|xls|csv)$/.test(name)) return 'excel';
+    if (mime.includes('word') || /\.(docx|doc)$/.test(name)) return 'word';
+    return 'other';
+  }
+
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  // ── Links compartibles ──────────────────────────────────────────────────
+
+  loadShareLinks(): void {
+    if (!this.tramiteId) return;
+    this.loadingLinks = true;
+    this.shareService.getTokensByTramite(this.tramiteId).subscribe({
+      next: (links) => {
+        this.shareLinks   = links ?? [];
+        this.loadingLinks = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loadingLinks = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  generateShareLink(): void {
+    if (!this.tramiteId || this.isGeneratingLink) return;
+    this.isGeneratingLink = true;
+    this.shareSuccess     = '';
+    this.cdr.markForCheck();
+
+    this.shareService.generateToken(this.tramiteId, this.tramiteCode).subscribe({
+      next: (result) => {
+        this.isGeneratingLink = false;
+        this.copyToClipboard(result.shareUrl);
+        this.loadShareLinks();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isGeneratingLink = false;
+        this.shareSuccess = 'ERROR';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  copyLinkToClipboard(url: string): void {
+    this.copyToClipboard(url);
+  }
+
+  private copyToClipboard(url: string): void {
+    navigator.clipboard.writeText(url).then(() => {
+      this.shareSuccess = url;
+      this.cdr.markForCheck();
+      setTimeout(() => { this.shareSuccess = ''; this.cdr.markForCheck(); }, 6000);
+    }).catch(() => {
+      this.shareSuccess = url;
+      this.cdr.markForCheck();
+    });
+  }
+
+  revokeLink(tokenId: string): void {
+    if (!confirm('¿Revocar este link? Quien lo tenga ya no podrá acceder.')) return;
+    this.shareService.revokeToken(tokenId).subscribe({
+      next: () => {
+        this.loadShareLinks();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  // ── Helpers de presentación ─────────────────────────────────────────────
 
   getFileIcon(mimeType: string): string {
     if (!mimeType) return '📎';
@@ -162,12 +279,13 @@ export class DocumentManagerComponent implements OnInit {
   formatDate(date: string): string {
     if (!date) return '—';
     return new Date(date).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
+  }
+
+  isExpired(expiresAt: string): boolean {
+    return new Date(expiresAt) < new Date();
   }
 
   get selectedFileName(): string {

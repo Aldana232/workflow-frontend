@@ -84,12 +84,67 @@
     <p class="empty-sub">Los documentos adjuntados al trámite aparecerán aquí</p>
   </div>
 
+  <!-- ── Links compartibles (solo cuando canUpload) ── -->
+  <div *ngIf="canUpload && tramiteId" class="share-section">
+    <div class="share-header" (click)="showShareSection = !showShareSection">
+      <span class="share-icon">🔗</span>
+      <span class="share-title">Links compartibles</span>
+      <span class="share-count" *ngIf="shareLinks.length > 0">{{ shareLinks.length }} activo{{ shareLinks.length !== 1 ? 's' : '' }}</span>
+      <span class="share-toggle">{{ showShareSection ? '▲' : '▼' }}</span>
+    </div>
+
+    <div *ngIf="showShareSection" class="share-body">
+      <!-- Botón generar -->
+      <button class="btn-gen-link" (click)="generateShareLink()" [disabled]="isGeneratingLink">
+        <span *ngIf="isGeneratingLink" class="btn-spinner"></span>
+        {{ isGeneratingLink ? 'Generando...' : '＋ Generar link compartible' }}
+      </button>
+
+      <!-- Mensaje de éxito -->
+      <div *ngIf="shareSuccess && shareSuccess !== 'ERROR'" class="share-success">
+        <span class="share-success-icon">✅</span>
+        <div class="share-success-body">
+          <p class="share-success-title">Link copiado al portapapeles — válido por 24 horas</p>
+          <code class="share-url">{{ shareSuccess }}</code>
+        </div>
+      </div>
+      <div *ngIf="shareSuccess === 'ERROR'" class="share-error">
+        ⚠️ No se pudo generar el link. Intente nuevamente.
+      </div>
+
+      <!-- Lista de links activos -->
+      <div *ngIf="loadingLinks" class="share-loading">
+        <span class="spinner-sm"></span> Cargando links...
+      </div>
+      <div *ngIf="!loadingLinks && shareLinks.length === 0" class="share-empty">
+        No hay links activos para este trámite.
+      </div>
+      <ul *ngIf="!loadingLinks && shareLinks.length > 0" class="share-list">
+        <li *ngFor="let link of shareLinks" class="share-item" [class.share-item--expired]="isExpired(link.expiresAt)">
+          <div class="share-item-info">
+            <span class="share-item-status">{{ isExpired(link.expiresAt) ? '🔴 Expirado' : '🟢 Activo' }}</span>
+            <span class="share-item-exp">Expira: {{ formatDate(link.expiresAt) }}</span>
+            <span class="share-item-views">👁 {{ link.accessCount }} vista{{ link.accessCount !== 1 ? 's' : '' }}</span>
+          </div>
+          <div class="share-item-actions">
+            <button class="btn-copy-link" (click)="copyLinkToClipboard(link.shareUrl)" title="Copiar link">
+              📋 Copiar
+            </button>
+            <button class="btn-revoke-link" (click)="revokeLink(link.id)" title="Revocar">
+              🗑 Revocar
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
   <!-- ── Lista de documentos ── -->
   <ul *ngIf="!isLoading && documents.length > 0" class="doc-list">
     <li *ngFor="let doc of documents" class="doc-item">
 
-      <!-- Fila principal -->
-      <div class="doc-row">
+      <!-- Fila principal — clic abre preview -->
+      <div class="doc-row" (click)="openPreview(doc)" style="cursor:pointer">
         <span class="doc-file-icon">{{ getFileIcon(doc.mimeType) }}</span>
 
         <div class="doc-info">
@@ -126,19 +181,19 @@
         <div class="doc-actions">
           <button
             class="btn-icon btn-events"
-            (click)="toggleEvents(doc.id)"
+            (click)="$event.stopPropagation(); toggleEvents(doc.id)"
             [title]="expandedDocId === doc.id ? 'Ocultar eventos' : 'Ver historial'"
           >
             {{ expandedDocId === doc.id ? '▲' : '▼' }}
             <span class="btn-label">{{ doc.events?.length ?? 0 }}</span>
           </button>
-          <button class="btn-icon btn-download" (click)="downloadDocument(doc)" title="Descargar">
+          <button class="btn-icon btn-download" (click)="$event.stopPropagation(); downloadDocument(doc)" title="Descargar">
             ↓
           </button>
           <button
             *ngIf="canUpload"
             class="btn-icon btn-delete"
-            (click)="deleteDocument(doc)"
+            (click)="$event.stopPropagation(); deleteDocument(doc)"
             title="Eliminar documento"
           >
             🗑
@@ -167,5 +222,62 @@
 
     </li>
   </ul>
+
+  <!-- ── Modal de vista previa ── -->
+  @if (showPreview && selectedDoc) {
+    <div class="preview-overlay" (click)="closePreview()">
+      <div class="preview-modal" (click)="$event.stopPropagation()">
+
+        <div class="preview-header">
+          <span class="preview-filename">{{ selectedDoc.fileName }}</span>
+          <div class="preview-actions">
+            <button class="btn-download-preview" (click)="downloadDocument(selectedDoc)">
+              ⬇ Descargar
+            </button>
+            <button class="btn-close-preview" (click)="closePreview()">✕</button>
+          </div>
+        </div>
+
+        <div class="preview-body">
+          @if (getDocumentType(selectedDoc) === 'image') {
+            <img [src]="selectedDoc.fileUrl" [alt]="selectedDoc.fileName" class="preview-image" />
+          }
+          @if (getDocumentType(selectedDoc) === 'pdf') {
+            <iframe [src]="getSafeUrl(selectedDoc.fileUrl)" class="preview-iframe" frameborder="0"></iframe>
+          }
+          @if (getDocumentType(selectedDoc) === 'excel') {
+            <div class="preview-unsupported">
+              <span class="preview-icon">📊</span>
+              <p>{{ selectedDoc.fileName }}</p>
+              <p class="preview-meta">Tamaño: {{ formatFileSize(selectedDoc.fileSize) }}</p>
+              <p class="preview-meta">Subido por: {{ selectedDoc.uploadedByName }}</p>
+              <p class="preview-note">La vista previa de Excel no está disponible en el navegador.</p>
+              <button class="btn-download-big" (click)="downloadDocument(selectedDoc)">⬇ Descargar archivo</button>
+            </div>
+          }
+          @if (getDocumentType(selectedDoc) === 'word') {
+            <div class="preview-unsupported">
+              <span class="preview-icon">📝</span>
+              <p>{{ selectedDoc.fileName }}</p>
+              <p class="preview-meta">Tamaño: {{ formatFileSize(selectedDoc.fileSize) }}</p>
+              <p class="preview-meta">Subido por: {{ selectedDoc.uploadedByName }}</p>
+              <p class="preview-note">La vista previa de Word no está disponible en el navegador.</p>
+              <button class="btn-download-big" (click)="downloadDocument(selectedDoc)">⬇ Descargar archivo</button>
+            </div>
+          }
+          @if (getDocumentType(selectedDoc) === 'other') {
+            <div class="preview-unsupported">
+              <span class="preview-icon">📎</span>
+              <p>{{ selectedDoc.fileName }}</p>
+              <p class="preview-meta">Tamaño: {{ formatFileSize(selectedDoc.fileSize) }}</p>
+              <p class="preview-meta">Subido por: {{ selectedDoc.uploadedByName }}</p>
+              <button class="btn-download-big" (click)="downloadDocument(selectedDoc)">⬇ Descargar archivo</button>
+            </div>
+          }
+        </div>
+
+      </div>
+    </div>
+  }
 
 </div>

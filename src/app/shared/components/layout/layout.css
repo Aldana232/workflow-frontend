@@ -9,6 +9,7 @@
   display: flex;
   flex: 1;
   overflow: hidden;
+  position: relative;
 }
 
 .layout-main {
@@ -16,4 +17,28 @@
   overflow-y: auto;
   background: #f1f5f9;
   padding: 1.5rem;
+  min-width: 0; /* evita overflow en flex */
+}
+
+/* ── Overlay (solo se activa en móvil cuando sidebar está abierto) ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, .55);
+  z-index: 250;
+  cursor: pointer;
+}
+
+@media (max-width: 767px) {
+  .layout-main {
+    padding: 1rem;
+  }
+
+  .sidebar-open .sidebar-overlay {
+    display: block;
+  }
 }

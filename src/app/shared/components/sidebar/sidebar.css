@@ -1,11 +1,13 @@
 .sidebar {
   width: 220px;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100dvh - 60px);
   background: #16213e;
   padding: 24px 0;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: transform .25s ease, width .25s ease;
+  overflow: hidden;
 }
 
 .sidebar-section {
@@ -20,6 +22,8 @@
   letter-spacing: 1px;
   padding: 0 20px 10px;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .nav-item {
@@ -33,6 +37,7 @@
   font-weight: 500;
   border-left: 3px solid transparent;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
 }
 
 .nav-item:hover {
@@ -46,6 +51,48 @@
   border-left-color: #6366f1;
 }
 
-.nav-label {
-  flex: 1;
+.nav-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  width: 22px;
+  text-align: center;
+}
+
+.nav-label { flex: 1; }
+
+/* ── Tablet (768px – 1024px): solo íconos ── */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .sidebar {
+    width: 64px;
+  }
+
+  .section-label { display: none; }
+  .nav-label     { display: none; }
+
+  .nav-item {
+    justify-content: center;
+    padding: 14px 0;
+    gap: 0;
+  }
+
+  .nav-icon { font-size: 1.3rem; width: auto; }
+}
+
+/* ── Móvil (<768px): sidebar oculto, slide-in como overlay ── */
+@media (max-width: 767px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 60px;
+    height: calc(100dvh - 60px);
+    min-height: 0;
+    z-index: 300;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, .5);
+    width: 240px;
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
+  }
 }

@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 
 interface NavItem {
   label: string;
   route: string;
+  icon:  string;
 }
 
 @Component({
@@ -14,27 +15,27 @@ interface NavItem {
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
+  @Input() isOpen = false;
+
   private authService = inject(AuthService);
 
-  get role(): string | null {
-    return this.authService.getRole();
-  }
+  get role(): string | null { return this.authService.getRole(); }
 
   adminItems: NavItem[] = [
-    { label: 'Dashboard',     route: '/admin/dashboard'   },
-    { label: 'Procesos',      route: '/admin/processes'   },
-    { label: 'Diseñador',     route: '/admin/designer'    },
-    { label: 'Departamentos', route: '/admin/departments' },
-    { label: 'Funcionarios',  route: '/admin/users'       },
-    { label: 'Analítica',     route: '/admin/analytics'   },
-    { label: 'Configuración', route: '/admin/settings'    },
+    { label: 'Dashboard',     route: '/admin/dashboard',   icon: '📊' },
+    { label: 'Procesos',      route: '/admin/processes',   icon: '📋' },
+    { label: 'Diseñador',     route: '/admin/designer',    icon: '✏️' },
+    { label: 'Departamentos', route: '/admin/departments', icon: '🏢' },
+    { label: 'Funcionarios',  route: '/admin/users',       icon: '👥' },
+    { label: 'Analítica',     route: '/admin/analytics',   icon: '📈' },
+    { label: 'Configuración', route: '/admin/settings',    icon: '⚙️' },
   ];
 
   funcionarioItems: NavItem[] = [
-    { label: 'Mis Tareas',       route: '/funcionario/dashboard'     },
-    { label: 'Nuevo Trámite',    route: '/funcionario/nuevo-tramite' },
-    { label: 'Mis Estadísticas', route: '/funcionario/stats'         },
-    { label: 'Configuración',    route: '/funcionario/settings'      },
+    { label: 'Mis Tareas',       route: '/funcionario/dashboard',     icon: '✅' },
+    { label: 'Nuevo Trámite',    route: '/funcionario/nuevo-tramite', icon: '➕' },
+    { label: 'Mis Estadísticas', route: '/funcionario/stats',         icon: '📊' },
+    { label: 'Configuración',    route: '/funcionario/settings',      icon: '⚙️' },
   ];
 
   get menuItems(): NavItem[] {
