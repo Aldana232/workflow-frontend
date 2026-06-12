@@ -51,3 +51,92 @@ app-root {
     padding: 1rem !important;
   }
 }
+
+/* ============================================
+   RESPONSIVO GLOBAL — MOBILE FIRST
+   ============================================ */
+
+/* Ocultar sidebar en móvil por defecto */
+@media (max-width: 1024px) {
+  app-sidebar aside,
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    width: 260px !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease !important;
+    z-index: 300 !important;
+  }
+
+  app-sidebar aside.sidebar--open,
+  .sidebar.sidebar--open {
+    transform: translateX(0) !important;
+  }
+
+  .layout-shell .main-content,
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .hamburger-btn {
+    display: flex !important;
+  }
+
+  .nav-brand span,
+  .brand-text {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .hamburger-btn {
+    display: none !important;
+  }
+
+  app-sidebar aside,
+  .sidebar {
+    position: relative !important;
+    transform: translateX(0) !important;
+    width: 240px !important;
+  }
+}
+
+/* Overlay global */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 250;
+}
+
+.sidebar-open .sidebar-overlay {
+  display: block !important;
+}
+
+/* Tablas responsivas globales */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .layout-shell {
+    flex-direction: column !important;
+  }
+
+  .page-header,
+  .dashboard-header {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .stats-grid,
+  .charts-row {
+    grid-template-columns: 1fr !important;
+  }
+}
