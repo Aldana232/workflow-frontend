@@ -28,6 +28,7 @@ export class SharedDocsComponent implements OnInit {
 
     this.share.validateToken(token).subscribe({
       next: (data) => {
+        console.log('SHARED DOCS - data recibida:', data);
         this.tramiteCode = data.tramiteCode ?? '';
         this.expiresAt   = data.expiresAt ?? '';
         this.documents   = data.documents ?? [];
@@ -35,6 +36,7 @@ export class SharedDocsComponent implements OnInit {
         this.isLoading   = false;
       },
       error: (err) => {
+        console.log('SHARED DOCS - error:', err);
         this.isLoading = false;
         this.isExpired = err.status === 410;
         this.isInvalid = err.status !== 410;
