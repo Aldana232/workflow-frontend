@@ -240,10 +240,20 @@
 
         <div class="preview-body">
           @if (getDocumentType(selectedDoc) === 'image') {
-            <img [src]="selectedDoc.fileUrl" [alt]="selectedDoc.fileName" class="preview-image" />
+            @if (!previewBlobUrl) {
+              <div class="preview-loading">⏳ Cargando vista previa...</div>
+            }
+            @if (previewBlobUrl) {
+              <img [src]="previewBlobUrl" [alt]="selectedDoc.fileName" class="preview-image" />
+            }
           }
           @if (getDocumentType(selectedDoc) === 'pdf') {
-            <iframe [src]="getSafeUrl(selectedDoc.fileUrl)" class="preview-iframe" frameborder="0"></iframe>
+            @if (!previewBlobUrl) {
+              <div class="preview-loading">⏳ Cargando vista previa...</div>
+            }
+            @if (previewBlobUrl) {
+              <iframe [src]="getSafeUrl(previewBlobUrl)" class="preview-iframe" frameborder="0"></iframe>
+            }
           }
           @if (getDocumentType(selectedDoc) === 'excel') {
             <div class="preview-unsupported">

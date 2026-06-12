@@ -39,8 +39,9 @@ export class DocumentManagerComponent implements OnInit {
   private selectedFile: File | null = null;
 
   // ── Vista previa ─────────────────────────────────────────────────────────
-  selectedDoc: any    = null;
-  showPreview: boolean = false;
+  selectedDoc: any      = null;
+  showPreview: boolean  = false;
+  previewBlobUrl: string | null = null;
 
   // ── Links compartibles ──────────────────────────────────────────────────
   shareLinks: ShareToken[] = [];
@@ -169,11 +170,30 @@ export class DocumentManagerComponent implements OnInit {
   // ── Vista previa ─────────────────────────────────────────────────────────
 
   openPreview(doc: any): void {
-    this.selectedDoc  = doc;
-    this.showPreview  = true;
+    this.selectedDoc    = doc;
+    this.showPreview    = true;
+    this.previewBlobUrl = null;
+
+    const type = this.getDocumentType(doc);
+    if (type === 'image' || type === 'pdf') {
+      this.documentService.downloadDocument(doc.id).subscribe({
+        next: (blob: Blob) => {
+          this.previewBlobUrl = URL.createObjectURL(blob);
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.previewBlobUrl = null;
+          this.cdr.markForCheck();
+        },
+      });
+    }
   }
 
   closePreview(): void {
+    if (this.previewBlobUrl) {
+      URL.revokeObjectURL(this.previewBlobUrl);
+      this.previewBlobUrl = null;
+    }
     this.selectedDoc = null;
     this.showPreview = false;
   }
