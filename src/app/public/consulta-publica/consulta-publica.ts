@@ -5,13 +5,14 @@ import { SlicePipe } from '@angular/common';
 import { TramiteService } from '../../core/services/tramite';
 import { Tramite } from '../../core/models/tramite.model';
 import { PolicyAgentComponent } from '../../shared/components/policy-agent/policy-agent.component';
+import { LucideRefreshCw, LucideSearch } from '@lucide/angular';
 
 /** Intervalo de refresco automático en ms (12 segundos) */
 const POLL_MS = 12_000;
 
 @Component({
   selector: 'app-consulta-publica',
-  imports: [FormsModule, RouterLink, SlicePipe, PolicyAgentComponent],
+  imports: [FormsModule, RouterLink, SlicePipe, PolicyAgentComponent, LucideRefreshCw, LucideSearch],
   templateUrl: './consulta-publica.html',
   styleUrl: './consulta-publica.css',
 })

@@ -3,7 +3,7 @@
   <!-- ── Header ── -->
   <div class="vr-header">
     <div class="vr-header-left">
-      <span class="vr-icon">🎙</span>
+      <svg lucideMic class="vr-icon" [size]="20"></svg>
       <div>
         <h3 class="vr-title">Reportes por Voz</h3>
         <span class="vr-subtitle">Habla o escribe para generar un reporte con IA</span>
@@ -33,7 +33,7 @@
         (click)="startListening()"
         [disabled]="isListening || isGenerating"
         title="Dictar por voz"
-      >🎙</button>
+      ><svg lucideMic [size]="16"></svg></button>
       <button
         class="vr-btn vr-btn-generate"
         (click)="generateReport()"
@@ -64,7 +64,7 @@
 
   <!-- ── Error ── -->
   @if (errorMessage) {
-    <div class="vr-error">⚠ {{ errorMessage }}</div>
+    <div class="vr-error"><svg lucideTriangleAlert [size]="16"></svg> {{ errorMessage }}</div>
   }
 
   <!-- ── Loading ── -->
@@ -83,10 +83,10 @@
         <span class="vr-result-badge">{{ reportTypeLabel }}</span>
         <div class="export-buttons">
           <button class="btn-export btn-pdf" (click)="exportToPDF()">
-            📄 Exportar PDF
+            <svg lucideFileText [size]="16"></svg> Exportar PDF
           </button>
           <button class="btn-export btn-word" (click)="exportToWord()">
-            📝 Exportar Word
+            <svg lucidePencilLine [size]="16"></svg> Exportar Word
           </button>
         </div>
       </div>
@@ -119,7 +119,7 @@
       @if (reportType === 'bottlenecks') {
         @if (bottleneckItems.length === 0) {
           <div class="vr-empty">
-            <span class="vr-empty-icon">✅</span>
+            <svg lucideCircleCheck class="vr-empty-icon" [size]="28"></svg>
             <p>No se detectaron cuellos de botella</p>
           </div>
         } @else {
@@ -158,7 +158,7 @@
       @if (reportType === 'anomalies') {
         @if (anomalyItems.length === 0) {
           <div class="vr-empty vr-empty--ok">
-            <span class="vr-empty-icon">✅</span>
+            <svg lucideCircleCheck class="vr-empty-icon" [size]="28"></svg>
             <p>Sin anomalías detectadas</p>
           </div>
         } @else {
@@ -169,7 +169,7 @@
                   <div class="vr-item-top">
                     <span class="vr-code">{{ a.code }}</span>
                     <div class="vr-item-chips">
-                      <span class="vr-chip-meta">⏳ {{ formatWait(a.minutesWaiting) }}</span>
+                      <span class="vr-chip-meta"><svg lucideClock [size]="12"></svg> {{ formatWait(a.minutesWaiting) }}</span>
                       <span class="vr-badge vr-badge--danger">Anómalo</span>
                     </div>
                   </div>
@@ -187,7 +187,7 @@
       @if (reportType === 'priority') {
         @if (priorityItems.length === 0) {
           <div class="vr-empty">
-            <span class="vr-empty-icon">📭</span>
+            <svg lucideInbox class="vr-empty-icon" [size]="28"></svg>
             <p>Sin trámites priorizados</p>
           </div>
         } @else {
@@ -218,7 +218,7 @@
                 </div>
                 @if (t.minutesWaiting) {
                   <div class="vr-item-chips">
-                    <span class="vr-chip-meta">⏳ {{ formatWait(t.minutesWaiting) }} en espera</span>
+                    <span class="vr-chip-meta"><svg lucideClock [size]="12"></svg> {{ formatWait(t.minutesWaiting) }} en espera</span>
                   </div>
                 }
                 @if (t.priorityReason) {
@@ -234,7 +234,7 @@
       @if (reportType === 'active') {
         @if (activeItems.length === 0) {
           <div class="vr-empty">
-            <span class="vr-empty-icon">📭</span>
+            <svg lucideInbox class="vr-empty-icon" [size]="28"></svg>
             <p>No hay trámites activos</p>
           </div>
         } @else {
@@ -243,12 +243,12 @@
               <li class="vr-item">
                 <div class="vr-item-top">
                   <span class="vr-code">{{ t.code }}</span>
-                  <span class="vr-chip-meta">⏳ {{ formatWait(t.waitingMinutes) }}</span>
+                  <span class="vr-chip-meta"><svg lucideClock [size]="12"></svg> {{ formatWait(t.waitingMinutes) }}</span>
                 </div>
                 <div class="vr-item-chips">
                   <span class="vr-chip-meta">{{ t.processName }}</span>
                   <span class="vr-chip-meta">{{ t.departmentName }}</span>
-                  <span class="vr-chip-meta">📍 {{ t.currentNode }}</span>
+                  <span class="vr-chip-meta"><svg lucideMapPin [size]="12"></svg> {{ t.currentNode }}</span>
                 </div>
               </li>
             }
@@ -260,7 +260,7 @@
       @if (reportType === 'department') {
         @if (departmentItems.length === 0) {
           <div class="vr-empty">
-            <span class="vr-empty-icon">🏢</span>
+            <svg lucideBuilding2 class="vr-empty-icon" [size]="28"></svg>
             <p>Sin datos de departamento disponibles</p>
           </div>
         } @else {

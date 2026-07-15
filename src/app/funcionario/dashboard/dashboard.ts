@@ -5,6 +5,10 @@ import { TramiteService } from '../../core/services/tramite';
 import { AuthService } from '../../core/services/auth';
 import { DepartmentService } from '../../core/services/department';
 import { NotificationService, WorkflowEvent } from '../../core/services/notification';
+import {
+  LucideCalendar, LucideBuilding2, LucidePencil, LucideCircleCheck,
+  LucideEye, LucideSearch,
+} from '@lucide/angular';
 
 interface TaskRow {
   id: string;
@@ -21,7 +25,11 @@ interface TaskRow {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [
+    RouterLink,
+    LucideCalendar, LucideBuilding2, LucidePencil, LucideCircleCheck,
+    LucideEye, LucideSearch,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

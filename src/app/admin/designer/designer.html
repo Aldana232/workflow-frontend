@@ -3,7 +3,7 @@
   <div class="toolbar">
     <div class="toolbar-left">
       <div class="toolbar-brand">
-        <div class="brand-icon">⚡</div>
+        <div class="brand-icon"><svg lucideZap [size]="14"></svg></div>
         <span class="brand-text">Diseñador</span>
       </div>
 
@@ -14,12 +14,12 @@
           [(ngModel)]="processName"
           placeholder="Nombre del proceso…"
         />
-        <span class="name-edit-icon">✏️</span>
+        <span class="name-edit-icon"><svg lucidePencil [size]="12"></svg></span>
       </div>
 
       <div class="toolbar-badges">
         @if (savedOk) {
-          <span class="badge-saved">✓ Guardado</span>
+          <span class="badge-saved"><svg lucideCheck [size]="12"></svg> Guardado</span>
         }
         @if (collabStatus === 'connected') {
           <span class="badge-collab badge-collab--connected" title="Colaboración activa">● En vivo</span>
@@ -46,7 +46,7 @@
         @if (saving) {
           <span class="spinner"></span> Guardando…
         } @else {
-          <span class="btn-icon">💾</span> Guardar
+          <span class="btn-icon"><svg lucideSave [size]="15"></svg></span> Guardar
         }
       </button>
       <div class="toolbar-divider"></div>
@@ -59,7 +59,7 @@
         @if (publishing) {
           <span class="spinner"></span> Publicando…
         } @else {
-          <span class="btn-icon">🚀</span> Publicar
+          <span class="btn-icon"><svg lucideRocket [size]="15"></svg></span> Publicar
         }
       </button>
 
@@ -69,17 +69,17 @@
       <!-- ── Controles de Zoom ───────────────────────────── -->
       <div class="zoom-controls">
         <button class="btn-toolbar btn-zoom" (click)="zoomIn()" title="Acercar (Ctrl++)">
-          <span class="btn-icon">🔍+</span>
+          <span class="btn-icon"><svg lucideZoomIn [size]="15"></svg></span>
         </button>
         <button class="btn-toolbar btn-zoom" (click)="zoomOut()" title="Alejar (Ctrl+-)">
-          <span class="btn-icon">🔍−</span>
+          <span class="btn-icon"><svg lucideZoomOut [size]="15"></svg></span>
         </button>
         <button
           class="btn-toolbar btn-zoom"
           (click)="fitScreen()"
           title="Ajustar a pantalla (Ctrl+0)"
         >
-          <span class="btn-icon">📐</span>
+          <span class="btn-icon"><svg lucideMaximize [size]="15"></svg></span>
         </button>
       </div>
 
@@ -94,9 +94,9 @@
       >
         @if (isRecording) {
           <span class="mic-pulse-ring"></span>
-          <span class="btn-icon">🎙</span> Grabando…
+          <span class="btn-icon"><svg lucideMic [size]="15"></svg></span> Grabando…
         } @else {
-          <span class="btn-icon">🎤</span> Voz
+          <span class="btn-icon"><svg lucideMic [size]="15"></svg></span> Voz
         }
       </button>
     </div>
@@ -115,7 +115,19 @@
               (mousedown)="onPaletteMousedown($event, item)"
               [title]="item.label"
             >
-              <span class="pal-icon">{{ item.icon }}</span>
+              <span class="pal-icon">
+                @switch (item.iconCmp) {
+                  @case ('hand') { <svg lucideHand [size]="16"></svg> }
+                  @case ('user') { <svg lucideUser [size]="16"></svg> }
+                  @case ('settings') { <svg lucideSettings [size]="16"></svg> }
+                  @case ('upload') { <svg lucideUpload [size]="16"></svg> }
+                  @case ('download') { <svg lucideDownload [size]="16"></svg> }
+                  @case ('filecode') { <svg lucideFileCode [size]="16"></svg> }
+                  @case ('file') { <svg lucideFile [size]="16"></svg> }
+                  @case ('archive') { <svg lucideArchive [size]="16"></svg> }
+                  @default { {{ item.icon }} }
+                }
+              </span>
               <span class="pal-label">{{ item.label }}</span>
             </button>
           }
@@ -146,7 +158,7 @@
                 <span class="wave-bar"></span>
               </div>
             </span>
-            <button class="voice-panel-close" (click)="showVoicePanel = false" title="Cerrar panel">✕</button>
+            <button class="voice-panel-close" (click)="showVoicePanel = false" title="Cerrar panel"><svg lucideX [size]="13"></svg></button>
           </div>
 
           <div class="voice-panel-body" #transcriptBody>
@@ -156,16 +168,16 @@
               </p>
             }
             @if (voiceError) {
-              <p class="voice-error">⚠ {{ voiceError }}</p>
+              <p class="voice-error"><svg lucideTriangleAlert [size]="13"></svg> {{ voiceError }}</p>
             }
             @for (entry of voiceHistory; track $index) {
               <div [class]="'voice-bubble voice-bubble--' + entry.role">
                 @if (entry.role === 'ai') {
-                  <span class="voice-bubble-avatar">🤖</span>
+                  <span class="voice-bubble-avatar"><svg lucideBot [size]="12"></svg></span>
                 }
                 <span class="voice-bubble-text">{{ entry.text }}</span>
                 @if (entry.role === 'user') {
-                  <span class="voice-bubble-avatar">🎤</span>
+                  <span class="voice-bubble-avatar"><svg lucideMic [size]="12"></svg></span>
                 }
               </div>
             }
@@ -181,10 +193,17 @@
             </div>
           } @else if (voiceCommandResult) {
             <div class="voice-cmd-result"
-                 [class.voice-cmd-result--ok]="voiceCommandResult.startsWith('✓')"
-                 [class.voice-cmd-result--err]="voiceCommandResult.startsWith('✗')"
-                 [class.voice-cmd-result--warn]="voiceCommandResult.startsWith('⚠') || voiceCommandResult.startsWith('ℹ')">
-              {{ voiceCommandResult }}
+                 [class.voice-cmd-result--ok]="voiceCommandResult.startsWith('OK:')"
+                 [class.voice-cmd-result--err]="voiceCommandResult.startsWith('ERR:')"
+                 [class.voice-cmd-result--warn]="voiceCommandResult.startsWith('WARN:') || voiceCommandResult.startsWith('INFO:')">
+              @if (voiceCommandResult.startsWith('OK:')) {
+                <svg lucideCheck [size]="13"></svg>
+              } @else if (voiceCommandResult.startsWith('ERR:')) {
+                <svg lucideX [size]="13"></svg>
+              } @else if (voiceCommandResult.startsWith('WARN:') || voiceCommandResult.startsWith('INFO:')) {
+                <svg lucideTriangleAlert [size]="13"></svg>
+              }
+              {{ voiceResultText }}
             </div>
           }
 
@@ -212,9 +231,9 @@
                 title="{{ isAgentListening ? 'Escuchando…' : 'Preguntar al agente JARVIS' }}"
               >
                 @if (isAgentListening) {
-                  <span class="voice-jarvis-ring"></span>⏺
+                  <span class="voice-jarvis-ring"></span><svg lucideMic [size]="13"></svg>
                 } @else {
-                  🎤
+                  <svg lucideMic [size]="13"></svg>
                 }
               </button>
               <button
@@ -243,10 +262,16 @@
       @if (selectedElement) {
         <div class="props-header">
           <div class="props-title-group">
-            <div class="props-title-icon" [style.background]="elementColor">{{ elementIcon }}</div>
+            <div class="props-title-icon" [style.background]="elementColor">
+              @if (isTaskNode) {
+                <svg lucideClipboardList [size]="14"></svg>
+              } @else {
+                {{ elementIcon }}
+              }
+            </div>
             <h3>Propiedades</h3>
           </div>
-          <button class="btn-close-props" (click)="clearSelection()">✕</button>
+          <button class="btn-close-props" (click)="clearSelection()"><svg lucideX [size]="13"></svg></button>
         </div>
 
         <div class="type-badge-row">
@@ -278,7 +303,7 @@
                 </span>
               </div>
             </div>
-            <button class="btn-apply" (click)="persistEdgeCondition()">✓ Guardar condición</button>
+            <button class="btn-apply" (click)="persistEdgeCondition()"><svg lucideCheck [size]="14"></svg> Guardar condición</button>
           }
 
           <!-- ══ NODO / TAREA / GATEWAY ══════════════════════════════════ -->
@@ -332,7 +357,7 @@
           </div>
           } <!-- fin @if isTaskNode -->
 
-          <button class="btn-apply" (click)="persistNodeProps()">✓ Aplicar cambios</button>
+          <button class="btn-apply" (click)="persistNodeProps()"><svg lucideCheck [size]="14"></svg> Aplicar cambios</button>
 
           <!-- ══ FORMULARIO DEL NODO — solo tareas ═════════════════════ -->
           @if (isTaskNode) {
@@ -363,7 +388,7 @@
                         (click)="deleteField($index)"
                         title="Eliminar campo"
                       >
-                        ✕
+                        <svg lucideX [size]="12"></svg>
                       </button>
                     </div>
                   }
@@ -447,7 +472,7 @@
                     @if (savingSchema) {
                       <span class="schema-spinner"></span> Guardando…
                     } @else {
-                      💾 Guardar formulario
+                      <svg lucideSave [size]="14"></svg> Guardar formulario
                     }
                   </button>
                 }
@@ -460,7 +485,7 @@
         </div>
       } @else {
         <div class="props-empty">
-          <div class="props-empty-illustration">🖱️</div>
+          <div class="props-empty-illustration"><svg lucideMousePointerClick [size]="28"></svg></div>
           <h4>Sin selección</h4>
           <p>Selecciona un elemento del diagrama para configurar sus propiedades</p>
           <ul class="props-empty-tips">

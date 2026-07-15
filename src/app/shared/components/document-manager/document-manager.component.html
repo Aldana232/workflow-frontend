@@ -3,7 +3,7 @@
   <!-- ── Header ── -->
   <div class="doc-header">
     <div class="doc-header-left">
-      <span class="doc-icon">🗂️</span>
+      <svg lucideFolderOpen class="doc-icon" [size]="20"></svg>
       <div>
         <h3 class="doc-title">Documentos del trámite</h3>
         <span class="doc-count">{{ documents.length }} archivo{{ documents.length !== 1 ? 's' : '' }}</span>
@@ -14,13 +14,13 @@
       class="btn-upload-trigger"
       (click)="showUploadForm = true"
     >
-      ＋ Subir documento
+      <svg lucidePlus [size]="16"></svg> Subir documento
     </button>
   </div>
 
   <!-- ── Error banner ── -->
   <div *ngIf="errorMessage" class="error-banner">
-    ⚠️ {{ errorMessage }}
+    <svg lucideTriangleAlert [size]="16"></svg> {{ errorMessage }}
   </div>
 
   <!-- ── Formulario de subida ── -->
@@ -31,7 +31,7 @@
       <label class="form-label">Archivo</label>
       <div class="file-pick-wrap">
         <label class="file-pick-btn">
-          📁 {{ selectedFileName || 'Seleccionar archivo' }}
+          <svg lucideFolder [size]="16"></svg> {{ selectedFileName || 'Seleccionar archivo' }}
           <input type="file" accept="*/*" (change)="onFileSelected($event)" class="file-hidden" />
         </label>
       </div>
@@ -79,7 +79,7 @@
 
   <!-- ── Estado vacío ── -->
   <div *ngIf="!isLoading && documents.length === 0 && !showUploadForm" class="empty-state">
-    <span class="empty-icon">📂</span>
+    <svg lucideFolderOpen class="empty-icon" [size]="40"></svg>
     <p class="empty-text">No hay documentos subidos aún</p>
     <p class="empty-sub">Los documentos adjuntados al trámite aparecerán aquí</p>
   </div>
@@ -87,7 +87,7 @@
   <!-- ── Links compartibles (solo cuando canUpload) ── -->
   <div *ngIf="canUpload && tramiteId" class="share-section">
     <div class="share-header" (click)="showShareSection = !showShareSection">
-      <span class="share-icon">🔗</span>
+      <svg lucideLink class="share-icon" [size]="16"></svg>
       <span class="share-title">Links compartibles</span>
       <span class="share-count" *ngIf="shareLinks.length > 0">{{ shareLinks.length }} activo{{ shareLinks.length !== 1 ? 's' : '' }}</span>
       <span class="share-toggle">{{ showShareSection ? '▲' : '▼' }}</span>
@@ -97,19 +97,20 @@
       <!-- Botón generar -->
       <button class="btn-gen-link" (click)="generateShareLink()" [disabled]="isGeneratingLink">
         <span *ngIf="isGeneratingLink" class="btn-spinner"></span>
-        {{ isGeneratingLink ? 'Generando...' : '＋ Generar link compartible' }}
+        @if (!isGeneratingLink) { <svg lucidePlus [size]="16"></svg> }
+        {{ isGeneratingLink ? 'Generando...' : 'Generar link compartible' }}
       </button>
 
       <!-- Mensaje de éxito -->
       <div *ngIf="shareSuccess && shareSuccess !== 'ERROR'" class="share-success">
-        <span class="share-success-icon">✅</span>
+        <svg lucideCircleCheck class="share-success-icon" [size]="18"></svg>
         <div class="share-success-body">
           <p class="share-success-title">Link copiado al portapapeles — válido por 24 horas</p>
           <code class="share-url">{{ shareSuccess }}</code>
         </div>
       </div>
       <div *ngIf="shareSuccess === 'ERROR'" class="share-error">
-        ⚠️ No se pudo generar el link. Intente nuevamente.
+        <svg lucideTriangleAlert [size]="16"></svg> No se pudo generar el link. Intente nuevamente.
       </div>
 
       <!-- Lista de links activos -->
@@ -122,16 +123,22 @@
       <ul *ngIf="!loadingLinks && shareLinks.length > 0" class="share-list">
         <li *ngFor="let link of shareLinks" class="share-item" [class.share-item--expired]="isExpired(link.expiresAt)">
           <div class="share-item-info">
-            <span class="share-item-status">{{ isExpired(link.expiresAt) ? '🔴 Expirado' : '🟢 Activo' }}</span>
+            <span class="share-item-status">
+              @if (isExpired(link.expiresAt)) {
+                <svg lucideCircleX [size]="14"></svg> Expirado
+              } @else {
+                <svg lucideCircleCheck [size]="14"></svg> Activo
+              }
+            </span>
             <span class="share-item-exp">Expira: {{ formatDate(link.expiresAt) }}</span>
-            <span class="share-item-views">👁 {{ link.accessCount }} vista{{ link.accessCount !== 1 ? 's' : '' }}</span>
+            <span class="share-item-views"><svg lucideEye [size]="14"></svg> {{ link.accessCount }} vista{{ link.accessCount !== 1 ? 's' : '' }}</span>
           </div>
           <div class="share-item-actions">
             <button class="btn-copy-link" (click)="copyLinkToClipboard(link.shareUrl)" title="Copiar link">
-              📋 Copiar
+              <svg lucideCopy [size]="14"></svg> Copiar
             </button>
             <button class="btn-revoke-link" (click)="revokeLink(link.id)" title="Revocar">
-              🗑 Revocar
+              <svg lucideTrash2 [size]="14"></svg> Revocar
             </button>
           </div>
         </li>
@@ -145,7 +152,15 @@
 
       <!-- Fila principal — clic abre preview -->
       <div class="doc-row" (click)="openPreview(doc)" style="cursor:pointer">
-        <span class="doc-file-icon">{{ getFileIcon(doc.mimeType) }}</span>
+        <span class="doc-file-icon">
+          @switch (getFileIcon(doc.mimeType)) {
+            @case ('pdf') { <svg lucideFileText [size]="20"></svg> }
+            @case ('image') { <svg lucideImage [size]="20"></svg> }
+            @case ('spreadsheet') { <svg lucideFileSpreadsheet [size]="20"></svg> }
+            @case ('video') { <svg lucideVideo [size]="20"></svg> }
+            @default { <svg lucidePaperclip [size]="20"></svg> }
+          }
+        </span>
 
         <div class="doc-info">
           <span class="doc-filename">{{ doc.fileName }}</span>
@@ -165,13 +180,13 @@
           <!-- Contexto: nodo | departamento | encargado -->
           <div class="doc-context">
             <span class="ctx-chip ctx-node" *ngIf="doc.nodeName || doc.nodeId">
-              📍 {{ doc.nodeName || doc.nodeId }}
+              <svg lucideMapPin [size]="12"></svg> {{ doc.nodeName || doc.nodeId }}
             </span>
             <span class="ctx-chip ctx-dept" *ngIf="doc.departmentName">
-              🏢 {{ doc.departmentName }}
+              <svg lucideBuilding2 [size]="12"></svg> {{ doc.departmentName }}
             </span>
             <span class="ctx-chip ctx-user">
-              👤 {{ doc.uploadedByName || doc.uploadedBy || '—' }}
+              <svg lucideUser [size]="12"></svg> {{ doc.uploadedByName || doc.uploadedBy || '—' }}
             </span>
           </div>
 
@@ -188,15 +203,25 @@
             <span class="btn-label">{{ doc.events?.length ?? 0 }}</span>
           </button>
           <button class="btn-icon btn-download" (click)="$event.stopPropagation(); downloadDocument(doc)" title="Descargar">
-            ↓
+            <svg lucideDownload [size]="16"></svg>
           </button>
+          @if (doc.collaborativeMode) {
+            <button class="btn-edit-collab" (click)="$event.stopPropagation(); openEditor(doc)" title="Editar colaborativamente">
+              <svg lucidePencil [size]="14"></svg> Editar
+            </button>
+          }
+          @if (isAdmin && !doc.collaborativeMode) {
+            <button class="btn-enable-collab" (click)="$event.stopPropagation(); enableCollab(doc)" title="Habilitar edición colaborativa">
+              <svg lucideHandshake [size]="14"></svg> Habilitar
+            </button>
+          }
           <button
             *ngIf="canUpload"
             class="btn-icon btn-delete"
             (click)="$event.stopPropagation(); deleteDocument(doc)"
             title="Eliminar documento"
           >
-            🗑
+            <svg lucideTrash2 [size]="16"></svg>
           </button>
         </div>
       </div>
@@ -232,16 +257,16 @@
           <span class="preview-filename">{{ selectedDoc.fileName }}</span>
           <div class="preview-actions">
             <button class="btn-download-preview" (click)="downloadDocument(selectedDoc)">
-              ⬇ Descargar
+              <svg lucideDownload [size]="16"></svg> Descargar
             </button>
-            <button class="btn-close-preview" (click)="closePreview()">✕</button>
+            <button class="btn-close-preview" (click)="closePreview()"><svg lucideX [size]="16"></svg></button>
           </div>
         </div>
 
         <div class="preview-body">
           @if (getDocumentType(selectedDoc) === 'image') {
             @if (!previewBlobUrl) {
-              <div class="preview-loading">⏳ Cargando vista previa...</div>
+              <div class="preview-loading"><svg lucideLoaderCircle class="spin-icon" [size]="16"></svg> Cargando vista previa...</div>
             }
             @if (previewBlobUrl) {
               <img [src]="previewBlobUrl" [alt]="selectedDoc.fileName" class="preview-image" />
@@ -249,7 +274,7 @@
           }
           @if (getDocumentType(selectedDoc) === 'pdf') {
             @if (!previewBlobUrl) {
-              <div class="preview-loading">⏳ Cargando vista previa...</div>
+              <div class="preview-loading"><svg lucideLoaderCircle class="spin-icon" [size]="16"></svg> Cargando vista previa...</div>
             }
             @if (previewBlobUrl) {
               <iframe [src]="getSafeUrl(previewBlobUrl)" class="preview-iframe" frameborder="0"></iframe>
@@ -257,35 +282,53 @@
           }
           @if (getDocumentType(selectedDoc) === 'excel') {
             <div class="preview-unsupported">
-              <span class="preview-icon">📊</span>
+              <svg lucideFileSpreadsheet class="preview-icon" [size]="48"></svg>
               <p>{{ selectedDoc.fileName }}</p>
               <p class="preview-meta">Tamaño: {{ formatFileSize(selectedDoc.fileSize) }}</p>
               <p class="preview-meta">Subido por: {{ selectedDoc.uploadedByName }}</p>
               <p class="preview-note">La vista previa de Excel no está disponible en el navegador.</p>
-              <button class="btn-download-big" (click)="downloadDocument(selectedDoc)">⬇ Descargar archivo</button>
+              <button class="btn-download-big" (click)="downloadDocument(selectedDoc)"><svg lucideDownload [size]="16"></svg> Descargar archivo</button>
             </div>
           }
           @if (getDocumentType(selectedDoc) === 'word') {
             <div class="preview-unsupported">
-              <span class="preview-icon">📝</span>
+              <svg lucideFileText class="preview-icon" [size]="48"></svg>
               <p>{{ selectedDoc.fileName }}</p>
               <p class="preview-meta">Tamaño: {{ formatFileSize(selectedDoc.fileSize) }}</p>
               <p class="preview-meta">Subido por: {{ selectedDoc.uploadedByName }}</p>
               <p class="preview-note">La vista previa de Word no está disponible en el navegador.</p>
-              <button class="btn-download-big" (click)="downloadDocument(selectedDoc)">⬇ Descargar archivo</button>
+              <button class="btn-download-big" (click)="downloadDocument(selectedDoc)"><svg lucideDownload [size]="16"></svg> Descargar archivo</button>
             </div>
           }
           @if (getDocumentType(selectedDoc) === 'other') {
             <div class="preview-unsupported">
-              <span class="preview-icon">📎</span>
+              <svg lucidePaperclip class="preview-icon" [size]="48"></svg>
               <p>{{ selectedDoc.fileName }}</p>
               <p class="preview-meta">Tamaño: {{ formatFileSize(selectedDoc.fileSize) }}</p>
               <p class="preview-meta">Subido por: {{ selectedDoc.uploadedByName }}</p>
-              <button class="btn-download-big" (click)="downloadDocument(selectedDoc)">⬇ Descargar archivo</button>
+              <button class="btn-download-big" (click)="downloadDocument(selectedDoc)"><svg lucideDownload [size]="16"></svg> Descargar archivo</button>
             </div>
           }
         </div>
 
+      </div>
+    </div>
+  }
+
+  <!-- ── Modal del editor colaborativo ── -->
+  @if (showEditor && selectedEditorDocId) {
+    <div class="editor-overlay" (click)="closeEditor()">
+      <div class="editor-modal" (click)="$event.stopPropagation()">
+        <div class="editor-modal-header">
+          <span class="editor-modal-title"><svg lucidePencil [size]="16"></svg> {{ selectedEditorDocName }}</span>
+          <button class="btn-close-editor" (click)="closeEditor()"><svg lucideX [size]="16"></svg></button>
+        </div>
+        <div class="editor-modal-body">
+          <app-document-editor
+            [documentId]="selectedEditorDocId"
+            [documentName]="selectedEditorDocName">
+          </app-document-editor>
+        </div>
       </div>
     </div>
   }

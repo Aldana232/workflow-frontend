@@ -5,6 +5,11 @@ import {
 import { FormsModule } from '@angular/forms';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import type { EChartsOption } from 'echarts';
+import {
+  LucideLoaderCircle, LucideDownload, LucideTriangleAlert, LucideClock,
+  LucideChartBar, LucideClipboardList, LucideSearch, LucideX, LucideInbox,
+  LucideCheck,
+} from '@lucide/angular';
 
 import {
   AnalyticsService, AnalyticsSummary,
@@ -33,7 +38,12 @@ const DEFAULT_SLA_MINUTES = DEFAULT_SLA_HOURS * 60;
 
 @Component({
   selector: 'app-analytics',
-  imports: [FormsModule, NgxEchartsDirective, AiAnalyticsComponent, VoiceReportComponent],
+  imports: [
+    FormsModule, NgxEchartsDirective, AiAnalyticsComponent, VoiceReportComponent,
+    LucideLoaderCircle, LucideDownload, LucideTriangleAlert, LucideClock,
+    LucideChartBar, LucideClipboardList, LucideSearch, LucideX, LucideInbox,
+    LucideCheck,
+  ],
   templateUrl: './analytics.html',
   styleUrl: './analytics.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

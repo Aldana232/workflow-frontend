@@ -7,10 +7,11 @@ import { AuthService } from '../../core/services/auth';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
+import { LucideUser, LucideLock, LucideSettings, LucideInfo, LucideSave } from '@lucide/angular';
 
 @Component({
   selector: 'app-funcionario-settings',
-  imports: [FormsModule],
+  imports: [FormsModule, LucideUser, LucideLock, LucideSettings, LucideInfo, LucideSave],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

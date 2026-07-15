@@ -8,7 +8,20 @@
         [routerLinkActive]="'active'"
         [title]="item.label"
       >
-        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-icon">
+          @switch (item.icon) {
+            @case ('dashboard') { <svg lucideLayoutDashboard [size]="18"></svg> }
+            @case ('procesos') { <svg lucideClipboardList [size]="18"></svg> }
+            @case ('disenador') { <svg lucidePencil [size]="18"></svg> }
+            @case ('departamentos') { <svg lucideBuilding2 [size]="18"></svg> }
+            @case ('funcionarios') { <svg lucideUsers [size]="18"></svg> }
+            @case ('analitica') { <svg lucideTrendingUp [size]="18"></svg> }
+            @case ('configuracion') { <svg lucideSettings [size]="18"></svg> }
+            @case ('mis-tareas') { <svg lucideCircleCheck [size]="18"></svg> }
+            @case ('nuevo-tramite') { <svg lucidePlus [size]="18"></svg> }
+            @case ('mis-estadisticas') { <svg lucideChartBar [size]="18"></svg> }
+          }
+        </span>
         <span class="nav-label">{{ item.label }}</span>
       </a>
     }

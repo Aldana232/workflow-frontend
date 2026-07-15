@@ -4,11 +4,27 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentService } from '../../../core/services/document.service';
 import { ShareService, ShareToken } from '../../../core/services/share.service';
+import { DocumentEditorComponent } from '../document-editor/document-editor.component';
+import { OnlyOfficeService } from '../../services/onlyoffice.service';
+import {
+  LucideFolderOpen, LucidePlus, LucideTriangleAlert, LucideFolder, LucideLink,
+  LucideCircleCheck, LucideCircleX, LucideEye, LucideCopy, LucideTrash2,
+  LucideFileText, LucideImage, LucideFileSpreadsheet, LucideVideo, LucidePaperclip,
+  LucideMapPin, LucideBuilding2, LucideUser, LucideDownload, LucidePencil,
+  LucideHandshake, LucideX, LucideLoaderCircle,
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-document-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, FormsModule, DocumentEditorComponent,
+    LucideFolderOpen, LucidePlus, LucideTriangleAlert, LucideFolder, LucideLink,
+    LucideCircleCheck, LucideCircleX, LucideEye, LucideCopy, LucideTrash2,
+    LucideFileText, LucideImage, LucideFileSpreadsheet, LucideVideo, LucidePaperclip,
+    LucideMapPin, LucideBuilding2, LucideUser, LucideDownload, LucidePencil,
+    LucideHandshake, LucideX, LucideLoaderCircle,
+  ],
   templateUrl: './document-manager.component.html',
   styleUrl: './document-manager.component.css',
 })
@@ -24,6 +40,7 @@ export class DocumentManagerComponent implements OnInit {
   private shareService    = inject(ShareService);
   private cdr             = inject(ChangeDetectorRef);
   private sanitizer       = inject(DomSanitizer);
+  private onlyOfficeService = inject(OnlyOfficeService);
 
   // ── Documentos ──────────────────────────────────────────────────────────
   documents: any[]         = [];
@@ -50,10 +67,24 @@ export class DocumentManagerComponent implements OnInit {
   showShareSection         = false;
   loadingLinks             = false;
 
+  // Editor colaborativo
+  showEditor = false;
+  selectedEditorDocId: string | null = null;
+  selectedEditorDocName: string = '';
+  isAdmin = false;
+
   ngOnInit(): void {
     this.loadDocuments();
     if (this.canUpload && this.tramiteId) {
       this.loadShareLinks();
+    }
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const role = payload.role?.[0]?.authority || '';
+        this.isAdmin = role === 'ROLE_ADMIN' || role === 'ROLE_SUPERADMIN';
+      } catch {}
     }
   }
 
@@ -281,13 +312,13 @@ export class DocumentManagerComponent implements OnInit {
 
   // ── Helpers de presentación ─────────────────────────────────────────────
 
-  getFileIcon(mimeType: string): string {
-    if (!mimeType) return '📎';
-    if (mimeType === 'application/pdf') return '📄';
-    if (mimeType.startsWith('image/')) return '🖼️';
-    if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType.includes('csv')) return '📊';
-    if (mimeType.startsWith('video/')) return '🎬';
-    return '📎';
+  getFileIcon(mimeType: string): 'pdf' | 'image' | 'spreadsheet' | 'video' | 'other' {
+    if (!mimeType) return 'other';
+    if (mimeType === 'application/pdf') return 'pdf';
+    if (mimeType.startsWith('image/')) return 'image';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType.includes('csv')) return 'spreadsheet';
+    if (mimeType.startsWith('video/')) return 'video';
+    return 'other';
   }
 
   formatFileSize(bytes: number): string {
@@ -310,5 +341,40 @@ export class DocumentManagerComponent implements OnInit {
 
   get selectedFileName(): string {
     return this.selectedFile ? this.selectedFile.name : '';
+  }
+
+  // ── Editor colaborativo ──────────────────────────────────────────────────
+
+  openEditor(doc: any): void {
+    this.selectedEditorDocId = doc.id;
+    this.selectedEditorDocName = doc.fileName;
+    this.showEditor = true;
+  }
+
+  closeEditor(): void {
+    this.showEditor = false;
+    this.selectedEditorDocId = null;
+    this.selectedEditorDocName = '';
+    // Recargar documentos para ver cambios guardados
+    this.loadDocuments();
+  }
+
+  enableCollab(doc: any): void {
+    // Por ahora habilita con el userId del admin como editor
+    const token = localStorage.getItem('token');
+    let userId = '';
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userId = payload.sub || '';
+      } catch {}
+    }
+    this.onlyOfficeService.enableCollaborativeMode(doc.id, [userId], []).subscribe({
+      next: () => {
+        doc.collaborativeMode = true;
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Error habilitando collab:', err)
+    });
   }
 }

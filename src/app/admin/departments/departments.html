@@ -14,7 +14,7 @@
     <div class="empty-state"><span class="spinner"></span><p>Cargando…</p></div>
   } @else if (departments.length === 0) {
     <div class="empty-state">
-      <div class="empty-icon">🏢</div>
+      <div class="empty-icon"><svg lucideBuilding2 [size]="40"></svg></div>
       <h3>Sin departamentos</h3>
       <p>Crea el primer departamento para empezar a asignar funcionarios.</p>
     </div>
@@ -25,7 +25,7 @@
       @for (d of departments; track d.id) {
         <div [class]="'dept-card' + (selected?.id === d.id ? ' dept-card--active' : '') + (!d.active ? ' dept-card--inactive' : '')"
              (click)="selectDept(d)">
-          <div class="dept-card-icon">🏢</div>
+          <div class="dept-card-icon"><svg lucideBuilding2 [size]="22"></svg></div>
           <div class="dept-card-info">
             <span class="dept-name">{{ d.name }}</span>
             <span class="dept-desc">{{ d.description || 'Sin descripción' }}</span>
@@ -48,9 +48,9 @@
             <p class="detail-desc">{{ selected.description || 'Sin descripción' }}</p>
           </div>
           <div class="detail-actions">
-            <button class="btn-outline" (click)="openEdit()">✏️ Editar</button>
+            <button class="btn-outline" (click)="openEdit()"><svg lucidePencil [size]="14"></svg> Editar</button>
             <button class="btn-danger-outline" (click)="deactivateDept()" [disabled]="!selected.active">
-              🚫 Desactivar
+              <svg lucideBan [size]="14"></svg> Desactivar
             </button>
             <button class="btn-primary" (click)="openAssign()">+ Asignar funcionario</button>
           </div>
@@ -61,7 +61,7 @@
 
           @if (deptUsers.length === 0) {
             <div class="no-users">
-              <span>👥</span>
+              <span><svg lucideUsers [size]="28"></svg></span>
               <p>No hay funcionarios en este departamento.</p>
               <button class="btn-primary" (click)="openAssign()">Asignar primer funcionario</button>
             </div>
@@ -113,7 +113,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Nuevo departamento</h2>
-        <button class="btn-close" (click)="showCreateDept = false">✕</button>
+        <button class="btn-close" (click)="showCreateDept = false"><svg lucideX [size]="16"></svg></button>
       </div>
       <div class="form-group">
         <label>Nombre *</label>
@@ -137,7 +137,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Editar departamento</h2>
-        <button class="btn-close" (click)="showEditDept = false">✕</button>
+        <button class="btn-close" (click)="showEditDept = false"><svg lucideX [size]="16"></svg></button>
       </div>
       <div class="form-group">
         <label>Nombre *</label>
@@ -161,7 +161,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Asignar funcionario a "{{ selected?.name }}"</h2>
-        <button class="btn-close" (click)="showAssignUser = false">✕</button>
+        <button class="btn-close" (click)="showAssignUser = false"><svg lucideX [size]="16"></svg></button>
       </div>
 
       @if (unassignedUsers.length === 0) {

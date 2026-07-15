@@ -2,13 +2,13 @@
 
   <!-- Header -->
   <div class="agent-header">
-    <span class="agent-icon">🤖</span>
+    <svg lucideBot class="agent-icon" [size]="20"></svg>
     <div class="agent-title-group">
       <h3 class="agent-title">Asistente Saguapac</h3>
       <span class="agent-sub">Te ayudo a encontrar el trámite correcto</span>
     </div>
     @if (isListening) {
-      <span class="listening-badge">🎙 Escuchando…</span>
+      <span class="listening-badge"><svg lucideMic [size]="14"></svg> Escuchando…</span>
     }
   </div>
 
@@ -19,7 +19,7 @@
 
       @if (msg.role === 'agent') {
         <div class="bubble-row bubble-row--agent">
-          <span class="bbl-avatar">🤖</span>
+          <svg lucideBot class="bbl-avatar" [size]="16"></svg>
           <div class="bubble bubble--agent">
             @if (msg.processName) {
               <div class="rec-card">
@@ -53,7 +53,7 @@
 
     @if (isThinking) {
       <div class="bubble-row bubble-row--agent">
-        <span class="bbl-avatar">🤖</span>
+        <svg lucideBot class="bbl-avatar" [size]="16"></svg>
         <div class="bubble bubble--agent bubble--typing">
           <span class="dot"></span>
           <span class="dot"></span>
@@ -68,7 +68,7 @@
   <!-- Input -->
   <div class="input-area">
     @if (voiceError) {
-      <p class="voice-error">⚠ {{ voiceError }}</p>
+      <p class="voice-error"><svg lucideTriangleAlert [size]="14"></svg> {{ voiceError }}</p>
     }
     <div class="input-row">
       <textarea
@@ -85,13 +85,13 @@
         (click)="listenVoice()"
         [disabled]="isListening || isThinking"
         title="Dictar mensaje"
-      >🎙</button>
+      ><svg lucideMic [size]="16"></svg></button>
       <button
         class="btn-send"
         (click)="sendMessage()"
         [disabled]="!inputText.trim() || isThinking"
         title="Enviar"
-      >➤</button>
+      ><svg lucideSend [size]="16"></svg></button>
     </div>
     <p class="input-hint">Enter para enviar · Shift+Enter para nueva línea</p>
   </div>

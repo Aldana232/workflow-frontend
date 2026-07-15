@@ -1,10 +1,11 @@
 import { Component, inject, HostListener, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
+import { LucideZap, LucideUser, LucideLogOut } from '@lucide/angular';
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  imports: [LucideZap, LucideUser, LucideLogOut],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })

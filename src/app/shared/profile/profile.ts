@@ -7,10 +7,11 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../core/services/auth';
 import { UserService } from '../../core/services/user';
+import { LucideArrowLeft, LucideCamera, LucideTrash2 } from '@lucide/angular';
 
 @Component({
   selector: 'app-profile',
-  imports: [FormsModule],
+  imports: [FormsModule, LucideArrowLeft, LucideCamera, LucideTrash2],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -6,6 +6,21 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import {
+  LucideArrowLeft,
+  LucideCircleX,
+  LucideCircleCheck,
+  LucideRefreshCw,
+  LucidePencilLine,
+  LucideExternalLink,
+  LucidePaperclip,
+  LucideMessageCircle,
+  LucideBot,
+  LucideX,
+  LucideMic,
+  LucideSend,
+  LucideArrowRight,
+} from '@lucide/angular';
 import { TramiteService } from '../../core/services/tramite';
 import { ProcessService } from '../../core/services/process';
 import { AssistantService, ChatMessage } from '../../core/services/assistant';
@@ -16,7 +31,25 @@ import { DocumentManagerComponent } from '../../shared/components/document-manag
 
 @Component({
   selector: 'app-task-detail',
-  imports: [DynamicForm, BpmnDiagram, FormsModule, DocumentManagerComponent],
+  imports: [
+    DynamicForm,
+    BpmnDiagram,
+    FormsModule,
+    DocumentManagerComponent,
+    LucideArrowLeft,
+    LucideCircleX,
+    LucideCircleCheck,
+    LucideRefreshCw,
+    LucidePencilLine,
+    LucideExternalLink,
+    LucidePaperclip,
+    LucideMessageCircle,
+    LucideBot,
+    LucideX,
+    LucideMic,
+    LucideSend,
+    LucideArrowRight,
+  ],
   templateUrl: './task-detail.html',
   styleUrl: './task-detail.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -325,7 +358,7 @@ export class TaskDetail implements OnInit, OnDestroy {
       error: (err) => {
         const msg = err?.error?.message ?? err?.error?.error
           ?? 'Error al consultar el asistente. Intenta de nuevo.';
-        this.chatMessages.push({ role: 'assistant', content: `⚠️ ${msg}` });
+        this.chatMessages.push({ role: 'assistant', content: msg });
         this.chatLoading = false;
         this.cdr.markForCheck();
         this.scrollChatToBottom();

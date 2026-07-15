@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { LucideSettings, LucideInfo, LucideBell, LucideMonitor, LucideRotateCcw, LucideSave } from '@lucide/angular';
 
 interface NotifPref {
   key: string;
@@ -14,7 +15,7 @@ interface NotifPref {
 
 @Component({
   selector: 'app-settings',
-  imports: [FormsModule],
+  imports: [FormsModule, LucideSettings, LucideInfo, LucideBell, LucideMonitor, LucideRotateCcw, LucideSave],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

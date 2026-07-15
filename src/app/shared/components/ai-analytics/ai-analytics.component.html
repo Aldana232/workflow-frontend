@@ -3,14 +3,18 @@
   <!-- ── Header ── -->
   <div class="ai-header">
     <div class="ai-header-left">
-      <span class="ai-icon">🤖</span>
+      <svg lucideBot class="ai-icon" [size]="20"></svg>
       <div>
         <h3 class="ai-title">Analítica IA</h3>
         <span class="ai-subtitle">Detección de anomalías y priorización inteligente</span>
       </div>
     </div>
     <button class="btn-policy-toggle" (click)="showPolicyForm = !showPolicyForm">
-      {{ showPolicyForm ? '✕ Cerrar' : '💡 Recomendar política' }}
+      @if (showPolicyForm) {
+        <svg lucideX [size]="16"></svg> Cerrar
+      } @else {
+        <svg lucideLightbulb [size]="16"></svg> Recomendar política
+      }
     </button>
   </div>
 
@@ -30,12 +34,12 @@
           (click)="recommendPolicy()"
           [disabled]="policyLoading || !policyDescription.trim()"
         >
-          @if (policyLoading) { <span class="ai-spinner"></span> } @else { ➤ }
+          @if (policyLoading) { <span class="ai-spinner"></span> } @else { <svg lucideSend [size]="16"></svg> }
         </button>
       </div>
       @if (policyResult) {
         <div class="policy-result">
-          <span class="policy-result-icon">✨</span>
+          <svg lucideSparkles class="policy-result-icon" [size]="20"></svg>
           <div class="policy-result-body">
             <p class="policy-result-line">
               <span class="policy-result-label">Proceso recomendado</span>
@@ -69,7 +73,7 @@
         [class.tab-btn--active]="activeTab === 'bottlenecks'"
         (click)="setTab('bottlenecks')"
       >
-        ⚡ Cuellos de Botella
+        <svg lucideZap [size]="15"></svg> Cuellos de Botella
         @if (bottlenecks.length) {
           <span class="tab-count">{{ bottlenecks.length }}</span>
         }
@@ -79,7 +83,7 @@
         [class.tab-btn--active]="activeTab === 'anomalies'"
         (click)="setTab('anomalies')"
       >
-        🔍 Anomalías
+        <svg lucideSearch [size]="15"></svg> Anomalías
         @if (anomalies.length) {
           <span class="tab-count tab-count--red">{{ anomalies.length }}</span>
         }
@@ -89,7 +93,7 @@
         [class.tab-btn--active]="activeTab === 'priority'"
         (click)="setTab('priority')"
       >
-        🎯 Prioridad
+        <svg lucideTarget [size]="15"></svg> Prioridad
         @if (priorityTramites.length) {
           <span class="tab-count tab-count--amber">{{ priorityTramites.length }}</span>
         }
@@ -101,7 +105,7 @@
       <div class="tab-content">
         @if (bottlenecks.length === 0) {
           <div class="ai-empty">
-            <span class="ai-empty-icon">✅</span>
+            <svg lucideCircleCheck class="ai-empty-icon" [size]="28"></svg>
             <p>No se detectaron cuellos de botella</p>
           </div>
         } @else {
@@ -113,9 +117,9 @@
                   <div class="item-name-wrap">
                     <span class="item-name">{{ getNodeDisplayName(node.nodeId, i) }}</span>
                     @if (node.isBottleneck) {
-                      <span class="badge badge-danger">⚠ Cuello de botella</span>
+                      <span class="badge badge-danger"><svg lucideTriangleAlert [size]="12"></svg> Cuello de botella</span>
                     } @else {
-                      <span class="badge badge-ok">✓ Normal</span>
+                      <span class="badge badge-ok"><svg lucideCheck [size]="12"></svg> Normal</span>
                     }
                   </div>
                 </div>
@@ -133,7 +137,7 @@
                 </div>
 
                 @if (node.recommendation) {
-                  <p class="item-recommendation">💡 {{ node.recommendation }}</p>
+                  <p class="item-recommendation"><svg lucideLightbulb [size]="14"></svg> {{ node.recommendation }}</p>
                 }
 
               </li>
@@ -148,8 +152,8 @@
       <div class="tab-content">
         @if (anomalies.length === 0) {
           <div class="ai-empty ai-empty--ok">
-            <span class="ai-empty-icon">✅</span>
-            <p>Sistema operando con normalidad ✓</p>
+            <svg lucideCircleCheck class="ai-empty-icon" [size]="28"></svg>
+            <p>Sistema operando con normalidad</p>
             <p class="ai-empty-sub">No se detectaron trámites anómalos</p>
           </div>
         } @else {
@@ -161,9 +165,9 @@
                   <div class="item-name-wrap">
                     <code class="item-code">{{ item.code }}</code>
                     @if (item.isAnomalous) {
-                      <span class="badge badge-danger">⚠ Anómalo</span>
+                      <span class="badge badge-danger"><svg lucideTriangleAlert [size]="12"></svg> Anómalo</span>
                     } @else {
-                      <span class="badge badge-ok">✓ Normal</span>
+                      <span class="badge badge-ok"><svg lucideCheck [size]="12"></svg> Normal</span>
                     }
                   </div>
                   <div class="item-scores">
@@ -176,7 +180,7 @@
                 </div>
 
                 <div class="item-meta-row">
-                  <span class="meta-chip">⏱ Espera: {{ formatWaiting(item.minutesWaiting) }}</span>
+                  <span class="meta-chip"><svg lucideClock [size]="12"></svg> Espera: {{ formatWaiting(item.minutesWaiting) }}</span>
                 </div>
 
                 @if (item.reason) {
@@ -195,7 +199,7 @@
       <div class="tab-content">
         @if (priorityTramites.length === 0) {
           <div class="ai-empty">
-            <span class="ai-empty-icon">📋</span>
+            <svg lucideClipboardList class="ai-empty-icon" [size]="28"></svg>
             <p>No hay trámites priorizados por la IA</p>
           </div>
         } @else {
@@ -223,7 +227,7 @@
                 </div>
 
                 <div class="item-meta-row">
-                  <span class="meta-chip">⏱ Espera: {{ formatWaiting(item.minutesWaiting) }}</span>
+                  <span class="meta-chip"><svg lucideClock [size]="12"></svg> Espera: {{ formatWaiting(item.minutesWaiting) }}</span>
                 </div>
 
                 @if (item.priorityReason) {

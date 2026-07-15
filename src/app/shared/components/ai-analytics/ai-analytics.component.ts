@@ -5,11 +5,21 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AnalyticsService } from '../../../core/services/analytics';
 import { ProcessService } from '../../../core/services/process';
+import {
+  LucideBot, LucideX, LucideLightbulb, LucideSend, LucideSparkles,
+  LucideZap, LucideSearch, LucideTarget, LucideCircleCheck,
+  LucideTriangleAlert, LucideCheck, LucideClipboardList, LucideClock,
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-ai-analytics',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, FormsModule,
+    LucideBot, LucideX, LucideLightbulb, LucideSend, LucideSparkles,
+    LucideZap, LucideSearch, LucideTarget, LucideCircleCheck,
+    LucideTriangleAlert, LucideCheck, LucideClipboardList, LucideClock,
+  ],
   templateUrl: './ai-analytics.component.html',
   styleUrl: './ai-analytics.component.css',
 })

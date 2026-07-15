@@ -5,6 +5,17 @@ import { ToastrService } from 'ngx-toastr';
 import { ProcessService } from '../../core/services/process';
 import { TramiteService } from '../../core/services/tramite';
 import { DocumentManagerComponent } from '../../shared/components/document-manager/document-manager.component';
+import {
+  LucideClipboardList,
+  LucidePencil,
+  LucideRocket,
+  LucidePause,
+  LucideTrash2,
+  LucideX,
+  LucideEye,
+  LucidePaperclip,
+  LucideMapPin,
+} from '@lucide/angular';
 
 interface ProcessCard {
   id: string;
@@ -16,7 +27,18 @@ interface ProcessCard {
 
 @Component({
   selector: 'app-processes',
-  imports: [SlicePipe, DocumentManagerComponent],
+  imports: [
+    SlicePipe, DocumentManagerComponent,
+    LucideClipboardList,
+    LucidePencil,
+    LucideRocket,
+    LucidePause,
+    LucideTrash2,
+    LucideX,
+    LucideEye,
+    LucidePaperclip,
+    LucideMapPin,
+  ],
   templateUrl: './processes.html',
   styleUrl: './processes.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

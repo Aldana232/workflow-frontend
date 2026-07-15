@@ -6,6 +6,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TramiteService } from '../../core/services/tramite';
 import { ProcessService } from '../../core/services/process';
 import { BpmnDiagram } from '../../shared/components/bpmn-diagram/bpmn-diagram';
+import {
+  LucideArrowLeft, LucidePencil, LucideClipboardList,
+  LucideCircleCheck, LucideCircleDot, LucideClock,
+} from '@lucide/angular';
 
 interface NodeStep {
   id: string;
@@ -16,7 +20,11 @@ interface NodeStep {
 
 @Component({
   selector: 'app-flow-view',
-  imports: [BpmnDiagram],
+  imports: [
+    BpmnDiagram,
+    LucideArrowLeft, LucidePencil, LucideClipboardList,
+    LucideCircleCheck, LucideCircleDot, LucideClock,
+  ],
   templateUrl: './flow-view.html',
   styleUrl: './flow-view.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,10 +124,10 @@ export class FlowView implements OnInit {
     return result;
   }
 
-  stateIcon(state: string): string {
-    if (state === 'completed') return '✅';
-    if (state === 'current')   return '🔵';
-    return '⏳';
+  stateIcon(state: string): 'completed' | 'current' | 'pending' {
+    if (state === 'completed') return 'completed';
+    if (state === 'current')   return 'current';
+    return 'pending';
   }
 
   typeLabel(type: string): string {

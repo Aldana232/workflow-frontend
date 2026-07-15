@@ -6,6 +6,7 @@ import { timeout } from 'rxjs/operators';
 import { AnalyticsService } from '../../../core/services/analytics';
 import { ProcessService } from '../../../core/services/process';
 import { SpeechService } from '../../../core/services/speech';
+import { LucideBot, LucideMic, LucideTriangleAlert, LucideSend } from '@lucide/angular';
 
 interface ChatMsg {
   id: number;
@@ -24,7 +25,7 @@ const NEGATIVE    = ['no', 'cancelar', 'otro', 'otra', 'diferente', 'buscar', 'n
 @Component({
   selector: 'app-policy-agent',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideBot, LucideMic, LucideTriangleAlert, LucideSend],
   templateUrl: './policy-agent.component.html',
   styleUrl: './policy-agent.component.css',
 })

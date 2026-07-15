@@ -11,7 +11,7 @@
     <div class="empty-state"><span class="spinner"></span><p>Cargando…</p></div>
   } @else if (users.length === 0) {
     <div class="empty-state">
-      <div style="font-size:3rem">👥</div>
+      <div style="font-size:3rem"><svg lucideUsers [size]="48"></svg></div>
       <h3>Sin funcionarios</h3>
       <p>Aún no hay usuarios registrados en el sistema.</p>
     </div>
@@ -63,7 +63,7 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Nuevo funcionario</h2>
-        <button class="btn-close" (click)="closeModal()">✕</button>
+        <button class="btn-close" (click)="closeModal()"><svg lucideX [size]="16"></svg></button>
       </div>
 
       <div class="form-grid">

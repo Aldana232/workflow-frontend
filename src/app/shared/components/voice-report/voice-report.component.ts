@@ -4,6 +4,10 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
+import {
+  LucideMic, LucideTriangleAlert, LucideFileText, LucidePencilLine,
+  LucideCircleCheck, LucideInbox, LucideMapPin, LucideBuilding2, LucideClock,
+} from '@lucide/angular';
 
 // Imports estáticos — ESBuild (Angular 17) no soporta require() dinámico
 import { jsPDF } from 'jspdf';
@@ -18,21 +22,25 @@ type ReportType = 'summary' | 'bottlenecks' | 'anomalies' | 'priority' | 'depart
 type ExportFmt  = 'pdf' | 'word' | null;
 
 const TYPE_LABELS: Record<string, string> = {
-  summary:     '📊 Resumen General',
-  bottlenecks: '🔴 Cuellos de Botella',
-  anomalies:   '⚠ Anomalías Detectadas',
-  priority:    '🔥 Trámites Prioritarios',
-  department:  '🏢 Rendimiento por Departamento',
-  active:      '📋 Trámites Activos',
-  bydate:      '📅 Reporte por Fecha',
-  byclient:    '👤 Reporte por Cliente',
-  byprocess:   '⚙ Estadísticas por Proceso',
+  summary:     'Resumen General',
+  bottlenecks: 'Cuellos de Botella',
+  anomalies:   'Anomalías Detectadas',
+  priority:    'Trámites Prioritarios',
+  department:  'Rendimiento por Departamento',
+  active:      'Trámites Activos',
+  bydate:      'Reporte por Fecha',
+  byclient:    'Reporte por Cliente',
+  byprocess:   'Estadísticas por Proceso',
 };
 
 @Component({
   selector: 'app-voice-report',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, FormsModule,
+    LucideMic, LucideTriangleAlert, LucideFileText, LucidePencilLine,
+    LucideCircleCheck, LucideInbox, LucideMapPin, LucideBuilding2, LucideClock,
+  ],
   templateUrl: './voice-report.component.html',
   styleUrl: './voice-report.component.css',
 })
@@ -56,7 +64,7 @@ export class VoiceReportComponent {
 
   // ── Getters de datos por tipo ────────────────────────────────────────────
 
-  get reportTypeLabel(): string    { return TYPE_LABELS[this.reportType] ?? '📄 Reporte'; }
+  get reportTypeLabel(): string    { return TYPE_LABELS[this.reportType] ?? 'Reporte'; }
   get summaryData(): any           { return this.reportData?.data ?? this.reportData; }
   get bottleneckItems(): any[]     { return this.reportData?.bottlenecks ?? []; }
   get anomalyItems(): any[]        { return this.reportData?.anomalies ?? []; }

@@ -14,10 +14,10 @@
     </div>
     <div class="pv-toolbar-right">
       <button class="btn-edit" (click)="edit()" [disabled]="!process">
-        ✏️ Editar
+        <svg lucidePencil [size]="16"></svg> Editar
       </button>
       <button class="btn-back" (click)="back()">
-        ← Volver
+        <svg lucideArrowLeft [size]="16"></svg> Volver
       </button>
     </div>
   </div>
@@ -30,9 +30,9 @@
       </div>
     } @else if (!bpmnXml) {
       <div class="pv-empty">
-        <div class="pv-empty-icon">📋</div>
+        <div class="pv-empty-icon"><svg lucideClipboardList [size]="40"></svg></div>
         <p>Este proceso no tiene un diagrama BPMN guardado aún.</p>
-        <button class="btn-edit" (click)="edit()">✏️ Ir al diseñador</button>
+        <button class="btn-edit" (click)="edit()"><svg lucidePencil [size]="16"></svg> Ir al diseñador</button>
       </div>
     } @else {
       <app-bpmn-diagram [xml]="bpmnXml" class="pv-diagram" />

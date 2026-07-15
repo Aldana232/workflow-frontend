@@ -283,6 +283,8 @@
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.spin-icon { animation: spin 1s linear infinite; }
+
 /* ── Estado vacío ── */
 .empty-state {
   display: flex;
@@ -924,4 +926,74 @@
   .preview-modal  { max-height: 95vh; }
   .preview-iframe { height: 60vh; }
   .preview-header { padding: 12px 16px; }
+}
+
+.btn-edit-collab {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-enable-collab {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.editor-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.editor-modal {
+  background: #1e293b;
+  border-radius: 12px;
+  width: 95vw;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #334155;
+}
+
+.editor-modal-title {
+  font-weight: 600;
+  color: #e2e8f0;
+  font-size: 15px;
+}
+
+.btn-close-editor {
+  background: #475569;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.editor-modal-body {
+  flex: 1;
+  overflow: hidden;
 }

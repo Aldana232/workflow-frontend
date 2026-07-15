@@ -1,7 +1,7 @@
 <div class="settings-page">
 
   <div class="page-header">
-    <h1>⚙️ Configuración</h1>
+    <h1><svg lucideSettings [size]="22"></svg> Configuración</h1>
     <p>Preferencias del sistema y notificaciones</p>
   </div>
 
@@ -9,7 +9,7 @@
 
     <!-- System Info -->
     <div class="settings-card">
-      <h2 class="card-title">ℹ️ Información del sistema</h2>
+      <h2 class="card-title"><svg lucideInfo [size]="18"></svg> Información del sistema</h2>
       <div class="info-grid">
         <div class="info-row">
           <span class="info-key">Empresa</span>
@@ -40,7 +40,7 @@
 
     <!-- Notification preferences -->
     <div class="settings-card">
-      <h2 class="card-title">🔔 Preferencias de notificaciones</h2>
+      <h2 class="card-title"><svg lucideBell [size]="18"></svg> Preferencias de notificaciones</h2>
       <div class="notif-list">
         @for (pref of notifPrefs; track pref.key) {
           <div class="notif-item">
@@ -61,7 +61,7 @@
 
     <!-- Display preferences -->
     <div class="settings-card">
-      <h2 class="card-title">🖥️ Preferencias de visualización</h2>
+      <h2 class="card-title"><svg lucideMonitor [size]="18"></svg> Preferencias de visualización</h2>
       <div class="pref-form">
         <div class="form-row">
           <label class="pref-label">Elementos por página</label>
@@ -85,8 +85,8 @@
 
     <!-- Actions -->
     <div class="settings-actions">
-      <button class="btn-reset" (click)="resetSettings()">↺ Restaurar por defecto</button>
-      <button class="btn-save" (click)="saveSettings()">💾 Guardar configuración</button>
+      <button class="btn-reset" (click)="resetSettings()"><svg lucideRotateCcw [size]="16"></svg> Restaurar por defecto</button>
+      <button class="btn-save" (click)="saveSettings()"><svg lucideSave [size]="16"></svg> Guardar configuración</button>
     </div>
 
   </div>

@@ -1,0 +1,22 @@
+<div class="editor-wrapper">
+  <!-- Loading -->
+  @if (isLoading) {
+    <div class="editor-loading">
+      <div class="spinner"></div>
+      <p>Cargando editor colaborativo...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (hasError) {
+    <div class="editor-error">
+      <svg lucideTriangleAlert class="error-icon" [size]="32"></svg>
+      <p>{{ errorMessage }}</p>
+    </div>
+  }
+
+  <!-- Editor container -->
+  @if (!hasError) {
+    <div id="onlyoffice-editor" #editorContainer class="editor-container"></div>
+  }
+</div>

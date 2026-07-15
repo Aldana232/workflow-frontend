@@ -3,13 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { DepartmentService } from '../../core/services/department';
 import { UserService } from '../../core/services/user';
+import { LucideBuilding2, LucidePencil, LucideBan, LucideUsers, LucideX } from '@lucide/angular';
 
 interface Dept  { id: string; name: string; description: string; active: boolean; companyId: string; }
 interface UserRow { id: string; firstName: string; lastName: string; email: string; role: string; departmentId: string | null; active: boolean; }
 
 @Component({
   selector: 'app-departments',
-  imports: [FormsModule],
+  imports: [FormsModule, LucideBuilding2, LucidePencil, LucideBan, LucideUsers, LucideX],
   templateUrl: './departments.html',
   styleUrl: './departments.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

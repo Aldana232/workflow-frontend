@@ -7,10 +7,18 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ToastrService } from 'ngx-toastr';
 import { TramiteService } from '../../core/services/tramite';
 import { ProcessService } from '../../core/services/process';
+import {
+  LucideArrowLeft, LucideCircleCheck, LucideArrowRight,
+  LucideSettings, LucideUser, LucideRocket,
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-nuevo-tramite',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    LucideArrowLeft, LucideCircleCheck, LucideArrowRight,
+    LucideSettings, LucideUser, LucideRocket,
+  ],
   templateUrl: './nuevo-tramite.html',
   styleUrl: './nuevo-tramite.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

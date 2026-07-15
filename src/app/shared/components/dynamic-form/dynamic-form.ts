@@ -15,6 +15,7 @@ import { debounceTime, pairwise, startWith, switchMap, map } from 'rxjs/operator
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
 import { AssistantService, FieldValidationResult } from '../../../core/services/assistant';
+import { LucidePaperclip, LucideCloudUpload, LucideBot } from '@lucide/angular';
 
 export interface FormField {
   name: string;
@@ -35,7 +36,7 @@ interface FileState {
 
 @Component({
   selector: 'app-dynamic-form',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LucidePaperclip, LucideCloudUpload, LucideBot],
   templateUrl: './dynamic-form.html',
   styleUrl: './dynamic-form.css',
 })

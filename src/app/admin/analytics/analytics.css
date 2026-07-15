@@ -12,6 +12,9 @@
 .page-header p  { font-size: .9rem; color: #64748b; margin: 0; }
 
 .btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
   padding: 10px 20px;
   background: #059669;
   color: #fff;
@@ -81,6 +84,8 @@
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.spin-icon { animation: spin 1s linear infinite; }
+
 .summary-error {
   padding: .75rem 1rem;
   background: #fef3c7;
@@ -105,7 +110,7 @@
   margin-bottom: 1.25rem;
 }
 
-.chart-title-group h3 { margin: 0 0 .2rem; }
+.chart-title-group h3 { margin: 0 0 .2rem; display: flex; align-items: center; gap: .4rem; }
 
 .chart-subtitle {
   font-size: .78rem;
@@ -263,6 +268,9 @@
   font-weight: 600;
   color: #1e293b;
   margin: 0 0 .15rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
 }
 
 .table-subtitle {

@@ -7,7 +7,11 @@
       <p>Métricas generales del sistema de gestión de trámites</p>
     </div>
     <button class="btn-export" (click)="exportToExcel()" [disabled]="exporting">
-      @if (exporting) { ⏳ Exportando… } @else { 📥 Exportar Excel }
+      @if (exporting) {
+        <svg lucideLoaderCircle class="spin-icon" [size]="16"></svg> Exportando…
+      } @else {
+        <svg lucideDownload [size]="16"></svg> Exportar Excel
+      }
     </button>
   </div>
 
@@ -18,7 +22,7 @@
     </div>
   } @else if (summaryError) {
     <div class="summary-error">
-      ⚠️ No se pudieron cargar las métricas del resumen. Mostrando datos de ejemplo.
+      <svg lucideTriangleAlert [size]="16"></svg> No se pudieron cargar las métricas del resumen. Mostrando datos de ejemplo.
     </div>
   }
 
@@ -37,7 +41,7 @@
   <div class="chart-card chart-card--full">
     <div class="chart-header">
       <div class="chart-title-group">
-        <h3>⏱ Rendimiento por nodo</h3>
+        <h3><svg lucideClock [size]="18"></svg> Rendimiento por nodo</h3>
         <span class="chart-subtitle">Tiempo promedio por etapa del proceso · SLA = {{ slaHours }}h</span>
       </div>
 
@@ -68,14 +72,14 @@
     <!-- Error / empty -->
     @else if (chartError) {
       <div class="chart-state chart-state--error">
-        ⚠️ No se pudieron cargar los datos de este proceso o no tiene nodos con actividad registrada.
+        <svg lucideTriangleAlert [size]="16"></svg> No se pudieron cargar los datos de este proceso o no tiene nodos con actividad registrada.
       </div>
     }
 
     <!-- Empty (nothing selected) -->
     @else if (!selectedProcessId) {
       <div class="chart-state chart-state--empty">
-        <span class="chart-empty-icon">📊</span>
+        <svg lucideChartBar class="chart-empty-icon" [size]="32"></svg>
         <span>Selecciona un proceso para ver el rendimiento por nodo</span>
       </div>
     }
@@ -135,7 +139,7 @@
 
     <div class="table-header">
       <div class="table-title-group">
-        <h3>📋 Trámites activos</h3>
+        <h3><svg lucideClipboardList [size]="18"></svg> Trámites activos</h3>
         @if (!tramitesLoading && !tramitesError) {
           <span class="table-subtitle">
             {{ filteredTramites.length }} de {{ activeTramites.length }} trámites
@@ -144,7 +148,7 @@
       </div>
 
       <div class="search-wrap">
-        <span class="search-icon">🔍</span>
+        <svg lucideSearch class="search-icon" [size]="16"></svg>
         <input
           type="text"
           class="search-input"
@@ -153,7 +157,7 @@
           placeholder="Buscar por código o departamento…"
         />
         @if (tramiteSearch) {
-          <button class="search-clear" (click)="tramiteSearch = ''; onSearchChange()">✕</button>
+          <button class="search-clear" (click)="tramiteSearch = ''; onSearchChange()"><svg lucideX [size]="14"></svg></button>
         }
       </div>
     </div>
@@ -168,7 +172,7 @@
     <!-- Error -->
     @else if (tramitesError) {
       <div class="table-state table-state--error">
-        ⚠️ No se pudieron cargar los trámites activos.
+        <svg lucideTriangleAlert [size]="16"></svg> No se pudieron cargar los trámites activos.
       </div>
     }
 
@@ -176,10 +180,10 @@
     @else if (filteredTramites.length === 0) {
       <div class="table-state table-state--empty">
         @if (tramiteSearch) {
-          <span class="chart-empty-icon">🔍</span>
+          <svg lucideSearch class="chart-empty-icon" [size]="32"></svg>
           <span>Sin resultados para <b>"{{ tramiteSearch }}"</b></span>
         } @else {
-          <span class="chart-empty-icon">📭</span>
+          <svg lucideInbox class="chart-empty-icon" [size]="32"></svg>
           <span>No hay trámites activos en este momento</span>
         }
       </div>
@@ -215,9 +219,9 @@
                 </td>
                 <td>
                   @if (isOverSla(t.waitingMinutes)) {
-                    <span class="status-badge status-badge--late">⚠ Retrasado</span>
+                    <span class="status-badge status-badge--late"><svg lucideTriangleAlert [size]="12"></svg> Retrasado</span>
                   } @else {
-                    <span class="status-badge status-badge--ok">✓ En tiempo</span>
+                    <span class="status-badge status-badge--ok"><svg lucideCheck [size]="12"></svg> En tiempo</span>
                   }
                 </td>
               </tr>

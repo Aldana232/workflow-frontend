@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../core/services/user';
 import { DepartmentService } from '../../core/services/department';
 import { AuthService } from '../../core/services/auth';
+import { LucideUsers, LucideX } from '@lucide/angular';
 
 interface UserRow {
   id: string;
@@ -29,7 +30,7 @@ interface UserForm {
 
 @Component({
   selector: 'app-users',
-  imports: [FormsModule],
+  imports: [FormsModule, LucideUsers, LucideX],
   templateUrl: './users.html',
   styleUrl: './users.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

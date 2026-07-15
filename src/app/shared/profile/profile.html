@@ -1,7 +1,7 @@
 <div class="profile-page">
 
   <div class="profile-header">
-    <button class="btn-back" (click)="goBack()">← Volver</button>
+    <button class="btn-back" (click)="goBack()"><svg lucideArrowLeft [size]="16"></svg> Volver</button>
     <h1>Mi Perfil</h1>
   </div>
 
@@ -21,7 +21,7 @@
 
       <div class="avatar-actions">
         <label class="btn-upload-avatar" for="avatarInput">
-          📷 Cambiar foto
+          <svg lucideCamera [size]="16"></svg> Cambiar foto
         </label>
         <input
           id="avatarInput"
@@ -31,7 +31,7 @@
           (change)="onAvatarChange($event)"
         />
         @if (avatarUrl) {
-          <button class="btn-remove-avatar" (click)="removeAvatar()">🗑 Quitar</button>
+          <button class="btn-remove-avatar" (click)="removeAvatar()"><svg lucideTrash2 [size]="16"></svg> Quitar</button>
         }
       </div>
       <p class="avatar-hint">JPG, PNG o GIF · máx 2 MB</p>

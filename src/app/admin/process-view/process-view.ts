@@ -2,10 +2,11 @@ import { Component, inject, OnInit, ChangeDetectorRef, ChangeDetectionStrategy }
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProcessService } from '../../core/services/process';
 import { BpmnDiagram } from '../../shared/components/bpmn-diagram/bpmn-diagram';
+import { LucidePencil, LucideArrowLeft, LucideClipboardList } from '@lucide/angular';
 
 @Component({
   selector: 'app-process-view',
-  imports: [BpmnDiagram],
+  imports: [BpmnDiagram, LucidePencil, LucideArrowLeft, LucideClipboardList],
   templateUrl: './process-view.html',
   styleUrl: './process-view.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

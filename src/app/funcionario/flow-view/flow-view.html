@@ -1,7 +1,7 @@
 <div class="flow-page">
 
   <div class="flow-header">
-    <button class="btn-back" (click)="goBack()">← Volver</button>
+    <button class="btn-back" (click)="goBack()"><svg lucideArrowLeft [size]="16"></svg> Volver</button>
     <div class="header-info">
       <h1>Flujo del trámite</h1>
       @if (tramite) {
@@ -9,7 +9,7 @@
       }
     </div>
     @if (tramite) {
-      <button class="btn-process" (click)="goProcess()">✏️ Procesar tarea</button>
+      <button class="btn-process" (click)="goProcess()"><svg lucidePencil [size]="16"></svg> Procesar tarea</button>
     }
   </div>
 
@@ -43,7 +43,13 @@
           <div class="steps-title">Pasos del flujo</div>
           @for (step of steps; track step.id) {
             <div [class]="'step-item step-' + step.state">
-              <span class="step-icon">{{ stateIcon(step.state) }}</span>
+              <span class="step-icon">
+                @switch (stateIcon(step.state)) {
+                  @case ('completed') { <svg lucideCircleCheck [size]="16"></svg> }
+                  @case ('current') { <svg lucideCircleDot [size]="16"></svg> }
+                  @default { <svg lucideClock [size]="16"></svg> }
+                }
+              </span>
               <div class="step-body">
                 <span class="step-label">{{ step.label }}</span>
                 <span class="step-type">{{ typeLabel(step.type) }}</span>
@@ -88,7 +94,7 @@
           </div>
         } @else {
           <div class="no-diagram">
-            <span>📋</span>
+            <span><svg lucideClipboardList [size]="20"></svg></span>
             <p>Este proceso no tiene diagrama BPMN.</p>
           </div>
         }

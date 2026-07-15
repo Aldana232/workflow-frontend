@@ -19,6 +19,30 @@ import {
   Validators,
 } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
+import {
+  LucideZap,
+  LucidePencil,
+  LucideCheck,
+  LucideSave,
+  LucideRocket,
+  LucideZoomIn,
+  LucideZoomOut,
+  LucideMaximize,
+  LucideMic,
+  LucideX,
+  LucideTriangleAlert,
+  LucideBot,
+  LucideHand,
+  LucideUser,
+  LucideSettings,
+  LucideUpload,
+  LucideDownload,
+  LucideFileCode,
+  LucideFile,
+  LucideArchive,
+  LucideClipboardList,
+  LucideMousePointerClick,
+} from '@lucide/angular';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { debounceTime, filter, Subject } from 'rxjs';
@@ -47,6 +71,17 @@ interface EdgeProps {
   condition: string;
 }
 
+interface PaletteItem {
+  id: string;
+  label: string;
+  icon: string;
+  /** Identificador del icono Lucide a renderizar en el template (ver @switch en designer.html) */
+  iconCmp?: string;
+  svg?: string;
+  action: string;
+  expanded?: boolean;
+}
+
 const EMPTY_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -69,7 +104,33 @@ const EMPTY_XML = `<?xml version="1.0" encoding="UTF-8"?>
 
 @Component({
   selector: 'app-designer',
-  imports: [FormsModule, ReactiveFormsModule, SlicePipe],
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    SlicePipe,
+    LucideZap,
+    LucidePencil,
+    LucideCheck,
+    LucideSave,
+    LucideRocket,
+    LucideZoomIn,
+    LucideZoomOut,
+    LucideMaximize,
+    LucideMic,
+    LucideX,
+    LucideTriangleAlert,
+    LucideBot,
+    LucideHand,
+    LucideUser,
+    LucideSettings,
+    LucideUpload,
+    LucideDownload,
+    LucideFileCode,
+    LucideFile,
+    LucideArchive,
+    LucideClipboardList,
+    LucideMousePointerClick,
+  ],
   templateUrl: './designer.html',
   styleUrl: './designer.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -134,7 +195,7 @@ export class Designer implements AfterViewInit, OnDestroy {
   voiceHistory: Array<{ role: 'user' | 'ai'; text: string }> = [];
   interimTranscript = ''; // fragmento parcial en curso
   voiceError = '';
-  voiceCommandResult = ''; // feedback de la última acción ejecutada
+  voiceCommandResult = ''; // feedback de la última acción ejecutada (con prefijo OK:/ERR:/WARN:/INFO:)
   voiceIsExecuting = false; // true mientras espera respuesta del backend
   private recognition: SpeechRecognition | null = null;
   private voiceFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
@@ -149,11 +210,11 @@ export class Designer implements AfterViewInit, OnDestroy {
   departments: { id: string; name: string }[] = [];
   formSchemas = ['form-conexion-agua', 'form-reclamo', 'form-inspeccion', 'form-aprobacion'];
 
-  readonly palette = [
+  readonly palette: { section: string; items: PaletteItem[] }[] = [
     {
       section: 'Navegación',
       items: [
-        { id: 'hand', label: 'Mano', icon: '✋', svg: 'hand', action: 'tool' },
+        { id: 'hand', label: 'Mano', icon: '', iconCmp: 'hand', svg: 'hand', action: 'tool' },
         { id: 'lasso', label: 'Selección', icon: '⬚', svg: 'lasso', action: 'tool' },
       ],
     },
@@ -170,11 +231,29 @@ export class Designer implements AfterViewInit, OnDestroy {
       section: 'Tareas',
       items: [
         { id: 'bpmn:Task', label: 'Tarea', icon: '□', action: 'create' },
-        { id: 'bpmn:UserTask', label: 'Usuario', icon: '👤', action: 'create' },
-        { id: 'bpmn:ServiceTask', label: 'Servicio', icon: '⚙', action: 'create' },
-        { id: 'bpmn:SendTask', label: 'Envío', icon: '📤', action: 'create' },
-        { id: 'bpmn:ReceiveTask', label: 'Recepción', icon: '📥', action: 'create' },
-        { id: 'bpmn:ScriptTask', label: 'Script', icon: '📝', action: 'create' },
+        { id: 'bpmn:UserTask', label: 'Usuario', icon: '', iconCmp: 'user', action: 'create' },
+        {
+          id: 'bpmn:ServiceTask',
+          label: 'Servicio',
+          icon: '',
+          iconCmp: 'settings',
+          action: 'create',
+        },
+        { id: 'bpmn:SendTask', label: 'Envío', icon: '', iconCmp: 'upload', action: 'create' },
+        {
+          id: 'bpmn:ReceiveTask',
+          label: 'Recepción',
+          icon: '',
+          iconCmp: 'download',
+          action: 'create',
+        },
+        {
+          id: 'bpmn:ScriptTask',
+          label: 'Script',
+          icon: '',
+          iconCmp: 'filecode',
+          action: 'create',
+        },
       ],
     },
     {
@@ -202,8 +281,20 @@ export class Designer implements AfterViewInit, OnDestroy {
     {
       section: 'Datos',
       items: [
-        { id: 'bpmn:DataObjectReference', label: 'Objeto', icon: '📄', action: 'create' },
-        { id: 'bpmn:DataStoreReference', label: 'Almacén', icon: '🗃', action: 'create' },
+        {
+          id: 'bpmn:DataObjectReference',
+          label: 'Objeto',
+          icon: '',
+          iconCmp: 'file',
+          action: 'create',
+        },
+        {
+          id: 'bpmn:DataStoreReference',
+          label: 'Almacén',
+          icon: '',
+          iconCmp: 'archive',
+          action: 'create',
+        },
       ],
     },
   ];
@@ -222,13 +313,19 @@ export class Designer implements AfterViewInit, OnDestroy {
   addFieldForm!: FormGroup;
   savingSchema = false;
 
+  /** Texto de voiceCommandResult sin el prefijo de estado (OK:/ERR:/WARN:/INFO:) para mostrar junto al icono */
+  get voiceResultText(): string {
+    return this.voiceCommandResult.replace(/^(OK|ERR|WARN|INFO):\s*/, '').trim();
+  }
+
   get isSelectType(): boolean {
     return this.addFieldForm?.get('type')?.value === 'SELECT';
   }
 
   get elementIcon(): string {
     const t = this.selectedElement?.type ?? '';
-    if (t.includes('Task')) return '📋';
+    // Nota: el caso 'Task' se renderiza con <svg lucideClipboardList> en el template
+    // (ver isTaskNode); este getter solo cubre los glifos BPMN geométricos restantes.
     if (t.includes('StartEvent')) return '▶';
     if (t.includes('EndEvent')) return '⏹';
     if (t.includes('Gateway')) return '◆';
@@ -596,7 +693,7 @@ export class Designer implements AfterViewInit, OnDestroy {
         props.conditionExpression = undefined;
       }
       modeling.updateProperties(this.selectedElement, props);
-      this.toastr.success('Condición guardada', '✅');
+      this.toastr.success('Condición guardada', '');
     } catch (e) {
       this.toastr.error('No se pudo guardar la condición', 'Error');
     }
@@ -676,7 +773,7 @@ export class Designer implements AfterViewInit, OnDestroy {
       call.subscribe({
         next: (res: any) => {
           if (!this.processId && res?.id) this.processId = res.id;
-          this.toastr.success('Proceso guardado correctamente', '✅ Guardado');
+          this.toastr.success('Proceso guardado correctamente', 'Guardado');
           this.saving = false;
           this.savedOk = true;
           this.cdr.markForCheck();
@@ -932,7 +1029,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     if (!this.processId) {
       this.toastr.warning(
         'Guarda el proceso primero antes de guardar el formulario',
-        '⚠️ Proceso sin guardar',
+        'Proceso sin guardar',
       );
       return;
     }
@@ -947,7 +1044,7 @@ export class Designer implements AfterViewInit, OnDestroy {
 
     this.formSchemaService.save(payload).subscribe({
       next: () => {
-        this.toastr.success('Formulario guardado correctamente', '✅ Guardado');
+        this.toastr.success('Formulario guardado correctamente', 'Guardado');
         this.savingSchema = false;
         this.cdr.markForCheck();
       },
@@ -1107,7 +1204,7 @@ export class Designer implements AfterViewInit, OnDestroy {
 
     if (this.analyzeOnCooldown) {
       this.showVoiceResult(
-        'ℹ El análisis acaba de ejecutarse. Espera unos segundos antes de volver a analizar.',
+        'INFO: El análisis acaba de ejecutarse. Espera unos segundos antes de volver a analizar.',
       );
       return;
     }
@@ -1121,7 +1218,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     if (localIssues.length > 0) {
       const speech = localIssues.slice(0, 2).join('. ');
       this.speechService.speak(speech);
-      this.showVoiceResult(`⚠ ${localIssues[0]}`);
+      this.showVoiceResult(`WARN: ${localIssues[0]}`);
       return;
     }
 
@@ -1140,11 +1237,11 @@ export class Designer implements AfterViewInit, OnDestroy {
               if (res.suggestions?.length) {
                 const speech = res.suggestions.slice(0, 2).join('. ');
                 this.speechService.speak(speech);
-                this.showVoiceResult(`ℹ ${res.suggestions[0]}`);
+                this.showVoiceResult(`INFO: ${res.suggestions[0]}`);
               } else {
                 const ok = 'El diagrama se ve bien. No se encontraron problemas.';
                 this.speechService.speak(ok);
-                this.showVoiceResult(`✓ ${ok}`);
+                this.showVoiceResult(`OK: ${ok}`);
               }
             },
             error: () => {
@@ -1337,7 +1434,7 @@ export class Designer implements AfterViewInit, OnDestroy {
       },
       error: () => {
         this.voiceIsExecuting = false;
-        this.showVoiceResult('✗ Error al conectar con el servidor de comandos de voz');
+        this.showVoiceResult('ERR: Error al conectar con el servidor de comandos de voz');
       },
     });
   }
@@ -1381,51 +1478,51 @@ export class Designer implements AfterViewInit, OnDestroy {
 
       case 'SAVE_PROCESS':
         this.save();
-        this.showVoiceResult('💾 Guardando proceso…');
+        this.showVoiceResult('Guardando proceso…');
         break;
 
       case 'PUBLISH_PROCESS':
         this.publish();
-        this.showVoiceResult('🚀 Publicando proceso…');
+        this.showVoiceResult('Publicando proceso…');
         break;
 
       case 'ZOOM_IN':
         this.zoomIn();
-        this.showVoiceResult('🔍 Zoom acercado');
+        this.showVoiceResult('Zoom acercado');
         break;
 
       case 'ZOOM_OUT':
         this.zoomOut();
-        this.showVoiceResult('🔍 Zoom alejado');
+        this.showVoiceResult('Zoom alejado');
         break;
 
       case 'FIT_SCREEN':
         this.fitScreen();
-        this.showVoiceResult('📐 Vista ajustada a la pantalla');
+        this.showVoiceResult('Vista ajustada a la pantalla');
         break;
 
       case 'UNDO':
         try {
           this.modeler.get('commandStack').undo();
-          this.showVoiceResult('↩ Último cambio deshecho');
+          this.showVoiceResult('Último cambio deshecho');
         } catch {
-          this.showVoiceResult('✗ No hay cambios para deshacer');
+          this.showVoiceResult('ERR: No hay cambios para deshacer');
         }
         break;
 
       case 'REDO':
         try {
           this.modeler.get('commandStack').redo();
-          this.showVoiceResult('↪ Cambio rehecho');
+          this.showVoiceResult('Cambio rehecho');
         } catch {
-          this.showVoiceResult('✗ No hay cambios para rehacer');
+          this.showVoiceResult('ERR: No hay cambios para rehacer');
         }
         break;
 
       case 'ANALYZE':
       case 'ANALYZE_DIAGRAM':
         this.analyzeDiagram();
-        this.showVoiceResult('🔍 Analizando el diagrama…');
+        this.showVoiceResult('Analizando el diagrama…');
         break;
 
       case 'SELECT_NODE':
@@ -1434,26 +1531,26 @@ export class Designer implements AfterViewInit, OnDestroy {
 
       case 'CLEAR_SELECTION':
         this.clearSelection();
-        this.showVoiceResult('✓ Selección limpiada');
+        this.showVoiceResult('OK: Selección limpiada');
         break;
 
       case 'EXPLAIN_TOOL': {
         const explanation = cmd.message ?? 'No tengo información sobre esa herramienta.';
-        this.showVoiceResult(`ℹ ${explanation}`);
+        this.showVoiceResult(`INFO: ${explanation}`);
         // La voz ya la maneja speakResponse dentro de showVoiceResult
         break;
       }
 
       case 'UNKNOWN':
         this.showVoiceResult(
-          '⚠ Comando no reconocido — prueba: "agrega tarea", "conecta X con Y", "deshacer", "analizar", "para qué sirve el inicio", "guarda"',
+          'WARN: Comando no reconocido — prueba: "agrega tarea", "conecta X con Y", "deshacer", "analizar", "para qué sirve el inicio", "guarda"',
         );
         break;
 
       default:
         // Acciones válidas sin implementación en canvas (dept, user, tramite…)
         // El backend message ya describe qué haría
-        this.showVoiceResult('ℹ ' + (cmd.message ?? cmd.action));
+        this.showVoiceResult('INFO: ' + (cmd.message ?? cmd.action));
     }
   }
 
@@ -1479,9 +1576,9 @@ export class Designer implements AfterViewInit, OnDestroy {
         modeling.updateLabel(newElement, cmd.nodeName);
       }
 
-      this.showVoiceResult(`✓ '${cmd.nodeName ?? bpmnType}' agregado al diagrama`);
+      this.showVoiceResult(`OK: '${cmd.nodeName ?? bpmnType}' agregado al diagrama`);
     } catch {
-      this.showVoiceResult('✗ No se pudo agregar el elemento al canvas');
+      this.showVoiceResult('ERR: No se pudo agregar el elemento al canvas');
     }
   }
 
@@ -1494,19 +1591,19 @@ export class Designer implements AfterViewInit, OnDestroy {
     const tgt = this.vcFindByName(cmd.targetNode);
 
     if (!src) {
-      this.showVoiceResult(`✗ No se encontró el nodo '${cmd.sourceNode}'`);
+      this.showVoiceResult(`ERR: No se encontró el nodo '${cmd.sourceNode}'`);
       return;
     }
     if (!tgt) {
-      this.showVoiceResult(`✗ No se encontró el nodo '${cmd.targetNode}'`);
+      this.showVoiceResult(`ERR: No se encontró el nodo '${cmd.targetNode}'`);
       return;
     }
 
     try {
       this.modeler.get('modeling').connect(src, tgt);
-      this.showVoiceResult(`✓ '${cmd.sourceNode}' → '${cmd.targetNode}' conectados`);
+      this.showVoiceResult(`OK: '${cmd.sourceNode}' → '${cmd.targetNode}' conectados`);
     } catch {
-      this.showVoiceResult('✗ No se pudo crear la conexión (¿ya existe?)');
+      this.showVoiceResult('ERR: No se pudo crear la conexión (¿ya existe?)');
     }
   }
 
@@ -1517,18 +1614,18 @@ export class Designer implements AfterViewInit, OnDestroy {
   private vcDeleteNode(cmd: VoiceCommand): void {
     const el = this.vcFindByName(cmd.nodeName);
     if (!el) {
-      this.showVoiceResult(`✗ No se encontró el nodo '${cmd.nodeName}'`);
+      this.showVoiceResult(`ERR: No se encontró el nodo '${cmd.nodeName}'`);
       return;
     }
     if (el.type === 'bpmn:Process' || el.type === '__implicitroot') {
-      this.showVoiceResult('✗ No se puede eliminar el proceso raíz');
+      this.showVoiceResult('ERR: No se puede eliminar el proceso raíz');
       return;
     }
     try {
       this.modeler.get('modeling').removeElements([el]);
-      this.showVoiceResult(`✓ Nodo '${cmd.nodeName}' eliminado`);
+      this.showVoiceResult(`OK: Nodo '${cmd.nodeName}' eliminado`);
     } catch {
-      this.showVoiceResult('✗ No se pudo eliminar el nodo');
+      this.showVoiceResult('ERR: No se pudo eliminar el nodo');
     }
   }
 
@@ -1536,14 +1633,14 @@ export class Designer implements AfterViewInit, OnDestroy {
   private vcRenameNode(cmd: VoiceCommand): void {
     const el = this.vcFindByName(cmd.nodeName);
     if (!el) {
-      this.showVoiceResult(`✗ No se encontró el nodo '${cmd.nodeName}'`);
+      this.showVoiceResult(`ERR: No se encontró el nodo '${cmd.nodeName}'`);
       return;
     }
     try {
       this.modeler.get('modeling').updateLabel(el, cmd.newName ?? '');
-      this.showVoiceResult(`✓ Renombrado a '${cmd.newName}'`);
+      this.showVoiceResult(`OK: Renombrado a '${cmd.newName}'`);
     } catch {
-      this.showVoiceResult('✗ No se pudo renombrar el nodo');
+      this.showVoiceResult('ERR: No se pudo renombrar el nodo');
     }
   }
 
@@ -1554,7 +1651,7 @@ export class Designer implements AfterViewInit, OnDestroy {
   private vcSetDepartment(cmd: VoiceCommand): void {
     const el = this.vcFindByName(cmd.nodeName);
     if (!el) {
-      this.showVoiceResult(`✗ No se encontró el nodo '${cmd.nodeName}'`);
+      this.showVoiceResult(`ERR: No se encontró el nodo '${cmd.nodeName}'`);
       return;
     }
 
@@ -1562,7 +1659,7 @@ export class Designer implements AfterViewInit, OnDestroy {
       (d) => d.name.toLowerCase() === (cmd.departmentName ?? '').toLowerCase(),
     );
     if (!dept) {
-      this.showVoiceResult(`✗ Departamento '${cmd.departmentName}' no existe en la lista cargada`);
+      this.showVoiceResult(`ERR: Departamento '${cmd.departmentName}' no existe en la lista cargada`);
       return;
     }
 
@@ -1573,7 +1670,7 @@ export class Designer implements AfterViewInit, OnDestroy {
       formSchemaId: '',
     };
     this.nodePropsMap[el.id] = { ...current, departmentId: dept.id };
-    this.showVoiceResult(`✓ Nodo '${cmd.nodeName}' asignado al departamento '${dept.name}'`);
+    this.showVoiceResult(`OK: Nodo '${cmd.nodeName}' asignado al departamento '${dept.name}'`);
   }
 
   /**
@@ -1584,7 +1681,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     const el = cmd.nodeName ? this.vcFindByName(cmd.nodeName) : this.selectedElement;
 
     if (!el) {
-      this.showVoiceResult(`✗ No se encontró el nodo '${cmd.nodeName ?? '(seleccionado)'}'`);
+      this.showVoiceResult(`ERR: No se encontró el nodo '${cmd.nodeName ?? '(seleccionado)'}'`);
       return;
     }
 
@@ -1595,14 +1692,14 @@ export class Designer implements AfterViewInit, OnDestroy {
       formSchemaId: '',
     };
     this.nodePropsMap[el.id] = { ...current, slaHours: cmd.slaHours ?? 0 };
-    this.showVoiceResult(`✓ SLA de '${el.businessObject?.name}' actualizado a ${cmd.slaHours}h`);
+    this.showVoiceResult(`OK: SLA de '${el.businessObject?.name}' actualizado a ${cmd.slaHours}h`);
   }
 
   /** Selecciona un nodo por nombre y actualiza el panel de propiedades. */
   private vcSelectNode(cmd: VoiceCommand): void {
     const el = this.vcFindByName(cmd.nodeName);
     if (!el) {
-      this.showVoiceResult(`✗ No se encontró el nodo '${cmd.nodeName}'`);
+      this.showVoiceResult(`ERR: No se encontró el nodo '${cmd.nodeName}'`);
       return;
     }
     try {
@@ -1617,9 +1714,9 @@ export class Designer implements AfterViewInit, OnDestroy {
         };
         this.cdr.markForCheck();
       });
-      this.showVoiceResult(`✓ Nodo '${cmd.nodeName}' seleccionado`);
+      this.showVoiceResult(`OK: Nodo '${cmd.nodeName}' seleccionado`);
     } catch {
-      this.showVoiceResult('✗ No se pudo seleccionar el nodo');
+      this.showVoiceResult('ERR: No se pudo seleccionar el nodo');
     }
   }
 
@@ -1683,7 +1780,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     this.voiceCommandResult = msg;
 
     // Texto limpio para el historial (sin emojis de estado al inicio)
-    const aiText = msg.replace(/^[✓✗⚠ℹ💾🚀🔍📐⏳]\s*/, '').trim();
+    const aiText = msg.replace(/^(OK|ERR|WARN|INFO):\s*/, '').trim();
     this.voiceHistory = [...this.voiceHistory, { role: 'ai', text: aiText }];
     this.speakResponse(aiText);
     this.cdr.markForCheck();

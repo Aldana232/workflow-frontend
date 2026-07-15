@@ -2,11 +2,21 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ShareService } from '../../core/services/share.service';
+import {
+  LucideClockAlert, LucideBan, LucideDroplet, LucideFolderOpen,
+  LucideFileText, LucideImage, LucideFileSpreadsheet, LucideVideo, LucidePaperclip,
+  LucideMapPin, LucideBuilding2, LucideUser, LucideExternalLink, LucideClock,
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-shared-docs',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    LucideClockAlert, LucideBan, LucideDroplet, LucideFolderOpen,
+    LucideFileText, LucideImage, LucideFileSpreadsheet, LucideVideo, LucidePaperclip,
+    LucideMapPin, LucideBuilding2, LucideUser, LucideExternalLink, LucideClock,
+  ],
   templateUrl: './shared-docs.component.html',
   styleUrl: './shared-docs.component.css',
 })
@@ -58,13 +68,13 @@ export class SharedDocsComponent implements OnInit {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  getFileIcon(mimeType: string): string {
-    if (!mimeType) return '📎';
-    if (mimeType === 'application/pdf') return '📄';
-    if (mimeType.startsWith('image/')) return '🖼️';
-    if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType.includes('csv')) return '📊';
-    if (mimeType.startsWith('video/')) return '🎬';
-    return '📎';
+  getFileIcon(mimeType: string): 'pdf' | 'image' | 'spreadsheet' | 'video' | 'other' {
+    if (!mimeType) return 'other';
+    if (mimeType === 'application/pdf') return 'pdf';
+    if (mimeType.startsWith('image/')) return 'image';
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType.includes('csv')) return 'spreadsheet';
+    if (mimeType.startsWith('video/')) return 'video';
+    return 'other';
   }
 
   openFile(doc: any): void {

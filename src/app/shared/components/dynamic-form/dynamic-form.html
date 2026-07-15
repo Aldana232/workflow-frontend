@@ -80,7 +80,7 @@
                          [src]="fileStates[field.name].fileUrl!"
                          [alt]="fileStates[field.name].fileName ?? ''" />
                   } @else {
-                    <span class="file-icon">📎</span>
+                    <svg lucidePaperclip class="file-icon" [size]="18"></svg>
                   }
                   <span class="file-name">{{ fileStates[field.name].fileName }}</span>
                   <a [href]="fileStates[field.name].fileUrl"
@@ -91,7 +91,7 @@
                 </div>
               } @else {
                 <label [for]="field.name + '_input'" class="btn-upload">
-                  <span>☁</span> Subir archivo
+                  <svg lucideCloudUpload [size]="16"></svg> Subir archivo
                   @if (field.required) { <span class="req-mark">*</span> }
                 </label>
               }
@@ -121,7 +121,7 @@
         <!-- AI hint from JARVIS — shown after the field loses focus + debounce -->
         @if (aiHints[field.name]) {
           <span class="field-ai-hint">
-            <span class="ai-hint-icon">🤖</span>
+            <svg lucideBot class="ai-hint-icon" [size]="14"></svg>
             {{ aiHints[field.name] }}
           </span>
         }

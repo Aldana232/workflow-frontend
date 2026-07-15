@@ -2,7 +2,7 @@
 
   <header class="consulta-header">
     <div class="header-brand">
-      <span class="brand-icon">🔄</span>
+      <span class="brand-icon"><svg lucideRefreshCw [size]="20"></svg></span>
       <span class="brand-name">WorkflowApp</span>
     </div>
     <a routerLink="/login" class="btn-login">Iniciar sesión</a>
@@ -38,7 +38,7 @@
 
     @if (searched && notFound) {
       <div class="result-card result-not-found">
-        <div class="nf-icon">🔍</div>
+        <div class="nf-icon"><svg lucideSearch [size]="28"></svg></div>
         <h3>Trámite no encontrado</h3>
         <p>No existe un trámite con el código <strong>{{ code }}</strong>. Verifica el código e intenta nuevamente.</p>
       </div>

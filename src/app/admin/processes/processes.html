@@ -34,15 +34,15 @@
           </p>
 
           <div class="card-actions">
-            <button class="btn-tramites" (click)="viewTramites(p)">📋 Trámites</button>
-            <button class="btn-design"   (click)="design(p)">✏️ Diseñar</button>
+            <button class="btn-tramites" (click)="viewTramites(p)"><svg lucideClipboardList [size]="14"></svg> Trámites</button>
+            <button class="btn-design"   (click)="design(p)"><svg lucidePencil [size]="14"></svg> Diseñar</button>
             @if (statusMod(p.status) === 'DRAFT') {
-              <button class="btn-publish" (click)="publish(p)">🚀 Publicar</button>
+              <button class="btn-publish" (click)="publish(p)"><svg lucideRocket [size]="14"></svg> Publicar</button>
             }
             @if (statusMod(p.status) === 'ACTIVO') {
-              <button class="btn-deactivate" (click)="deactivate(p)" title="Desactivar proceso">⏸ Desactivar</button>
+              <button class="btn-deactivate" (click)="deactivate(p)" title="Desactivar proceso"><svg lucidePause [size]="14"></svg> Desactivar</button>
             }
-            <button class="btn-delete" (click)="deleteProcess(p)" title="Eliminar proceso">🗑</button>
+            <button class="btn-delete" (click)="deleteProcess(p)" title="Eliminar proceso"><svg lucideTrash2 [size]="14"></svg></button>
           </div>
         </div>
       }
@@ -53,7 +53,7 @@
       <div class="tramites-panel">
         <div class="tramites-panel-header">
           <h2>Trámites — {{ selectedProcess.name }}</h2>
-          <button class="btn-close-panel" (click)="closeTramites()">✕ Cerrar</button>
+          <button class="btn-close-panel" (click)="closeTramites()"><svg lucideX [size]="14"></svg> Cerrar</button>
         </div>
 
         @if (loadingTramites) {
@@ -91,8 +91,8 @@
                       {{ t.startedAt ? (t.startedAt | slice:0:10) : '—' }}
                     </td>
                     <td class="actions-cell">
-                      <button class="btn-view-detail" (click)="viewDetail(t)" title="Ver detalle">👁</button>
-                      <button class="btn-delete-tram" (click)="deleteTramite(t)" title="Eliminar trámite">🗑</button>
+                      <button class="btn-view-detail" (click)="viewDetail(t)" title="Ver detalle"><svg lucideEye [size]="14"></svg></button>
+                      <button class="btn-delete-tram" (click)="deleteTramite(t)" title="Eliminar trámite"><svg lucideTrash2 [size]="14"></svg></button>
                     </td>
                   </tr>
                 }
@@ -111,7 +111,7 @@
         <div class="detail-panel">
           <div class="tramites-panel-header">
             <h2>Detalle — <code class="tram-code">{{ detailTramite.code }}</code></h2>
-            <button class="btn-close-panel" (click)="closeDetail()">✕ Cerrar</button>
+            <button class="btn-close-panel" (click)="closeDetail()"><svg lucideX [size]="14"></svg> Cerrar</button>
           </div>
 
           <div class="detail-body">
@@ -163,7 +163,7 @@
             <!-- ── Gestión Documental ── -->
             <div class="detail-section detail-section--full">
               <div class="doc-mgmt-header">
-                <h3>📎 Gestión Documental</h3>
+                <h3><svg lucidePaperclip [size]="16"></svg> Gestión Documental</h3>
                 <div class="node-selector-wrap">
                   <label class="node-selector-label">Nodo destino para subir:</label>
                   @if (loadingNodes) {
@@ -180,7 +180,7 @@
                   }
                   @if (selectedNodeId) {
                     <span class="node-selected-chip">
-                      📍 {{ selectedNodeName }} · subida habilitada
+                      <svg lucideMapPin [size]="14"></svg> {{ selectedNodeName }} · subida habilitada
                     </span>
                   }
                 </div>

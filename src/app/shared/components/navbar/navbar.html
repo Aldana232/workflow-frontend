@@ -6,7 +6,7 @@
       <span class="ham-bar"></span>
     </button>
     <div class="navbar-brand">
-      <span class="brand-icon">⚡</span>
+      <span class="brand-icon"><svg lucideZap [size]="18"></svg></span>
       <span class="brand-name">Workflow Platform</span>
     </div>
   </div>
@@ -44,11 +44,11 @@
           </div>
           <hr class="dropdown-sep" />
           <button class="dropdown-item" (click)="goProfile()">
-            <span>👤</span> Mi Perfil
+            <span><svg lucideUser [size]="16"></svg></span> Mi Perfil
           </button>
           <hr class="dropdown-sep" />
           <button class="dropdown-item dropdown-item--danger" (click)="logout()">
-            <span>🚪</span> Cerrar sesión
+            <span><svg lucideLogOut [size]="16"></svg></span> Cerrar sesión
           </button>
         </div>
       }

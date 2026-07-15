@@ -2,10 +2,11 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
+import { LucideZap } from '@lucide/angular';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, LucideZap],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

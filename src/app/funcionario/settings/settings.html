@@ -11,15 +11,15 @@
     <nav class="settings-nav">
       <button [class]="'nav-tab' + (activeTab==='profile' ? ' active' : '')"
               (click)="setTab('profile')">
-        👤 Perfil
+        <svg lucideUser [size]="16"></svg> Perfil
       </button>
       <button [class]="'nav-tab' + (activeTab==='security' ? ' active' : '')"
               (click)="setTab('security')">
-        🔒 Seguridad
+        <svg lucideLock [size]="16"></svg> Seguridad
       </button>
       <button [class]="'nav-tab' + (activeTab==='preferences' ? ' active' : '')"
               (click)="setTab('preferences')">
-        ⚙️ Preferencias
+        <svg lucideSettings [size]="16"></svg> Preferencias
       </button>
     </nav>
 
@@ -61,7 +61,7 @@
           </div>
 
           <div class="info-note">
-            ℹ️ Para actualizar tu información de perfil, contacta al administrador del sistema.
+            <svg lucideInfo [size]="16"></svg> Para actualizar tu información de perfil, contacta al administrador del sistema.
           </div>
         </div>
       }
@@ -89,7 +89,7 @@
                      name="confirmPw" placeholder="••••••••" />
             </div>
             <button type="submit" class="btn-save" [disabled]="pwLoading">
-              @if (pwLoading) { Guardando… } @else { 🔒 Cambiar contraseña }
+              @if (pwLoading) { Guardando… } @else { <svg lucideLock [size]="16"></svg> Cambiar contraseña }
             </button>
           </form>
 
@@ -149,7 +149,7 @@
           </div>
 
           <button class="btn-save" (click)="savePreferences()">
-            💾 Guardar preferencias
+            <svg lucideSave [size]="16"></svg> Guardar preferencias
           </button>
         </div>
       }

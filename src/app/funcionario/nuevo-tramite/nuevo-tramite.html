@@ -1,7 +1,7 @@
 <div class="nt-page">
 
   <div class="nt-header">
-    <button class="btn-back" (click)="goBack()">← Volver</button>
+    <button class="btn-back" (click)="goBack()"><svg lucideArrowLeft [size]="16"></svg> Volver</button>
     <div>
       <h1>Nuevo Trámite</h1>
       <p>Completa los datos del cliente e inicia el proceso</p>
@@ -11,7 +11,7 @@
   <!-- ══ CÓDIGO GENERADO ══════════════════════════════════════════════════ -->
   @if (codigoGenerado) {
     <div class="success-banner">
-      <span class="success-icon">✅</span>
+      <span class="success-icon"><svg lucideCircleCheck [size]="20"></svg></span>
       <div>
         <strong>Trámite registrado exitosamente</strong>
         <div class="codigo-wrap">
@@ -19,7 +19,7 @@
           <span class="codigo-hint">Guarda este código para consultar el estado</span>
         </div>
       </div>
-      <button class="btn-go-tasks" (click)="goBack()">Ver mis tareas →</button>
+      <button class="btn-go-tasks" (click)="goBack()">Ver mis tareas <svg lucideArrowRight [size]="16"></svg></button>
     </div>
   }
 
@@ -29,7 +29,7 @@
 
       <!-- Proceso -->
       <div class="form-card">
-        <h3 class="card-title">⚙️ Proceso a iniciar</h3>
+        <h3 class="card-title"><svg lucideSettings [size]="18"></svg> Proceso a iniciar</h3>
         <div class="field-group">
           <label>Proceso <span class="req">*</span></label>
           <select formControlName="processId" [class.invalid]="err('processId')">
@@ -46,7 +46,7 @@
 
       <!-- Datos del cliente -->
       <div class="form-card">
-        <h3 class="card-title">👤 Datos del cliente</h3>
+        <h3 class="card-title"><svg lucideUser [size]="18"></svg> Datos del cliente</h3>
 
         <div class="fields-grid">
 
@@ -121,7 +121,7 @@
           @if (submitting) {
             <span class="spinner"></span> Creando trámite…
           } @else {
-            🚀 Iniciar trámite
+            <svg lucideRocket [size]="16"></svg> Iniciar trámite
           }
         </button>
       </div>

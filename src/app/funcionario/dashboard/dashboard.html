@@ -62,8 +62,8 @@
             </div>
 
             <div class="card-meta">
-              <span class="meta-item">📅 {{ formatDate(t.arrivedAt) }}</span>
-              <span class="meta-item">🏢 {{ getDeptName(t.departmentId) }}</span>
+              <span class="meta-item"><svg lucideCalendar [size]="14"></svg> {{ formatDate(t.arrivedAt) }}</span>
+              <span class="meta-item"><svg lucideBuilding2 [size]="14"></svg> {{ getDeptName(t.departmentId) }}</span>
             </div>
 
             <div class="card-actions">
@@ -73,15 +73,15 @@
                 (click)="openTask(t)"
               >
                 @if (t.canProcess) {
-                  ✏️ Procesar tarea
+                  <svg lucidePencil [size]="16"></svg> Procesar tarea
                 } @else if (t.status === 'COMPLETED') {
-                  ✅ Ver tarea completada
+                  <svg lucideCircleCheck [size]="16"></svg> Ver tarea completada
                 } @else {
-                  👁 Ver detalle
+                  <svg lucideEye [size]="16"></svg> Ver detalle
                 }
               </button>
               <button class="btn-flow" (click)="openFlow(t)">
-                🔍 Ver flujo
+                <svg lucideSearch [size]="16"></svg> Ver flujo
               </button>
             </div>
 

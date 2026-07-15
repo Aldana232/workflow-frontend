@@ -8,14 +8,14 @@
 
   <!-- ── Expirado ── -->
   <div *ngIf="!isLoading && isExpired" class="state-card state-card--error">
-    <span class="state-icon">⏰</span>
+    <svg lucideClockAlert class="state-icon" [size]="40"></svg>
     <h2 class="state-title">Link expirado</h2>
     <p class="state-text">Este enlace de acceso ha vencido. Solicite uno nuevo al encargado del trámite.</p>
   </div>
 
   <!-- ── Inválido ── -->
   <div *ngIf="!isLoading && isInvalid" class="state-card state-card--error">
-    <span class="state-icon">🚫</span>
+    <svg lucideBan class="state-icon" [size]="40"></svg>
     <h2 class="state-title">Enlace no válido</h2>
     <p class="state-text">Este enlace no existe o fue revocado. Solicite un nuevo enlace al encargado.</p>
   </div>
@@ -26,7 +26,7 @@
     <!-- Header / branding -->
     <header class="shared-header">
       <div class="brand">
-        <span class="brand-icon">💧</span>
+        <svg lucideDroplet class="brand-icon" [size]="20"></svg>
         <span class="brand-name">Saguapac</span>
       </div>
       <div class="badge-public">Vista pública · Solo lectura</div>
@@ -40,7 +40,7 @@
           <span *ngIf="tramiteCode" class="tramite-code">{{ tramiteCode }}</span>
         </div>
         <div *ngIf="expiresAt" class="expires-chip">
-          ⏱ Acceso hasta {{ formatDate(expiresAt) }}
+          <svg lucideClock [size]="14"></svg> Acceso hasta {{ formatDate(expiresAt) }}
         </div>
       </div>
 
@@ -73,13 +73,21 @@
       </h2>
 
       <div *ngIf="documents.length === 0" class="empty-docs">
-        <span class="empty-icon">📂</span>
+        <svg lucideFolderOpen class="empty-icon" [size]="40"></svg>
         <p>No hay documentos adjuntos en este trámite.</p>
       </div>
 
       <ul *ngIf="documents.length > 0" class="doc-list">
         <li *ngFor="let doc of documents" class="doc-item">
-          <span class="doc-file-icon">{{ getFileIcon(doc.mimeType) }}</span>
+          <span class="doc-file-icon">
+            @switch (getFileIcon(doc.mimeType)) {
+              @case ('pdf') { <svg lucideFileText [size]="20"></svg> }
+              @case ('image') { <svg lucideImage [size]="20"></svg> }
+              @case ('spreadsheet') { <svg lucideFileSpreadsheet [size]="20"></svg> }
+              @case ('video') { <svg lucideVideo [size]="20"></svg> }
+              @default { <svg lucidePaperclip [size]="20"></svg> }
+            }
+          </span>
           <div class="doc-info">
             <span class="doc-name">{{ doc.fileName }}</span>
             <div class="doc-meta">
@@ -90,14 +98,14 @@
               <span class="doc-date">{{ formatDate(doc.createdAt) }}</span>
             </div>
             <div class="doc-context" *ngIf="doc.nodeName || doc.departmentName || doc.uploadedByName">
-              <span class="ctx-chip ctx-node" *ngIf="doc.nodeName">📍 {{ doc.nodeName }}</span>
-              <span class="ctx-chip ctx-dept" *ngIf="doc.departmentName">🏢 {{ doc.departmentName }}</span>
-              <span class="ctx-chip ctx-user" *ngIf="doc.uploadedByName">👤 {{ doc.uploadedByName }}</span>
+              <span class="ctx-chip ctx-node" *ngIf="doc.nodeName"><svg lucideMapPin [size]="12"></svg> {{ doc.nodeName }}</span>
+              <span class="ctx-chip ctx-dept" *ngIf="doc.departmentName"><svg lucideBuilding2 [size]="12"></svg> {{ doc.departmentName }}</span>
+              <span class="ctx-chip ctx-user" *ngIf="doc.uploadedByName"><svg lucideUser [size]="12"></svg> {{ doc.uploadedByName }}</span>
             </div>
             <p *ngIf="doc.description" class="doc-desc">{{ doc.description }}</p>
           </div>
           <button class="btn-open" (click)="openFile(doc)" [disabled]="!doc.fileUrl" title="Abrir / Descargar">
-            ↗ Abrir
+            <svg lucideExternalLink [size]="14"></svg> Abrir
           </button>
         </li>
       </ul>
