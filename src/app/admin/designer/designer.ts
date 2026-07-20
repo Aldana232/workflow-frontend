@@ -318,8 +318,9 @@ export class Designer implements AfterViewInit, OnDestroy {
     return this.voiceCommandResult.replace(/^(OK|ERR|WARN|INFO):\s*/, '').trim();
   }
 
-  get isSelectType(): boolean {
-    return this.addFieldForm?.get('type')?.value === 'SELECT';
+  get isOptionsType(): boolean {
+    const t = this.addFieldForm?.get('type')?.value;
+    return t === 'SELECT' || t === 'CHECKLIST';
   }
 
   get elementIcon(): string {
@@ -929,7 +930,9 @@ export class Designer implements AfterViewInit, OnDestroy {
     // Validación dinámica: options requerida solo si SELECT
     this.addFieldForm.get('type')!.valueChanges.subscribe((t: string) => {
       const optCtrl = this.addFieldForm.get('options')!;
-      t === 'SELECT' ? optCtrl.setValidators([Validators.required]) : optCtrl.clearValidators();
+      (t === 'SELECT' || t === 'CHECKLIST')
+        ? optCtrl.setValidators([Validators.required])
+        : optCtrl.clearValidators();
       optCtrl.updateValueAndValidity();
       this.cdr.markForCheck();
     });
@@ -1005,7 +1008,7 @@ export class Designer implements AfterViewInit, OnDestroy {
       type: type as FormField['type'],
       required: !!required,
       placeholder: (placeholder as string)?.trim() || undefined,
-      ...(type === 'SELECT' && {
+      ...((type === 'SELECT' || type === 'CHECKLIST') && {
         options: (options as string)
           .split(',')
           .map((o: string) => o.trim())

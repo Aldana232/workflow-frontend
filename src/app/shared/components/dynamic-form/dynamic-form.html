@@ -66,6 +66,23 @@
             </label>
           }
 
+          @case ('CHECKLIST') {
+            <div class="checklist-wrap">
+              @for (opt of (field.options ?? []); track opt.value) {
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    class="checkbox-input"
+                    [checked]="isChecklistOptionChecked(field, opt.value)"
+                    (change)="toggleChecklistOption(field, opt.value, $event)"
+                  />
+                  <span class="checkbox-box"></span>
+                  <span class="checkbox-text">{{ opt.label }}</span>
+                </label>
+              }
+            </div>
+          }
+
           @case ('FILE') {
             <div class="file-wrap">
               @if (fileStates[field.name].uploading) {

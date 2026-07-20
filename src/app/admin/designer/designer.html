@@ -415,11 +415,12 @@
                       <option value="TEXTAREA">📄 Área de texto</option>
                       <option value="SELECT">🔽 Lista desplegable</option>
                       <option value="CHECKBOX">☑ Casilla de verificación</option>
+                      <option value="CHECKLIST">☑☑ Lista de verificación</option>
                       <option value="FILE">📎 Archivo adjunto</option>
                     </select>
                   </div>
 
-                  @if (isSelectType) {
+                  @if (isOptionsType) {
                     <div class="prop-group">
                       <label>Opciones <span class="required-star">*</span></label>
                       <input
@@ -435,7 +436,7 @@
                     </div>
                   }
 
-                  @if (addFieldForm.get('type')?.value !== 'CHECKBOX' && addFieldForm.get('type')?.value !== 'FILE') {
+                  @if (addFieldForm.get('type')?.value !== 'CHECKBOX' && addFieldForm.get('type')?.value !== 'CHECKLIST' && addFieldForm.get('type')?.value !== 'FILE') {
                     <div class="prop-group">
                       <label>Texto de ayuda (placeholder)</label>
                       <input

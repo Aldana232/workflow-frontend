@@ -129,6 +129,13 @@
   line-height: 1.4;
 }
 
+/* ── Checklist ── */
+.checklist-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+
 /* ── File upload ── */
 .file-wrap {
   display: flex;

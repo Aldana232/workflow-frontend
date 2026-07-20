@@ -20,7 +20,7 @@ import { LucidePaperclip, LucideCloudUpload, LucideBot } from '@lucide/angular';
 export interface FormField {
   name: string;
   label: string;
-  type: 'TEXT' | 'TEXTAREA' | 'SELECT' | 'CHECKBOX' | 'FILE';
+  type: 'TEXT' | 'TEXTAREA' | 'SELECT' | 'CHECKBOX' | 'CHECKLIST' | 'FILE';
   required?: boolean;
   options?: { label: string; value: any }[];
   placeholder?: string;
@@ -76,7 +76,11 @@ export class DynamicForm implements OnInit, OnChanges {
 
     const controls: Record<string, FormControl> = {};
     for (const field of this.fields) {
-      const initial = field.value ?? (field.type === 'CHECKBOX' ? false : '');
+      const initial = field.value ?? (
+        field.type === 'CHECKBOX' ? false :
+        field.type === 'CHECKLIST' ? [] :
+        ''
+      );
       const validators = field.required && field.type !== 'FILE'
         ? [Validators.required]
         : [];
@@ -185,6 +189,27 @@ export class DynamicForm implements OnInit, OnChanges {
     } finally {
       state.uploading = false;
     }
+  }
+
+  isChecklistOptionChecked(field: FormField, optionValue: any): boolean {
+    const current = this.getControl(field.name).value;
+    return Array.isArray(current) && current.includes(optionValue);
+  }
+
+  toggleChecklistOption(field: FormField, optionValue: any, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const ctrl = this.getControl(field.name);
+    const current: any[] = Array.isArray(ctrl.value) ? [...ctrl.value] : [];
+
+    if (checked) {
+      if (!current.includes(optionValue)) current.push(optionValue);
+    } else {
+      const idx = current.indexOf(optionValue);
+      if (idx > -1) current.splice(idx, 1);
+    }
+
+    ctrl.setValue(current);
+    ctrl.markAsTouched();
   }
 
   isImageUrl(url: string | null): boolean {

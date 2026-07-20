@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 
 // ── Tipos públicos exportados ────────────────────────────────────────────────
 
-export type FormFieldType = 'TEXT' | 'TEXTAREA' | 'SELECT' | 'CHECKBOX' | 'FILE';
+export type FormFieldType = 'TEXT' | 'TEXTAREA' | 'SELECT' | 'CHECKBOX' | 'CHECKLIST' | 'FILE';
 
 export interface FormField {
   id?:          string;
@@ -15,7 +15,7 @@ export interface FormField {
   type:         FormFieldType;
   required:     boolean;
   placeholder?: string;
-  options?:     string[];   // solo para type === 'SELECT'
+  options?:     string[];   // solo para type === 'SELECT' o 'CHECKLIST'
 }
 
 export interface NodeFormSchema {
