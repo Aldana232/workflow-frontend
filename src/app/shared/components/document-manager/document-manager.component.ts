@@ -2,7 +2,7 @@ import { Component, Input, OnInit, inject, ChangeDetectorRef } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { DocumentService } from '../../../core/services/document.service';
+import { DocumentService, DocumentVersion } from '../../../core/services/document.service';
 import { ShareService, ShareToken } from '../../../core/services/share.service';
 import { DocumentEditorComponent } from '../document-editor/document-editor.component';
 import { OnlyOfficeService } from '../../services/onlyoffice.service';
@@ -11,7 +11,7 @@ import {
   LucideCircleCheck, LucideCircleX, LucideEye, LucideCopy, LucideTrash2,
   LucideFileText, LucideImage, LucideFileSpreadsheet, LucideVideo, LucidePaperclip,
   LucideMapPin, LucideBuilding2, LucideUser, LucideDownload, LucidePencil,
-  LucideHandshake, LucideX, LucideLoaderCircle,
+  LucideHandshake, LucideX, LucideLoaderCircle, LucideHistory,
 } from '@lucide/angular';
 
 @Component({
@@ -23,7 +23,7 @@ import {
     LucideCircleCheck, LucideCircleX, LucideEye, LucideCopy, LucideTrash2,
     LucideFileText, LucideImage, LucideFileSpreadsheet, LucideVideo, LucidePaperclip,
     LucideMapPin, LucideBuilding2, LucideUser, LucideDownload, LucidePencil,
-    LucideHandshake, LucideX, LucideLoaderCircle,
+    LucideHandshake, LucideX, LucideLoaderCircle, LucideHistory,
   ],
   templateUrl: './document-manager.component.html',
   styleUrl: './document-manager.component.css',
@@ -66,6 +66,12 @@ export class DocumentManagerComponent implements OnInit {
   isGeneratingLink         = false;
   showShareSection         = false;
   loadingLinks             = false;
+
+  // ── Historial de versiones ───────────────────────────────────────────────
+  showVersionsModal = false;
+  versionsDoc: any = null;
+  versions: DocumentVersion[] = [];
+  loadingVersions = false;
 
   // Editor colaborativo
   showEditor = false;
@@ -181,6 +187,52 @@ export class DocumentManagerComponent implements OnInit {
       },
       error: () => {
         this.errorMessage = 'No se pudo eliminar el documento.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  // ── Historial de versiones ───────────────────────────────────────────────
+
+  openVersions(doc: any): void {
+    this.versionsDoc = doc;
+    this.showVersionsModal = true;
+    this.versions = [];
+    this.loadingVersions = true;
+    this.documentService.getDocumentVersions(doc.id).subscribe({
+      next: (versions) => {
+        this.versions = versions ?? [];
+        this.loadingVersions = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loadingVersions = false;
+        this.errorMessage = 'No se pudo cargar el historial de versiones.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  closeVersionsModal(): void {
+    this.showVersionsModal = false;
+    this.versionsDoc = null;
+    this.versions = [];
+  }
+
+  downloadVersion(version: DocumentVersion): void {
+    if (!this.versionsDoc) return;
+    this.documentService.downloadDocumentVersion(this.versionsDoc.id, version.versionId).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.target   = '_blank';
+        a.download = this.versionsDoc.fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.errorMessage = 'No se pudo descargar esa versión.';
         this.cdr.markForCheck();
       },
     });

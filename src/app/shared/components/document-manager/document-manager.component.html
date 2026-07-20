@@ -205,6 +205,9 @@
           <button class="btn-icon btn-download" (click)="$event.stopPropagation(); downloadDocument(doc)" title="Descargar">
             <svg lucideDownload [size]="16"></svg>
           </button>
+          <button class="btn-icon btn-versions" (click)="$event.stopPropagation(); openVersions(doc)" title="Historial de versiones">
+            <svg lucideHistory [size]="16"></svg>
+          </button>
           @if (doc.collaborativeMode) {
             <button class="btn-edit-collab" (click)="$event.stopPropagation(); openEditor(doc)" title="Editar colaborativamente">
               <svg lucidePencil [size]="14"></svg> Editar
@@ -308,6 +311,47 @@
               <p class="preview-meta">Subido por: {{ selectedDoc.uploadedByName }}</p>
               <button class="btn-download-big" (click)="downloadDocument(selectedDoc)"><svg lucideDownload [size]="16"></svg> Descargar archivo</button>
             </div>
+          }
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ── Modal de historial de versiones ── -->
+  @if (showVersionsModal && versionsDoc) {
+    <div class="preview-overlay" (click)="closeVersionsModal()">
+      <div class="versions-modal" (click)="$event.stopPropagation()">
+
+        <div class="preview-header">
+          <span class="preview-filename">Historial de versiones — {{ versionsDoc.fileName }}</span>
+          <button class="btn-close-preview" (click)="closeVersionsModal()"><svg lucideX [size]="16"></svg></button>
+        </div>
+
+        <div class="versions-body">
+          @if (loadingVersions) {
+            <div class="preview-loading"><svg lucideLoaderCircle class="spin-icon" [size]="16"></svg> Cargando versiones...</div>
+          }
+          @if (!loadingVersions && versions.length === 0) {
+            <p class="events-empty">Sin versiones anteriores registradas.</p>
+          }
+          @if (!loadingVersions && versions.length > 0) {
+            <ul class="versions-list">
+              @for (v of versions; track v.versionId) {
+                <li class="version-item">
+                  <div class="version-info">
+                    <span class="version-date">{{ formatDate(v.lastModified) }}</span>
+                    @if (v.latest) {
+                      <span class="version-badge">Actual</span>
+                    }
+                    <span class="version-size">{{ formatFileSize(v.sizeBytes) }}</span>
+                  </div>
+                  <button class="btn-icon btn-download" (click)="downloadVersion(v)" title="Descargar esta versión">
+                    <svg lucideDownload [size]="16"></svg>
+                  </button>
+                </li>
+              }
+            </ul>
           }
         </div>
 

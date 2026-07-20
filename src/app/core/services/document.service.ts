@@ -61,4 +61,22 @@ export class DocumentService {
   getStats(companyId: string): Observable<any> {
     return this.http.get(`${this.base}/documents/stats/${companyId}`);
   }
+
+  getDocumentVersions(documentId: string): Observable<DocumentVersion[]> {
+    return this.http.get<DocumentVersion[]>(`${this.base}/documents/${documentId}/versions`);
+  }
+
+  downloadDocumentVersion(documentId: string, versionId: string): Observable<Blob> {
+    return this.http.get(
+      `${this.base}/documents/${documentId}/versions/${encodeURIComponent(versionId)}/download`,
+      { responseType: 'blob' as 'json' }
+    ) as Observable<Blob>;
+  }
+}
+
+export interface DocumentVersion {
+  versionId: string;
+  lastModified: string;
+  sizeBytes: number;
+  latest: boolean;
 }
