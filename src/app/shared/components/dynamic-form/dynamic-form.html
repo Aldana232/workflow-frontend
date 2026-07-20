@@ -83,6 +83,48 @@
             </div>
           }
 
+          @case ('TABLE') {
+            <div class="table-wrap">
+              <table class="dyn-table">
+                <thead>
+                  <tr>
+                    @for (col of (field.options ?? []); track col.value) {
+                      <th>{{ col.label }}</th>
+                    }
+                    <th class="table-col-actions"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of tableRows(field); track $index; let rowIndex = $index) {
+                    <tr>
+                      @for (col of (field.options ?? []); track col.value) {
+                        <td>
+                          <input
+                            type="text"
+                            class="table-cell-input"
+                            [value]="row[col.value] ?? ''"
+                            (change)="updateTableCell(field, rowIndex, col.value, $event)"
+                          />
+                        </td>
+                      }
+                      <td class="table-col-actions">
+                        <button
+                          type="button"
+                          class="btn-table-row-remove"
+                          (click)="removeTableRow(field, rowIndex)"
+                          title="Eliminar fila"
+                        >✕</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <button type="button" class="btn-table-row-add" (click)="addTableRow(field)">
+                + Agregar fila
+              </button>
+            </div>
+          }
+
           @case ('FILE') {
             <div class="file-wrap">
               @if (fileStates[field.name].uploading) {

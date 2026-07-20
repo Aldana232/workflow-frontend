@@ -136,6 +136,79 @@
   gap: .55rem;
 }
 
+/* ── Tabla dinámica ── */
+.table-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.dyn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+
+.dyn-table th {
+  text-align: left;
+  font-size: .78rem;
+  font-weight: 600;
+  color: #334155;
+  padding: .4rem .5rem;
+  border-bottom: 1.5px solid #e2e8f0;
+}
+
+.dyn-table td {
+  padding: .3rem .5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table-cell-input {
+  width: 100%;
+  padding: .45rem .6rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: .82rem;
+  background: #f8fafc;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.table-cell-input:focus {
+  border-color: #4f46e5;
+  background: #fff;
+}
+
+.table-col-actions {
+  width: 32px;
+}
+
+.btn-table-row-remove {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: .8rem;
+  padding: .3rem;
+}
+
+.btn-table-row-add {
+  align-self: flex-start;
+  padding: .45rem 1rem;
+  background: #eef2ff;
+  border: 1.5px dashed #c7d2fe;
+  border-radius: 10px;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #4f46e5;
+  cursor: pointer;
+}
+
+.btn-table-row-add:hover {
+  background: #e0e7ff;
+}
+
 /* ── File upload ── */
 .file-wrap {
   display: flex;

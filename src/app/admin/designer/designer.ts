@@ -320,7 +320,11 @@ export class Designer implements AfterViewInit, OnDestroy {
 
   get isOptionsType(): boolean {
     const t = this.addFieldForm?.get('type')?.value;
-    return t === 'SELECT' || t === 'CHECKLIST';
+    return t === 'SELECT' || t === 'CHECKLIST' || t === 'TABLE';
+  }
+
+  get isTableType(): boolean {
+    return this.addFieldForm?.get('type')?.value === 'TABLE';
   }
 
   get elementIcon(): string {
@@ -930,7 +934,7 @@ export class Designer implements AfterViewInit, OnDestroy {
     // Validación dinámica: options requerida solo si SELECT
     this.addFieldForm.get('type')!.valueChanges.subscribe((t: string) => {
       const optCtrl = this.addFieldForm.get('options')!;
-      (t === 'SELECT' || t === 'CHECKLIST')
+      (t === 'SELECT' || t === 'CHECKLIST' || t === 'TABLE')
         ? optCtrl.setValidators([Validators.required])
         : optCtrl.clearValidators();
       optCtrl.updateValueAndValidity();
@@ -1008,7 +1012,7 @@ export class Designer implements AfterViewInit, OnDestroy {
       type: type as FormField['type'],
       required: !!required,
       placeholder: (placeholder as string)?.trim() || undefined,
-      ...((type === 'SELECT' || type === 'CHECKLIST') && {
+      ...((type === 'SELECT' || type === 'CHECKLIST' || type === 'TABLE') && {
         options: (options as string)
           .split(',')
           .map((o: string) => o.trim())

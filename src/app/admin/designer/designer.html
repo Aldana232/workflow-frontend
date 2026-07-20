@@ -416,27 +416,28 @@
                       <option value="SELECT">🔽 Lista desplegable</option>
                       <option value="CHECKBOX">☑ Casilla de verificación</option>
                       <option value="CHECKLIST">☑☑ Lista de verificación</option>
+                      <option value="TABLE">▦ Tabla</option>
                       <option value="FILE">📎 Archivo adjunto</option>
                     </select>
                   </div>
 
                   @if (isOptionsType) {
                     <div class="prop-group">
-                      <label>Opciones <span class="required-star">*</span></label>
+                      <label>{{ isTableType ? 'Columnas' : 'Opciones' }} <span class="required-star">*</span></label>
                       <input
                         formControlName="options"
-                        placeholder="Ej: Domiciliaria, Comercial, Industrial"
+                        [placeholder]="isTableType ? 'Ej: Descripción, Cantidad, Precio' : 'Ej: Domiciliaria, Comercial, Industrial'"
                       />
-                      <span class="field-hint">Separa las opciones con coma</span>
+                      <span class="field-hint">{{ isTableType ? 'Separa las columnas con coma' : 'Separa las opciones con coma' }}</span>
                       @if (
                         addFieldForm.get('options')?.invalid && addFieldForm.get('options')?.touched
                       ) {
-                        <span class="field-error">Ingresa al menos una opción</span>
+                        <span class="field-error">{{ isTableType ? 'Ingresa al menos una columna' : 'Ingresa al menos una opción' }}</span>
                       }
                     </div>
                   }
 
-                  @if (addFieldForm.get('type')?.value !== 'CHECKBOX' && addFieldForm.get('type')?.value !== 'CHECKLIST' && addFieldForm.get('type')?.value !== 'FILE') {
+                  @if (addFieldForm.get('type')?.value !== 'CHECKBOX' && addFieldForm.get('type')?.value !== 'CHECKLIST' && addFieldForm.get('type')?.value !== 'TABLE' && addFieldForm.get('type')?.value !== 'FILE') {
                     <div class="prop-group">
                       <label>Texto de ayuda (placeholder)</label>
                       <input

@@ -20,7 +20,7 @@ import { LucidePaperclip, LucideCloudUpload, LucideBot } from '@lucide/angular';
 export interface FormField {
   name: string;
   label: string;
-  type: 'TEXT' | 'TEXTAREA' | 'SELECT' | 'CHECKBOX' | 'CHECKLIST' | 'FILE';
+  type: 'TEXT' | 'TEXTAREA' | 'SELECT' | 'CHECKBOX' | 'CHECKLIST' | 'TABLE' | 'FILE';
   required?: boolean;
   options?: { label: string; value: any }[];
   placeholder?: string;
@@ -78,7 +78,7 @@ export class DynamicForm implements OnInit, OnChanges {
     for (const field of this.fields) {
       const initial = field.value ?? (
         field.type === 'CHECKBOX' ? false :
-        field.type === 'CHECKLIST' ? [] :
+        (field.type === 'CHECKLIST' || field.type === 'TABLE') ? [] :
         ''
       );
       const validators = field.required && field.type !== 'FILE'
@@ -210,6 +210,37 @@ export class DynamicForm implements OnInit, OnChanges {
 
     ctrl.setValue(current);
     ctrl.markAsTouched();
+  }
+
+  tableRows(field: FormField): Record<string, string | undefined>[] {
+    const value = this.getControl(field.name).value;
+    return Array.isArray(value) ? value : [];
+  }
+
+  addTableRow(field: FormField): void {
+    const ctrl = this.getControl(field.name);
+    const emptyRow: Record<string, string> = {};
+    for (const opt of field.options ?? []) emptyRow[opt.value] = '';
+
+    const rows = Array.isArray(ctrl.value) ? [...ctrl.value, emptyRow] : [emptyRow];
+    ctrl.setValue(rows);
+    ctrl.markAsTouched();
+  }
+
+  removeTableRow(field: FormField, rowIndex: number): void {
+    const ctrl = this.getControl(field.name);
+    const rows: Record<string, string>[] = Array.isArray(ctrl.value) ? [...ctrl.value] : [];
+    rows.splice(rowIndex, 1);
+    ctrl.setValue(rows);
+    ctrl.markAsTouched();
+  }
+
+  updateTableCell(field: FormField, rowIndex: number, columnKey: string, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    const ctrl = this.getControl(field.name);
+    const rows: Record<string, string>[] = Array.isArray(ctrl.value) ? [...ctrl.value] : [];
+    rows[rowIndex] = { ...rows[rowIndex], [columnKey]: value };
+    ctrl.setValue(rows);
   }
 
   isImageUrl(url: string | null): boolean {
